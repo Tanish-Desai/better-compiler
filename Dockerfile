@@ -17,8 +17,24 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # ---------------------------------------------------------------------------
 # 1. System packages
+#
+#    gcc-13/g++-13 are NOT in Ubuntu 22.04's default repos (jammy ships
+#    gcc-12) — they require the ubuntu-toolchain-r/test PPA.
+#
+#    NOTE: we add the PPA manually (curl + keyring file) rather than via
+#    `add-apt-repository`, because that tool shells out to gpg-agent, which
+#    doesn't exist yet in a bare Ubuntu image and fails with
+#    "gpg: failed to start agent". Curl-ing the key directly avoids gpg
+#    entirely.
 # ---------------------------------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl gnupg \
+    && install -d /etc/apt/keyrings \
+    && curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get\&search=0xC8EC952E2A0E1FBDC5090F6A2C277A0A352154E5 \
+       -o /etc/apt/keyrings/ubuntu-toolchain-r.asc \
+    && echo "deb [signed-by=/etc/apt/keyrings/ubuntu-toolchain-r.asc] https://ppa.launchpadcontent.net/ubuntu-toolchain-r/test/ubuntu jammy main" \
+       > /etc/apt/sources.list.d/ubuntu-toolchain-r.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
     ninja-build \
     build-essential \
     cmake \
@@ -30,8 +46,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3 \
     python3-pip \
-    curl \
-    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # ---------------------------------------------------------------------------
