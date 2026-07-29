@@ -1,0 +1,18 @@
+services:
+  better-compiler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: better-compiler:latest
+    container_name: better-compiler
+    stdin_open: true   # keeps the container usable interactively (docker attach / exec)
+    tty: true
+    volumes:
+      # Persists the LLVM build directory across container restarts on THIS
+      # machine only (per teammate). Rebuilding `opt` for a bug you already
+      # built once won't require starting from a clean tree, even if the
+      # container itself gets removed and recreated.
+      - llvm_build:/workspace/llvm-apr-benchmark/work/llvm-project/build
+
+volumes:
+  llvm_build:

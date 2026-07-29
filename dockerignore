@@ -1,0 +1,11 @@
+# Local build artifacts and clones — these are (re)generated inside the
+# image/container, never part of the build context sent to `docker build`.
+llvm-apr-benchmark/work/
+alive2/
+
+# General noise
+.git/
+**/*.o
+**/*.pyc
+__pycache__/
+.DS_Store
