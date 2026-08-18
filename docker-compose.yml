@@ -7,12 +7,42 @@ services:
     container_name: better-compiler
     stdin_open: true   # keeps the container usable interactively (docker attach / exec)
     tty: true
+    # Caps the container's memory to prevent LLVM builds (esp. ninja's default
+    # full-parallelism) from exhausting host RAM and triggering the OOM killer
+    # against unrelated host processes (this happened once already). Adjust
+    # to whatever fits your machine — leave enough headroom for the host OS.
+    mem_limit: 10g
+    memswap_limit: 10g   # same as mem_limit = no swap usage allowed beyond it
     volumes:
       # Persists the LLVM build directory across container restarts on THIS
       # machine only (per teammate). Rebuilding `opt` for a bug you already
       # built once won't require starting from a clean tree, even if the
       # container itself gets removed and recreated.
-      - llvm_build:/workspace/llvm-apr-benchmark/work/llvm-project/build
+      #
+      # NOTE: mounted OUTSIDE llvm-project/ on purpose. lab_env's reset()
+      # runs `git clean -fdx` inside the llvm-project repo, which tries to
+      # rmdir any untracked directory it empties — including a build/ dir
+      # that sits inside the repo. A mount point can never be rmdir'd from
+      # inside the container (only Docker can remove it), so git clean
+      # fails with "Device or resource busy". Keeping the build dir outside
+      # the repo's working tree means git never touches it at all.
+      - llvm_build:/workspace/llvm-build
+      # ccache's cache directory. lab_env.py's build() step uses ccache as
+      # a compiler launcher — most base_commits are close together in
+      # LLVM's history, so a warm ccache turns most per-bug rebuilds into
+      # mostly-cache-hit relinks instead of full recompiles. Without this
+      # volume, the cache resets to cold every time a container is removed.
+      - ccache_data:/root/.ccache
 
+# NOTE: these are named volumes, which by default live under Docker's
+# data-root (typically /var/lib/docker/volumes on the root filesystem).
+# If root-drive space is tight, either:
+#   (a) repoint Docker's whole data-root at a larger partition via
+#       /etc/docker/daemon.json's "data-root" key, or
+#   (b) replace the two volume definitions below with bind mounts, e.g.:
+#         - /mnt/dastor/better-compiler/llvm-build:/workspace/llvm-build
+#         - /mnt/dastor/better-compiler/ccache:/root/.ccache
+#       (and delete the `volumes:` block entirely if using only bind mounts)
 volumes:
   llvm_build:
+  ccache_data:

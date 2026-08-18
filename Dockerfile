@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3 \
     python3-pip \
+    ccache \
     && rm -rf /var/lib/apt/lists/*
 
 # ---------------------------------------------------------------------------
@@ -135,7 +136,7 @@ RUN mkdir -p /workspace/llvm-apr-benchmark/examples/fixes
 #    (numbering here is intentionally sequential with steps 1-5 above)
 # ---------------------------------------------------------------------------
 ENV LAB_LLVM_DIR=/workspace/llvm-apr-benchmark/work/llvm-project
-ENV LAB_LLVM_BUILD_DIR=/workspace/llvm-apr-benchmark/work/llvm-project/build
+ENV LAB_LLVM_BUILD_DIR=/workspace/llvm-build
 ENV LAB_LLVM_ALIVE_TV=/workspace/alive2/build/alive-tv
 ENV LAB_DATASET_DIR=/workspace/llvm-apr-benchmark/dataset
 ENV LAB_FIX_DIR=/workspace/llvm-apr-benchmark/examples/fixes
