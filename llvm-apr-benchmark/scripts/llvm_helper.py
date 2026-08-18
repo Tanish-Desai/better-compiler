@@ -40,7 +40,7 @@ def git_execute(args):
 
 def reset(commit):
     git_execute(["restore", "--staged", "."])
-    git_execute(["clean", "-fdx"])
+    git_execute(["clean", "-fdx", "-e", "build"])
     git_execute(["checkout", "."])
     git_execute(["checkout", commit])
 
