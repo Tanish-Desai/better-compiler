@@ -129,7 +129,9 @@ COPY . /workspace
 # 5. llvm-apr-benchmark Python deps + required directories
 # ---------------------------------------------------------------------------
 RUN pip3 install --no-cache-dir -r /workspace/llvm-apr-benchmark/requirements.txt
-RUN mkdir -p /workspace/llvm-apr-benchmark/examples/fixes
+# pytest is for this repo's own `ce` package test suite, not the benchmark's.
+RUN pip3 install --no-cache-dir pytest
+RUN mkdir -p /workspace/llvm-apr-benchmark/examples/fixes /workspace/results
 
 # ---------------------------------------------------------------------------
 # 6. Environment variables required by lab_env.Environment

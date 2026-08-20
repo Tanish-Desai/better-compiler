@@ -14,6 +14,18 @@ services:
     mem_limit: 10g
     memswap_limit: 10g   # same as mem_limit = no swap usage allowed beyond it
     volumes:
+      # Live-mount the research code so editing on the host takes effect in the
+      # container without a rebuild. These are mounted INDIVIDUALLY rather than
+      # as `.:/workspace`, because /workspace also holds the llvm-project clone
+      # (llvm-apr-benchmark/work/), which exists only inside the image — a
+      # whole-repo bind mount would shadow it and break every build.
+      - ./ce:/workspace/ce
+      - ./tests:/workspace/tests
+      - ./data:/workspace/data
+      - ./scripts:/workspace/scripts
+      - ./examples:/workspace/examples
+      # Experiment output, so run records survive the container.
+      - ./results:/workspace/results
       # Persists the LLVM build directory across container restarts on THIS
       # machine only (per teammate). Rebuilding `opt` for a bug you already
       # built once won't require starting from a clean tree, even if the
