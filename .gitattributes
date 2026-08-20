@@ -1,0 +1,9 @@
+# The container is Linux and the dev machines are Windows. Normalise line
+# endings in the working tree so that the .ll fixtures and Python sources are
+# byte-identical on both, which the IR round-trip check depends on.
+* text=auto eol=lf
+
+# Alive2 output fixtures and LLVM IR are compared byte-for-byte by the tests.
+*.ll   text eol=lf
+*.txt  text eol=lf
+*.py   text eol=lf
