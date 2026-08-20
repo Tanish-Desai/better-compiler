@@ -1,0 +1,48 @@
+
+----------------------------------------
+define i32 @g(i32 %x) {
+#0:
+  %a = add i32 %x, 1
+  ret i32 %a
+}
+=>
+define i32 @g(i32 %x) {
+#0:
+  %a = add i32 %x, 1
+  ret i32 %a
+}
+Transformation seems to be correct! (syntactically equal)
+
+
+----------------------------------------
+define i8 @h(i8 %x) {
+#0:
+  %a = sdiv i8 %x, 4
+  ret i8 %a
+}
+=>
+define i8 @h(i8 %x) {
+#0:
+  %a = ashr i8 %x, 2
+  ret i8 %a
+}
+Transformation doesn't verify!
+
+ERROR: Value mismatch
+
+Example:
+i8 %x = #xfe (254, -2)
+
+Source:
+i8 %a = #x00 (0)
+
+Target:
+i8 %a = #xff (255, -1)
+Source value: #x00 (0)
+Target value: #xff (255, -1)
+
+Summary:
+  1 correct transformations
+  1 incorrect transformations
+  0 failed-to-prove transformations
+  0 Alive2 errors

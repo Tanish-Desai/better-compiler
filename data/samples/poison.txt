@@ -1,0 +1,91 @@
+
+----------------------------------------
+define i8 @f(i8 %x, i8 %y, i8 %z) {
+entry:
+  %a = add nsw i8 %x, 1
+  %b = mul i8 %y, 3
+  %c = sub i8 %a, %b
+  %d = xor i8 %z, 7
+  %e = and i8 %c, %d
+  %cmp = icmp slt i8 %x, 0
+  br i1 %cmp, label %t, label %f
+
+f:
+  %r2 = ashr i8 %e, 1
+  br label %join
+
+t:
+  %r1 = shl i8 %e, 1
+  br label %join
+
+join:
+  %p = phi i8 [ %r1, %t ], [ %r2, %f ]
+  %out = add nuw i8 %p, %a
+  ret i8 %out
+}
+=>
+define i8 @f(i8 %x, i8 %y, i8 %z) {
+entry:
+  %a = add nsw i8 %x, 1
+  %b = mul i8 %y, 3
+  %c = sub i8 %a, %b
+  %d = xor i8 %z, 7
+  %e = and i8 %c, %d
+  %cmp = icmp slt i8 %x, 0
+  br i1 %cmp, label %t, label %f
+
+f:
+  %r2 = ashr i8 %e, 1
+  br label %join
+
+t:
+  %r1 = shl i8 %e, 1
+  br label %join
+
+join:
+  %p = phi i8 [ %r1, %t ], [ %r2, %f ]
+  %out = add nsw nuw i8 %p, %a
+  ret i8 %out
+}
+Transformation doesn't verify!
+
+ERROR: Target is more poisonous than source
+
+Example:
+i8 %x = #x7e (126)
+i8 %y = #x00 (0)
+i8 %z = #x00 (0)
+
+Source:
+i8 %a = #x7f (127)
+i8 %b = #x00 (0)
+i8 %c = #x7f (127)
+i8 %d = #x07 (7)
+i8 %e = #x07 (7)
+i1 %cmp = #x0 (0)
+  >> Jump to %f
+i8 %r2 = #x03 (3)
+  >> Jump to %join
+i8 %p = #x03 (3)
+i8 %out = #x82 (130, -126)
+
+Target:
+i8 %a = #x7f (127)
+i8 %b = #x00 (0)
+i8 %c = #x7f (127)
+i8 %d = #x07 (7)
+i8 %e = #x07 (7)
+i1 %cmp = #x0 (0)
+  >> Jump to %f
+i8 %r2 = #x03 (3)
+  >> Jump to %join
+i8 %p = #x03 (3)
+i8 %out = poison
+Source value: #x82 (130, -126)
+Target value: poison
+
+Summary:
+  0 correct transformations
+  1 incorrect transformations
+  0 failed-to-prove transformations
+  0 Alive2 errors

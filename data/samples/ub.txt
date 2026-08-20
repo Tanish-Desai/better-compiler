@@ -1,0 +1,41 @@
+
+----------------------------------------
+define i32 @f(ptr %p, i32 %n) {
+#0:
+  %v = load i32, ptr %p, align 4
+  ret i32 %v
+}
+=>
+define i32 @f(ptr %p, i32 %n) {
+#0:
+  %g = gep inbounds ptr %p, 4 x i32 4
+  %v = load i32, ptr %g, align 4
+  ret i32 %v
+}
+Transformation doesn't verify!
+
+ERROR: Source is more defined than target
+
+Example:
+ptr %p = pointer(non-local, block_id=1, offset=0) / Address=#x04
+i32 %n = poison
+
+Source:
+i32 %v = poison
+
+SOURCE MEMORY STATE
+===================
+NON-LOCAL BLOCKS:
+Block 0 >	size: 0	align: 4	alloc type: 0	alive: false	address: 0
+Block 1 >	size: 8	align: 1	alloc type: 0	alive: true	address: 4
+
+Target:
+ptr %g = poison
+i32 %v = UB triggered!
+
+
+Summary:
+  0 correct transformations
+  1 incorrect transformations
+  0 failed-to-prove transformations
+  0 Alive2 errors

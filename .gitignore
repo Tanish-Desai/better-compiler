@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Experiment output: run records are data, regenerate them rather than commit
+results/
+
+# Local scratch
+*.egg-info/
+.venv/

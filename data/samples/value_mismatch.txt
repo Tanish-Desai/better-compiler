@@ -1,0 +1,33 @@
+
+----------------------------------------
+define i32 @f(i32 %x) {
+#0:
+  %a = sdiv i32 %x, 4
+  ret i32 %a
+}
+=>
+define i32 @f(i32 %x) {
+#0:
+  %a = ashr i32 %x, 2
+  ret i32 %a
+}
+Transformation doesn't verify!
+
+ERROR: Value mismatch
+
+Example:
+i32 %x = #xffffffda (4294967258, -38)
+
+Source:
+i32 %a = #xfffffff7 (4294967287, -9)
+
+Target:
+i32 %a = #xfffffff6 (4294967286, -10)
+Source value: #xfffffff7 (4294967287, -9)
+Target value: #xfffffff6 (4294967286, -10)
+
+Summary:
+  0 correct transformations
+  1 incorrect transformations
+  0 failed-to-prove transformations
+  0 Alive2 errors
