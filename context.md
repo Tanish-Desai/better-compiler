@@ -1,5 +1,15 @@
 # Master Research Context
 
+> **Status update (2026-08-27):** the "Blocker 1" hindrance referenced in
+> `docs/IMPLEMENTATION.md` §9 — `opt` was never built, so nothing ran
+> end-to-end — is **resolved for one bug**. On branch `feat/e2e-bootstrap`,
+> `opt` was built for real for issue `115575` (a VectorCombine
+> miscompilation) and the bug was confirmed to reproduce against that build.
+> See `docs/IMPLEMENTATION.md` §9 for the full transcript and
+> `scripts/bootstrap_first_repair.py` for the script that did it. Still
+> outstanding: Phase 2 (an actual LLM repair attempt, needs `LAB_LLM_TOKEN`)
+> and scaling past this one bug (Blocker 3).
+
 ## 1. Research Project
 
 We are working on a research project in **automated program repair (APR) for compiler bugs**, specifically **real-world LLVM middle-end/optimization bugs**.
