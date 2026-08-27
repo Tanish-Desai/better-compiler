@@ -112,8 +112,17 @@ Primary metric: correct repair rate under the benchmark's own criterion
 merely compiles, or that only fixes the reproducer, does not count; this is
 enforced by the benchmark, not by this code.
 
-Secondary: iterations, estimated prompt tokens, LLM tokens, oracle calls,
-reduction time, wall time, and the size metrics before/after reduction.
+Secondary, and **not all equally weighted as efficiency claims**
+(`context.md` RQ4/H5, decided 2026-08-27 — see `docs/IMPLEMENTATION.md`
+Blocker 2): one repair iteration is one LLVM rebuild, minutes of wall time, so
+a difference of a few hundred prompt tokens or a few seconds is noise next to
+that. The efficiency claim is **iterations to fix** (and the build/oracle-call
+counts that scale with it) — report those as the "condition X is more
+efficient" number. Estimated prompt tokens, LLM tokens, reduction time, and
+wall time are still recorded and worth showing, but as descriptive context
+beside the repair-rate/iteration numbers, not as the headline efficiency
+result. The size metrics before/after reduction are separate again — they
+describe the reducer, not the repair loop's cost.
 
 `examples/summarize_results.py` also prints a **paired** table restricted to
 bugs attempted under every condition. Prefer it: an unpaired table can credit a

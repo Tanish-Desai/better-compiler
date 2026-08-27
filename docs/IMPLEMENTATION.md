@@ -682,14 +682,24 @@ Blocker 3 now that the mechanics are proven end-to-end for one bug.
 
 ---
 
-### 🔴 Blocker 2: build time probably dwarfs what we're measuring
+### 🟢 Blocker 2: build time probably dwarfs what we're measuring — DECIDED
 
 We planned to measure efficiency in tokens saved. But if one iteration = one
 LLVM rebuild (minutes), then saving 200 prompt tokens is **statistical noise**
 in wall-clock terms.
 
-**Fix:** reframe the efficiency claim around **fewer iterations**, not fewer
-tokens or seconds. Decide this now — it changes what we claim in the paper.
+**Decided 2026-08-27:** the efficiency claim is reframed around **fewer LLM
+iterations to fix** (and the build/oracle-call counts that scale with
+iterations), not fewer tokens or seconds. Reflected in `context.md` (RQ4, H5,
+§18) and `docs/METHODOLOGY.md` §5. Tokens and wall-clock time are still
+recorded in every `RunLog` (`ce/benchmark.py`) and still worth reporting —
+just as descriptive context beside the repair-rate/iteration numbers, never
+as the headline "N% more efficient" claim.
+
+This was a documentation decision, not a code change — `ce/benchmark.py`'s
+`totals()`/`summarize()` already computed `mean_iterations` alongside the
+token/time fields; nothing there needed touching, only which number the
+prose leads with.
 
 ---
 
@@ -778,7 +788,8 @@ migrated to `llvm-autofix`.
    above) — it does exactly this, against a pre-selected simple candidate.
 2. **Decide the model and the knowledge-cutoff position** (Blocker 4). Affects
    how we word every claim.
-3. **Decide the efficiency framing** (Blocker 2). Iterations, not tokens.
+3. ~~Decide the efficiency framing (Blocker 2).~~ Done: iterations, not
+   tokens/seconds — see Blocker 2 above.
 
 ### To make the science defensible
 

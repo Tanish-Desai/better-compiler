@@ -11,6 +11,13 @@ condition: how many bugs were attempted, how many were fixed, and what it cost
 A condition that fixes more bugs while spending twice as much is a different
 finding from one that fixes more for less.
 
+When comparing cost, **`mean_iterations` is the efficiency claim** — not
+`mean_prompt_tokens_est` or `mean_wall_seconds`. One iteration is one LLVM
+rebuild (minutes); a few hundred prompt tokens or a few seconds of difference
+is noise against that (`context.md` RQ4, decided 2026-08-27 — see
+`docs/IMPLEMENTATION.md` Blocker 2). The token/time columns are still printed
+because they're useful descriptive context, just don't lead with them.
+
 WHY THERE ARE TWO TABLES
 ------------------------
 The second table is the one to trust.

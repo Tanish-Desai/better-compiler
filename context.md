@@ -563,13 +563,20 @@ Does IR-aware reduction outperform generic/textual reduction?
 
 ### RQ4 — Efficiency
 
-Does minimization reduce:
+**Decided 2026-08-27 (Blocker 2, `docs/IMPLEMENTATION.md` §9):** each repair
+iteration means an LLVM rebuild — minutes, not the seconds a prompt-token
+difference would cost. Saving a few hundred prompt tokens is statistical
+noise against that, so this RQ is claimed in terms of:
 
-* LLM iterations?
-* tokens?
-* number of builds?
-* number of Alive2 calls?
-* wall-clock repair time?
+* **LLM iterations to fix** (primary — the thing an extra build actually costs)
+* **number of builds** and **number of Alive2 calls** (both proportional to
+  iterations, reported as corroborating detail)
+
+Tokens and wall-clock time are still recorded (`ce/benchmark.py`'s `RunLog`),
+but are **not** the efficiency claim — report them as descriptive context
+only, never as the headline "X% more efficient" number.
+
+Does minimization reduce these?
 
 ### RQ5 — Feedback Representation
 
@@ -754,12 +761,11 @@ Combining semantic minimization and structured annotation provides the strongest
 
 ### H5
 
-The proposed method reduces repair cost, including:
-
-* LLM iterations
-* context/token consumption
-* verification cycles
-* total time
+The proposed method reduces repair cost. Per the RQ4 decision above, this is
+claimed primarily as **fewer LLM iterations** (and the build/verification
+cycles that scale with iteration count), not as fewer tokens or less
+wall-clock time — those are recorded but are noise next to per-iteration
+LLVM rebuild time.
 
 The AI should treat these as **hypotheses to test**, not established facts.
 
@@ -793,7 +799,11 @@ original reproducer passes
 
 The repair should satisfy the benchmark's appropriate validation criteria, including broader regression testing and formal verification where applicable.
 
-Secondary metrics:
+Secondary metrics — **efficiency claims are made via `number of iterations`
+(and the correlated `total builds`/`total verifier calls`), per the RQ4
+decision above; `wall-clock time` and `LLM token usage` are recorded but are
+descriptive context, not the efficiency claim, since one iteration is an LLVM
+rebuild measured in minutes**:
 
 * repair success rate
 * pass@k / success within N attempts
