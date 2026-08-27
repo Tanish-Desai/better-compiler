@@ -22,12 +22,13 @@ Alive2 at all.
 
 from __future__ import annotations
 
+import json
 import os
 
 import pytest
 
 from ce.alive import run_alive_tv
-from ce.benchmark import RunLog, Iteration, normalize_feedback, summarize
+from ce.benchmark import RunLog, Iteration, normalize_feedback, run_record_path, summarize
 from ce.feedback import MATRIX_LETTERS, build_feedback, resolve_condition
 from ce.oracle import establish
 from ce.reduce_generic import reduce_generic
@@ -279,6 +280,37 @@ def test_run_log_totals_and_summary(tmp_path):
     table = summarize([run.as_dict()])
     assert table["iraware-structured"]["repair_rate"] == 1.0
     assert table["iraware-structured"]["mean_iterations"] == 2.0
+
+
+def test_no_promotion_ablation_does_not_collide_with_the_default_run(tmp_path):
+    """Blocker 7: running the --no-promotion ablation for a bug/condition
+    already run must not silently overwrite (or get skipped in favor of) the
+    paired result -- the two need distinct paths."""
+    assert run_record_path(str(tmp_path), "121459", "iraware-structured") == \
+        run_record_path(str(tmp_path), "121459", "iraware-structured", allow_promotion=True)
+    assert run_record_path(str(tmp_path), "121459", "iraware-structured") != \
+        run_record_path(str(tmp_path), "121459", "iraware-structured", allow_promotion=False)
+
+    default_run = RunLog(bug_id="121459", condition="iraware-structured",
+                         notes={"allow_promotion": True})
+    default_run.record(Iteration(0, "iraware-structured", fixed=True))
+    ablation_run = RunLog(bug_id="121459", condition="iraware-structured",
+                          notes={"allow_promotion": False})
+    ablation_run.record(Iteration(0, "iraware-structured", fixed=False))
+
+    default_path = default_run.write(str(tmp_path))
+    ablation_path = ablation_run.write(str(tmp_path))
+
+    assert default_path != ablation_path
+    assert default_path.endswith("121459.iraware-structured.json")
+    assert ablation_path.endswith("121459.iraware-structured.no-promotion.json")
+
+    # Both files actually exist and hold their own (different) content --
+    # the old scheme would have had the second write clobber the first.
+    with open(default_path, encoding="utf-8") as f:
+        assert json.load(f)["totals"]["fixed"] is True
+    with open(ablation_path, encoding="utf-8") as f:
+        assert json.load(f)["totals"]["fixed"] is False
 
 
 def test_summary_separates_conditions():

@@ -108,6 +108,33 @@ def normalize_feedback(
     return fb
 
 
+def run_record_path(
+    directory: str, bug_id: str, condition: str, *, allow_promotion: bool = True,
+) -> str:
+    """Where a run record for ``(bug_id, condition, allow_promotion)`` lives.
+
+    One file per ``(bug, condition)`` keeps different conditions from
+    overwriting each other, which a single ``<bug_id>.json`` would do -- but
+    ``allow_promotion`` needs the same treatment (docs/IMPLEMENTATION.md
+    Blocker 7): it is a separate ablation axis, not part of ``condition``,
+    yet ``--no-promotion`` only makes sense for ``iraware*`` conditions. Without
+    this, running the ablation for a bug/condition already run either
+    silently overwrote the paired result or (worse) got skipped entirely by
+    the "already done" check, because both wrote to the identical path.
+
+    The default (``allow_promotion=True``) keeps the original filename
+    unchanged, so existing run records and tooling that assumes
+    ``<bug_id>.<condition>.json`` are unaffected; only the ablation variant
+    gets a suffix.
+
+    ``examples/repair_experiment.py``'s own "already done" pre-check calls
+    this directly (rather than duplicating the naming scheme) specifically so
+    the two can never drift apart again.
+    """
+    suffix = "" if allow_promotion else ".no-promotion"
+    return os.path.join(directory, f"{bug_id}.{condition}{suffix}.json")
+
+
 @dataclass
 class Iteration:
     """One turn of the repair loop, as a row of experiment data."""
@@ -188,13 +215,12 @@ class RunLog:
         }
 
     def write(self, directory: str) -> str:
-        """Write ``<bug_id>.<condition>.json`` and return the path.
-
-        One file per (bug, condition) keeps runs of different conditions from
-        overwriting each other, which a single ``<bug_id>.json`` would do.
-        """
+        """Write the run record and return the path. See ``run_record_path``."""
         os.makedirs(directory, exist_ok=True)
-        path = os.path.join(directory, f"{self.bug_id}.{self.condition}.json")
+        path = run_record_path(
+            directory, self.bug_id, self.condition,
+            allow_promotion=self.notes.get("allow_promotion", True),
+        )
         with open(path, "w", encoding="utf-8") as f:
             json.dump(self.as_dict(), f, indent=2)
         return path

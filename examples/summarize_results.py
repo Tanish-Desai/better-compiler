@@ -29,6 +29,18 @@ meaningless.
 
 The "paired" table fixes this by only counting bugs that **every** condition
 attempted, so all conditions are being scored on identical work.
+
+THE PROMOTION ABLATION IS KEPT SEPARATE
+----------------------------------------
+``--no-promotion`` (docs/IMPLEMENTATION.md Blocker 7) is a separate ablation
+axis, not one of the six/eight main conditions -- a run under
+``iraware-structured`` with promotion off is still "the ``iraware-structured``
+condition", just with one pass disabled. Mixing it into the main tables would
+silently conflate two different runs of the same condition name. The "All
+runs"/"Paired" tables above therefore only ever include the default
+(promotion-on) records; a separate "No-promotion ablation" table is printed
+underneath when any ``--no-promotion`` records exist, so the ablation is
+visible without corrupting the primary comparison.
 """
 
 from __future__ import annotations
@@ -66,16 +78,25 @@ def print_table(table: dict) -> None:
         print("  ".join(cells))
 
 
+def _allow_promotion(run: dict) -> bool:
+    return run.get("notes", {}).get("allow_promotion", True)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
-    runs = load_runs(args.directory)
-    if not runs:
+    all_runs = load_runs(args.directory)
+    if not all_runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2
+
+    # Keep the promotion ablation out of the main tables (see module
+    # docstring) -- it's a separate axis, not another condition.
+    runs = [r for r in all_runs if _allow_promotion(r)]
+    ablation_runs = [r for r in all_runs if not _allow_promotion(r)]
 
     table = summarize(runs)
 
@@ -87,11 +108,14 @@ def main(argv=None) -> int:
     common = set.intersection(*by_condition.values()) if by_condition else set()
     paired = summarize([r for r in runs if r["bug_id"] in common]) if common else {}
 
+    ablation_table = summarize(ablation_runs) if ablation_runs else {}
+
     if args.json:
         print(json.dumps({
             "all": table,
             "paired": paired,
             "paired_bug_count": len(common),
+            "no_promotion_ablation": ablation_table,
         }, indent=2))
         return 0
 
@@ -101,6 +125,10 @@ def main(argv=None) -> int:
         print(f"\nPaired over the {len(common)} bugs attempted under all "
               f"{len(by_condition)} conditions")
         print_table(paired)
+    if ablation_table:
+        print(f"\nNo-promotion ablation ({len(ablation_runs)} records) -- "
+              f"compare each row against its counterpart above")
+        print_table(ablation_table)
     return 0
 
 

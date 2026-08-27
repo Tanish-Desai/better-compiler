@@ -48,6 +48,14 @@ The benchmark consists of real LLVM middle-end bugs. The benchmark repository st
 * 181 crash bugs
 * 8 hang bugs
 
+> **Correction (2026-08-28, Blocker 8, `docs/IMPLEMENTATION.md` §9): this
+> quote is stale.** The dataset actually checked out in this repo has grown
+> to **491 issues** — 142 miscompilation, 340 crash, 9 hang (counted live
+> from `llvm-apr-benchmark/dataset/*.json`, the same method
+> `scripts/select_bootstrap_bug.py` and `scripts/select_experiment_sample.py`
+> use — neither hardcodes a total). Never quote the README's number; count
+> from the dataset.
+
 The benchmark provides, depending on the issue:
 
 * issue description
@@ -221,7 +229,19 @@ Instead, we should modify one important part of the loop:
 
 # 6. Existing LLM Compiler Repair Work: llvm-autofix
 
-A major existing baseline is **llvm-autofix**, introduced in the paper *Agentic Harness for Real-World Compilers*.
+> **Correction (2026-08-28, Blocker 6, `docs/IMPLEMENTATION.md` §9):** this
+> section originally named llvm-autofix as *the* baseline our repair loop
+> runs against. It is not — our code builds on `llvm-apr-benchmark`'s much
+> simpler `examples/baseline.py` (checked directly: a single chat loop with
+> two tool calls, no specialized agentic scaffolding). Integrating with
+> llvm-autofix for real was considered and rejected as disproportionate — a
+> second unfamiliar harness we don't have access to or have audited, for a
+> project already carrying several other open issues. llvm-autofix remains
+> exactly what it should: the strongest published prior result, cited below
+> to justify that LLM-based LLVM repair is worth attempting at all — not a
+> system this repository runs against or improves on directly.
+
+A major existing **published result** is **llvm-autofix**, introduced in the paper *Agentic Harness for Real-World Compilers*.
 
 The work argues that compiler bugs are unusually difficult for generic LLM agents because they require:
 
@@ -232,11 +252,11 @@ The work argues that compiler bugs are unusually difficult for generic LLM agent
 
 It provides an LLVM-specific agentic harness, LLVM tools, and a benchmark of reproducible LLVM bugs. The published evaluation reports that frontier models experience a substantial performance drop on compiler bugs compared with common software bugs, and that the specialized minimal agent improves over the prior state of the art.
 
-This is an essential baseline for our project.
+This is essential **related work** to cite, not the system this project extends — see the correction above.
 
 We should therefore frame our work as:
 
-> **An investigation into improving the feedback channel inside an existing LLVM-specific LLM repair workflow.**
+> **An investigation into how verification-feedback representation affects an already-plausible, `llvm-apr-benchmark`-baseline-level LLM repair loop for LLVM — not a claim of improving on llvm-autofix specifically.**
 
 The contribution is not “LLMs can fix LLVM bugs.” That has already been demonstrated.
 

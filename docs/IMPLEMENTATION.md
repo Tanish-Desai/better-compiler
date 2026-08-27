@@ -823,31 +823,89 @@ passing against real `alive-tv` + `llvm-reduce`, plus the full 62-test suite.
 
 ---
 
-### 🟡 Blocker 6: the claimed baseline isn't the implemented one
+### 🟢 Blocker 6: the claimed baseline isn't the implemented one — RESTATED
 
 `context.md` names **llvm-autofix** as the primary baseline. Our code builds on
 llvm-apr-benchmark's much simpler `baseline.py`. Those are different systems.
 
-**Fix:** either integrate with llvm-autofix properly, or restate in writing what
-we are actually comparing against.
+**Decided 2026-08-28 (the "restate" branch of the fix, not the "integrate"
+one):** integrating with llvm-autofix would mean standing up a second,
+unfamiliar agentic harness (specialized tools, its own prompting, its own
+repair loop) we don't have access to and haven't audited — swapping one
+undocumented gap for a much larger, riskier one, for a project already
+carrying five other blockers. Restating what we actually compare against is
+the honest, bounded fix.
+
+Checked `llvm-apr-benchmark/examples/baseline.py` directly rather than
+assuming: it's a single OpenAI-compatible chat loop with two tool calls
+(`get_source`, and an optional bisection helper), no compiler-specific
+scaffolding beyond what the benchmark harness itself provides (the
+build/test/Alive2 plumbing in `llvm_helper.py`/`lab_env.py`). That is a real
+system, but a much simpler one than `llvm-autofix` is described as being in
+`context.md` §6 (specialized tools, sparse-report understanding, a published
+agentic-harness paper).
+
+`context.md` §6 has been corrected: it no longer claims llvm-autofix as
+*the* baseline our repair loop runs against. llvm-autofix stays exactly what
+it always should have been — the strongest published prior result to cite in
+related work, framing why an LLM-repair-for-LLVM approach is worth trying at
+all — while `examples/repair_experiment.py` (a one-line-changed fork of
+`baseline.py`) is named as what this project's numbers are actually measured
+against. The narrower, honest framing (`context.md` §6, revised): *how does
+verification-feedback representation affect an already-plausible,
+`baseline.py`-level compiler-repair loop* — not a claim about improving on
+llvm-autofix specifically.
 
 ---
 
-### 🟡 Blocker 7: `promote-operands` generalises the program
+### 🟢 Blocker 7: `promote-operands` generalises the program — FIXED
 
 See [`reduce_iraware.py`](#cereduce_irawarepy--the-smart-shrinker-) above.
 
-**Fix:** already switchable via `--no-promotion`. Run both and report both as an
-ablation.
+**Fixed 2026-08-28:** `--no-promotion` already existed, but "switchable"
+undersold a real gap — `RunLog.write()` and `repair_experiment.py`'s
+"already done" pre-check both keyed the output filename by `(bug_id,
+condition)` only. Running the ablation for a bug/condition already run would
+either **silently overwrite** the paired result, or (worse) get **skipped
+entirely** by the pre-check thinking it was already done — either way, "run
+both and report both" was not actually possible without manually renaming
+files between runs.
+
+Fixed with one shared function,
+[`run_record_path`](../ce/benchmark.py) (`ce/benchmark.py`), used by both
+`RunLog.write()` and `repair_experiment.py`'s pre-check so they can't drift
+apart again: the default (promotion-on) filename is unchanged
+(`<bug_id>.<condition>.json`), and `--no-promotion` runs get a
+`.no-promotion` suffix instead of colliding.
+[`examples/summarize_results.py`](../examples/summarize_results.py) now
+keeps the ablation out of the main comparison tables (it's a separate axis,
+not another condition) and prints it as its own labeled table when present,
+so "report both as an ablation" is now something running the sweep with and
+without `--no-promotion` actually produces, not just permits. Pinned by
+`test_no_promotion_ablation_does_not_collide_with_the_default_run` in
+`tests/test_integration.py`.
 
 ---
 
-### 🟡 Blocker 8: stale numbers everywhere
+### 🟢 Blocker 8: stale numbers everywhere — FIXED
 
 The benchmark README says 295 issues; there are actually **491**. Upstream also
 migrated to `llvm-autofix`.
 
-**Fix:** never quote the README. Count from the dataset.
+**Fixed 2026-08-28:** `context.md` §2 itself had exactly this stale quote —
+"295 verified issues... 106 miscompilation / 181 crash / 8 hang" — sitting
+uncorrected since it was written. Added a footnote there with the live count
+(same method as Blocker 3's sample selection: counted from the dataset
+directory, not read off a doc): **491 total — 142 miscompilation, 340 crash,
+9 hang.** No other stale count found elsewhere in this repo's own docs
+(`grep -rn "295"` across `README.md`/`context.md`/`docs/`/`examples/`/`ce/`/
+`scripts/` turns up only this one, now-annotated, spot).
+
+The practice going forward is already structural, not just a reminder:
+`scripts/select_bootstrap_bug.py` and `scripts/select_experiment_sample.py`
+both compute their counts live from `llvm-apr-benchmark/dataset/*.json` every
+time they run — neither hardcodes a total, so there is nothing in this repo's
+own tooling left to go stale the way the upstream README did.
 
 ---
 
@@ -873,7 +931,9 @@ migrated to `llvm-autofix`.
 5. ~~Decide the sample~~ Done (Blocker 3): `data/experiment_sample.json`, 24
    bugs. **Still open: how many repeats (*k*, for pass@k) and what
    statistical test** — decide before running, not after.
-6. **Run the `--no-promotion` ablation** alongside the main sweep.
+6. **Run the `--no-promotion` ablation** alongside the main sweep. (Blocker 7
+   fixed the filename collision that would have silently broken this — this
+   item is still open because the sweep itself hasn't run yet.)
 
 ### Nice to have
 
