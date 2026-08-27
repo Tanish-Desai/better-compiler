@@ -92,7 +92,9 @@ def phase1_build_and_verify(bug_id: str, build_jobs: int):
     rx._import_benchmark()  # puts llvm-apr-benchmark/scripts on sys.path
     Env = rx.Env
 
-    env = Env(bug_id, base_model_knowledge_cutoff="2099-01-01Z",
+    # Must be <= the bug's own knowledge_cutoff (lab_env.use_knowledge() raises
+    # otherwise) — phase 1 never queries any hint, so any date this early works.
+    env = Env(bug_id, base_model_knowledge_cutoff="2000-01-01Z",
               max_build_jobs=build_jobs)
     print(f"[{bug_id}] base_commit={env.get_base_commit()} "
           f"bug_type={env.get_bug_type()}")
