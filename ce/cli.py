@@ -11,15 +11,18 @@ FOUR COMMANDS
 
 ``reduce``
     Shrink a counterexample with one strategy and print the before/after
-    sizes.  ``--strategy iraware`` (smart) or ``--strategy generic`` (dumb).
+    sizes.  ``--strategy iraware`` (smart), ``--strategy generic`` (dumb,
+    line-level), or ``--strategy llvmreduce`` (real IR-valid reduction, but
+    blind to the counterexample -- see ``reduce_llvmreduce.py``).
 
 ``feedback``
     Show the exact message an AI model would receive under one condition.
     Handy for eyeballing whether the message is actually readable.
 
 ``compare``
-    Run *all six* conditions on the same pair and print a comparison table.
-    This is the one that generates experiment data.
+    Run the six-condition A-F matrix (``--conditions`` to name any other set,
+    e.g. the ``llvmreduce-*`` conditions) on the same pair and print a
+    comparison table. This is the one that generates experiment data.
 
 A GOOD FIRST COMMAND TO TRY
 ---------------------------
@@ -47,6 +50,7 @@ from .feedback import CONDITIONS, MATRIX_LETTERS, build_feedback
 from .oracle import establish
 from .reduce_generic import reduce_generic
 from .reduce_iraware import reduce_iraware
+from .reduce_llvmreduce import reduce_llvmreduce
 
 
 def _read(path: str) -> str:
@@ -119,6 +123,8 @@ def cmd_reduce(args) -> int:
 
     if args.strategy == "generic":
         result = reduce_generic(src, tgt, oracle)
+    elif args.strategy == "llvmreduce":
+        result = reduce_llvmreduce(src, tgt, oracle)
     else:
         result = reduce_iraware(src, tgt, oracle, violation,
                                 allow_promotion=not args.no_promotion)
@@ -231,7 +237,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = sub.add_parser("reduce", help="reduce a counterexample")
     _add_common(p)
     _add_reduce_opts(p)
-    p.add_argument("--strategy", default="iraware", choices=["generic", "iraware"])
+    p.add_argument("--strategy", default="iraware",
+                   choices=["generic", "llvmreduce", "iraware"])
     p.add_argument("--out", help="directory to write the reduced pair into")
     p.add_argument("--quiet", action="store_true", help="print metrics only")
     p.set_defaults(func=cmd_reduce)

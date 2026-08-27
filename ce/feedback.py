@@ -5,19 +5,29 @@ WHAT THIS FILE IS FOR
 This is where the two independent ideas get combined into the actual
 experiment.  We have two knobs:
 
-    knob 1 -- how much shrinking?   raw / generic / iraware
+    knob 1 -- how much shrinking?   raw / generic / llvmreduce / iraware
     knob 2 -- how is it laid out?   plain / structured
 
-Turning both gives a 2x3 grid of six ways to present the same bug:
+Turning both gives a 2x4 grid of eight ways to present the same bug:
 
-                  |  plain              |  structured
-    --------------+---------------------+--------------------------
-    raw           |  raw-plain          |  raw-structured
-    generic       |  generic-plain      |  generic-structured
-    iraware       |  iraware-plain      |  iraware-structured
+                  |  plain                |  structured
+    --------------+-----------------------+-----------------------------
+    raw           |  raw-plain            |  raw-structured
+    generic       |  generic-plain        |  generic-structured
+    llvmreduce    |  llvmreduce-plain     |  llvmreduce-structured
+    iraware       |  iraware-plain        |  iraware-structured
 
-Plus a seventh, ``baseline``, which gets no counterexample at all -- just
+Plus a ninth, ``baseline``, which gets no counterexample at all -- just
 "this is wrong" -- to show what the AI can do with nothing.
+
+``llvmreduce`` (``reduce_llvmreduce.py``) was added for docs/IMPLEMENTATION.md
+Blocker 5: ``generic`` is honest but attackable as a strawman (176 of 183
+attempts produced invalid IR), so it alone can't tell you whether an
+IR-aware-but-not-counterexample-aware reducer would ALSO have helped. The
+Blocker-5 comparison holds structure fixed and reads across the ``generic`` /
+``llvmreduce`` / ``iraware`` row: only the last one is claimed to understand
+the counterexample, and the middle one is what isolates that from merely
+"produces valid IR".
 
 WHY A GRID INSTEAD OF JUST "OURS VS THEIRS"?
 --------------------------------------------
@@ -45,6 +55,11 @@ We implement the section-16 grid, because it is the design that can actually
 separate the factors.  Its letters are ``MATRIX_LETTERS``.  Section 15's
 letters still resolve, via ``LEGACY_LETTERS``, so old notes do not break.
 
+``llvmreduce-plain``/``llvmreduce-structured`` (added for Blocker 5, after
+both letter schemes were written) have **no letter in either scheme** -- they
+are a second baseline bolted onto the reduction knob, not part of either
+historical grid. Refer to them only by full name.
+
     >>> Always write the full condition name in reports and papers.
     >>> A bare "condition C" is ambiguous in this project.
 
@@ -64,10 +79,11 @@ from .irmodel import measure_pair
 from .oracle import Oracle, Violation
 from .reduce_generic import reduce_generic
 from .reduce_iraware import reduce_iraware
+from .reduce_llvmreduce import reduce_llvmreduce
 from .reduction import Reduction, make_reduction
 from .structured import render_plain, render_structured
 
-REDUCTIONS = ("raw", "generic", "iraware")
+REDUCTIONS = ("raw", "generic", "llvmreduce", "iraware")
 STRUCTURES = ("plain", "structured")
 
 
@@ -278,6 +294,8 @@ def _apply_reduction(
     )
     if cond.reduction == "generic":
         reduction = reduce_generic(src, tgt, oracle)
+    elif cond.reduction == "llvmreduce":
+        reduction = reduce_llvmreduce(src, tgt, oracle)
     else:
         reduction = reduce_iraware(
             src, tgt, oracle, violation, allow_promotion=allow_promotion
