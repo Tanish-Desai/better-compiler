@@ -1,0 +1,211 @@
+{
+  "n_requested": 24,
+  "n_tiers": 3,
+  "excluded": [
+    "115575"
+  ],
+  "pool_size": 99,
+  "tiers": {
+    "easy": [
+      {
+        "bug_id": "89390",
+        "base_commit": "d674f45d51bffbba474b12e07f7d57a2390d2f31",
+        "component": "VectorCombine",
+        "hint_lines": 6,
+        "reproducer_lines": 12
+      },
+      {
+        "bug_id": "165878",
+        "base_commit": "d310693bde68b49cdb5c5877aadffb41d35c45fb",
+        "component": "SLPVectorizer",
+        "hint_lines": 6,
+        "reproducer_lines": 15
+      },
+      {
+        "bug_id": "135182",
+        "base_commit": "77db154cf9383fa20685fca56633601ce0ea47fa",
+        "component": "SimplifyIndVar",
+        "hint_lines": 6,
+        "reproducer_lines": 16
+      },
+      {
+        "bug_id": "126974",
+        "base_commit": "dab9156923133b4ce3c40efcae4f80b0d720e72f",
+        "component": "InstCombine",
+        "hint_lines": 6,
+        "reproducer_lines": 18
+      },
+      {
+        "bug_id": "154116",
+        "base_commit": "4ff7ac23301bee8cab04993b6047e360571adde3",
+        "component": "SeparateConstOffsetFromGEP",
+        "hint_lines": 6,
+        "reproducer_lines": 19
+      },
+      {
+        "bug_id": "116249",
+        "base_commit": "c1f6cb74634509d0e4204dadd46566185fa33e2b",
+        "component": "IndVarSimplify",
+        "hint_lines": 6,
+        "reproducer_lines": 22
+      },
+      {
+        "bug_id": "143123",
+        "base_commit": "5d3899d293e902124c3602b466031b6b799fb123",
+        "component": "ValueTracking",
+        "hint_lines": 6,
+        "reproducer_lines": 22
+      },
+      {
+        "bug_id": "126012",
+        "base_commit": "52a02b6d1e0c6b492495ff79a3a06ce93e6180b8",
+        "component": "ScalarEvolution",
+        "hint_lines": 6,
+        "reproducer_lines": 25
+      }
+    ],
+    "medium": [
+      {
+        "bug_id": "115149",
+        "base_commit": "0f44d72e0ee74970cf696ff4c791f63e0c3fa9b4",
+        "component": "InstCombine",
+        "hint_lines": 7,
+        "reproducer_lines": 32
+      },
+      {
+        "bug_id": "114879",
+        "base_commit": "3850801ca57575640a6ad3a5a421a416dc5c6f12",
+        "component": "ScalarEvolution",
+        "hint_lines": 7,
+        "reproducer_lines": 164
+      },
+      {
+        "bug_id": "118467",
+        "base_commit": "73731d6873b6fb0757c3065aaf2452eaccd0eebc",
+        "component": "AggressiveInstCombine",
+        "hint_lines": 8,
+        "reproducer_lines": 12
+      },
+      {
+        "bug_id": "91369",
+        "base_commit": "9a28814f59e8f52cc63ae3d17023cee8348d9b53",
+        "component": "LoopVectorize",
+        "hint_lines": 8,
+        "reproducer_lines": 22
+      },
+      {
+        "bug_id": "114738",
+        "base_commit": "2588b8be5624f721c56f44fd2a69f7327de8c0c1",
+        "component": "SLPVectorizer",
+        "hint_lines": 9,
+        "reproducer_lines": 11
+      },
+      {
+        "bug_id": "167627",
+        "base_commit": "3cfe6aa46e06a8caa3f07057838d31c6ce840076",
+        "component": "Float2Int",
+        "hint_lines": 10,
+        "reproducer_lines": 6
+      },
+      {
+        "bug_id": "91177",
+        "base_commit": "de8cf69abf4f8b16d5c5ecb77a6dfb1f5c09e45a",
+        "component": "FunctionAttrs",
+        "hint_lines": 10,
+        "reproducer_lines": 41
+      },
+      {
+        "bug_id": "82884",
+        "base_commit": "0c7a605ada6cb392e6e8c16dbccf2b7e59017399",
+        "component": "Local",
+        "hint_lines": 11,
+        "reproducer_lines": 14
+      }
+    ],
+    "hard": [
+      {
+        "bug_id": "112350",
+        "base_commit": "35e937b4de1890186347a382f7727ba86441dbda",
+        "component": "ValueTracking",
+        "hint_lines": 12,
+        "reproducer_lines": 63
+      },
+      {
+        "bug_id": "173784",
+        "base_commit": "5f5560f62bfbaf3b38c90ae926fd07463ab74b8e",
+        "component": "SLPVectorizer",
+        "hint_lines": 13,
+        "reproducer_lines": 6
+      },
+      {
+        "bug_id": "161492",
+        "base_commit": "c09054866a1ad6c250e6c972d369b9023abb4b3b",
+        "component": "InstCombine",
+        "hint_lines": 13,
+        "reproducer_lines": 21
+      },
+      {
+        "bug_id": "179613",
+        "base_commit": "6a5375fbce1992cb58a31a8c94d59ecb35c752a9",
+        "component": "unknown",
+        "hint_lines": 13,
+        "reproducer_lines": 22
+      },
+      {
+        "bug_id": "180870",
+        "base_commit": "e0182ebd40066fedc282f9cb06cbec48b6f827dc",
+        "component": "ScalarEvolution",
+        "hint_lines": 13,
+        "reproducer_lines": 23
+      },
+      {
+        "bug_id": "89672",
+        "base_commit": "b64e483785bfef5ec4977988543ed5cfaf62f306",
+        "component": "SimplifyCFG",
+        "hint_lines": 14,
+        "reproducer_lines": 27
+      },
+      {
+        "bug_id": "91957",
+        "base_commit": "c2a9a974ca85e4ac4509e368d4b9acae7e67bf71",
+        "component": "LICM",
+        "hint_lines": 15,
+        "reproducer_lines": 15
+      },
+      {
+        "bug_id": "114901",
+        "base_commit": "a88be11eef59b1722030e1219109ea0b76eebbe5",
+        "component": "VectorCombine",
+        "hint_lines": 17,
+        "reproducer_lines": 8
+      }
+    ]
+  },
+  "bug_ids": [
+    "89390",
+    "165878",
+    "135182",
+    "126974",
+    "154116",
+    "116249",
+    "143123",
+    "126012",
+    "115149",
+    "114879",
+    "118467",
+    "91369",
+    "114738",
+    "167627",
+    "91177",
+    "82884",
+    "112350",
+    "173784",
+    "161492",
+    "179613",
+    "180870",
+    "89672",
+    "91957",
+    "114901"
+  ],
+  "n_selected": 24
+}

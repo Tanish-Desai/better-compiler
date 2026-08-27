@@ -29,8 +29,10 @@ comparison needed to find out whether that helps.
 | [`examples/repair_experiment.py`](examples/repair_experiment.py) | the repair loop, parameterised by condition |
 | [`examples/summarize_results.py`](examples/summarize_results.py) | aggregates run records into the experiment table |
 | [`scripts/check_ir_roundtrip.py`](scripts/check_ir_roundtrip.py) | validates the IR model against every dataset reproducer |
+| [`scripts/select_experiment_sample.py`](scripts/select_experiment_sample.py) | picks the stratified bug sample for the real sweep (Blocker 3) |
 | [`tests/`](tests/) | unit tests plus `alive-tv` integration tests |
 | [`data/samples/`](data/samples/) | real `alive-tv` outputs, used as parser fixtures |
+| [`data/experiment_sample.json`](data/experiment_sample.json) | the picked 24-bug sample, stratified by complexity and component |
 | [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) | **start here** — full walkthrough, glossary, blockers |
 | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | what the results do and do not support |
 | [`llvm-apr-benchmark/`](llvm-apr-benchmark/) | upstream benchmark, unmodified |

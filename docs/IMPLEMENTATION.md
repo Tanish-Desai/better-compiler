@@ -703,7 +703,7 @@ prose leads with.
 
 ---
 
-### 🟠 Blocker 3: scale
+### 🟢 Blocker 3: scale — SAMPLE PICKED
 
 Real numbers from the dataset:
 
@@ -713,13 +713,35 @@ Real numbers from the dataset:
 | Crash bugs (no counterexample) | 340 |
 | Hang bugs (no counterexample) | 9 |
 | Miscompilations | 142 |
-| — of which checked by Alive2 | **135 ← what we can use** |
+| — of which checked by Alive2 | 135 |
 | — checked only by `lli` | 7 |
+| — of the 135, also `is_single_func_fix` | **100 ← what we can actually use** |
 
-135 bugs × 6 conditions × *k* repeats (AI is nondeterministic, so we need
+The 135 figure this blocker was originally written against overcounts: multi-
+function fixes are skipped by `repair_experiment.py`'s `repair()` (its
+`is_single_func_fix()` check) regardless of Alive2 coverage, so the real pool
+is **100**, not 135.
+
+100 bugs × 6 conditions × *k* repeats (AI is nondeterministic, so we need
 repeats for pass@k) × one LLVM build per iteration = **thousands of builds**.
 
-**Fix:** pick a stratified subsample of bugs, justify it, and say so plainly.
+**Decided 2026-08-27:** [`scripts/select_experiment_sample.py`](../scripts/select_experiment_sample.py)
+picks a stratified 24-bug sample (8 each easy/medium/hard by hint-region +
+reproducer size, maximizing distinct `hints.components` within each tier
+before repeating one — InstCombine alone is 45% of the pool, so an unweighted
+pick would be mostly InstCombine at every tier). Selection is fully
+deterministic — score, then component, then bug_id as tiebreak — so it's
+reproducible from the dataset alone, not "some random sample." The committed
+result is [`data/experiment_sample.json`](../data/experiment_sample.json):
+`115575` (the Blocker 1 bootstrap bug) is excluded by default since it's
+already been build-tested in isolation.
+
+24 is a starting point for a pilot, not a derived sufficient-power number —
+see the script's docstring for the reasoning, and re-run with a larger `--n`
+once Phase 2 gives a real per-iteration wall-clock estimate to budget
+against. **Still undecided:** *k* (the repeat count for pass@k) — that's a
+compute-budget call the sampling script deliberately leaves open; see "What
+needs doing" below.
 
 ---
 
@@ -795,8 +817,9 @@ migrated to `llvm-autofix`.
 
 4. **Add `llvm-reduce` as a second generic baseline** (Blocker 5). Highest value
    for the effort.
-5. **Decide the sample and the statistics.** Which bugs, how many repeats, what
-   test. Do this *before* running, not after.
+5. ~~Decide the sample~~ Done (Blocker 3): `data/experiment_sample.json`, 24
+   bugs. **Still open: how many repeats (*k*, for pass@k) and what
+   statistical test** — decide before running, not after.
 6. **Run the `--no-promotion` ablation** alongside the main sweep.
 
 ### Nice to have
