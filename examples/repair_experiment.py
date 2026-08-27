@@ -107,6 +107,15 @@ class Model:
         from openai import OpenAI
 
         self.name = os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner")
+        # SELF-DECLARED, not verified (docs/IMPLEMENTATION.md Blocker 4):
+        # lab_env.Environment.use_knowledge() only compares this string
+        # against each bug's knowledge_cutoff -- it has no way to check
+        # whether the model's REAL training data actually respects it. This
+        # default (2023-12-31) is almost certainly earlier than
+        # deepseek-reasoner's actual training cutoff, so treat "benchmark
+        # legal" as unverifiable from inside this harness regardless of what
+        # this variable is set to. The paper's claims must not depend on
+        # legality; see Blocker 4's resolution in context.md/METHODOLOGY.md.
         self.cutoff = os.environ.get("LAB_LLM_BASEMODEL_CUTOFF", "2023-12-31Z")
         self.temperature = float(os.environ.get("LAB_LLM_TEMP", "0.8"))
         self.client = OpenAI(

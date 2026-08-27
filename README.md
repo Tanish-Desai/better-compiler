@@ -45,6 +45,7 @@ comparison needed to find out whether that helps.
 | [`irmodel.py`](ce/irmodel.py) | edit-oriented model of textual LLVM IR: blocks, def-use, slicing, edits |
 | [`oracle.py`](ce/oracle.py) | "is this still the same violation?", with strictness levels and cost accounting |
 | [`reduce_generic.py`](ce/reduce_generic.py) | IR-blind line-level ddmin — the baseline that controls for prompt length |
+| [`reduce_llvmreduce.py`](ce/reduce_llvmreduce.py) | second baseline: LLVM's own `llvm-reduce` — IR-valid, but counterexample-blind |
 | [`reduce_iraware.py`](ce/reduce_iraware.py) | the proposed reducer: tandem, dependency-closed, counterexample-seeded |
 | [`structured.py`](ce/structured.py) | the structured feedback rendering |
 | [`feedback.py`](ce/feedback.py) | the experimental conditions; one call produces one LLM message |
@@ -84,6 +85,30 @@ The IR-aware reducer leaves a two-instruction function whose only difference
 from its source is the offending flag. Line-level ddmin removes nothing
 structural in ten times the verifier calls, because almost every candidate it
 proposes is invalid IR — it has no way to know the two files are one function.
+
+**Is that just because `generic` is a strawman?** Add `llvm-reduce` — a real,
+IR-valid-by-construction reducer with zero counterexample awareness
+(`ce/reduce_llvmreduce.py`, docs/IMPLEMENTATION.md Blocker 5):
+
+```bash
+docker compose exec better-compiler python3 -m ce.cli \
+    compare data/samples/poison.src.ll data/samples/poison.tgt.ll \
+    --conditions raw-plain generic-plain llvmreduce-plain iraware-plain
+```
+
+```
+condition               prompt_tok  shown_in  shown_l  reduction_  oracle_c  seconds
+raw-plain               378         28        40       -           -         -
+generic-plain           375         28        38       0.000       183       4.744
+llvmreduce-plain        173         5         13       0.821       351       32.545
+iraware-plain           148         4         10       0.857       17        0.919
+```
+
+`llvmreduce` closes almost all of `generic`'s gap (0.821 vs 0.000 reduction —
+IR-validity alone buys a lot), which is the honest answer to "wouldn't any
+real reducer have done this?" But `iraware` still reaches a smaller result
+using **20x fewer oracle calls**, showing counterexample-awareness adds real
+value beyond IR-validity, not just repeating what `llvmreduce` already shows.
 
 **This is one hand-built example, not a result.** It shows the mechanism works;
 it says nothing yet about repair rates on real bugs.

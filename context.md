@@ -1173,9 +1173,20 @@ The preferred conceptual comparison is:
 | Existing baseline     |               ✓ |                 — |                       — |                   — |
 | Raw Alive2            |               ✓ |                 — |                       — |                   — |
 | Generic reduction     |               ✓ |                 ✓ |                       — |                   — |
+| IR-valid, CE-blind reduction (`llvm-reduce`) | ✓ | — |         ✓ (partially) |                   — |
 | IR-aware reduction    |               ✓ |                 — |                       ✓ |                   — |
 | Structured feedback   |               ✓ |                 — |                       — |                   ✓ |
 | IR-aware + structured |               ✓ |                 — |                       ✓ |                   ✓ |
+
+The `llvm-reduce` row (added for Blocker 5, `docs/IMPLEMENTATION.md` §9) is
+marked "IR-aware (partially)" deliberately: it produces well-formed IR by
+construction, same as the IR-aware row, but has zero notion of the
+src/tgt pairing or the counterexample itself — that is exactly the
+distinction the two rows exist to separate. On the bundled sample it closes
+most of `generic`'s gap (28→5 instructions, vs 28→4 for IR-aware, vs 28→28
+for `generic`) while still costing far more oracle calls than IR-aware
+(351 vs 17) — evidence that IR-validity and counterexample-awareness are
+separately-contributing factors, not one thing measured twice.
 
 The exact implementation details can vary, but the scientific comparison should isolate the contribution of each factor.
 

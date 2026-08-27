@@ -745,29 +745,81 @@ needs doing" below.
 
 ---
 
-### 🟠 Blocker 4: benchmark rules conflict with using a good model
+### 🟢 Blocker 4: benchmark rules conflict with using a good model — DECIDED
 
 The benchmark says you may only use a model whose training cutoff is *earlier*
 than the bug. Bugs run into 2025. Any frontier model we'd want to use likely
 **violates that rule**, so we can't claim benchmark-legal fixes.
 
-**Fix:** this is mostly fine, but must be stated. We are measuring **relative
-differences between conditions** with the same model throughout — that
-comparison stays valid even if absolute numbers aren't leaderboard-eligible.
-Just never present them as leaderboard numbers.
+**Decided 2026-08-27, grounded in the actual sample** (not a general
+statement — checked against `data/experiment_sample.json`'s real
+`knowledge_cutoff` fields): the 24 picked bugs span **2024-02-24 to
+2026-02-11**. No model that exists today can honestly claim a training
+cutoff before the latest of those — so for this sample specifically, "legal"
+is off the table, not just improbable.
+
+There is a second, sharper problem underneath the first: the harness's
+legality check (`lab_env.Environment.use_knowledge()`) only compares a
+**self-declared** cutoff string against each bug's date — it has no way to
+verify that a model's real training data actually respects it.
+`examples/repair_experiment.py`'s existing default,
+`LAB_LLM_BASEMODEL_CUTOFF=2023-12-31`, paired with `deepseek-reasoner`
+(DeepSeek-R1, released January 2025), is almost certainly **not** an honest
+claim about that model's real training data — it would make every one of the
+24 bugs look "legal" to the harness's bookkeeping without that meaning
+anything. Flagged in the code itself now (see the comment above `Model.__init__`
+in `repair_experiment.py`) so nobody mistakes passing the harness's check for
+an actual legality guarantee.
+
+**The decision, unchanged from the original proposed fix, now stated
+explicitly:** we do not claim benchmark-legal or leaderboard-eligible
+absolute repair rates, for any model. Every claim is a **relative
+comparison between conditions run under the same model** — that comparison's
+validity does not depend on the model's knowledge cutoff at all, since every
+condition gets identical (and identically "illegal") access to post-cutoff
+knowledge. State the model and its actual (best-effort, not
+harness-verified) release/training date plainly in the writeup; never quote
+the run against the benchmark's own leaderboard.
 
 ---
 
-### 🟠 Blocker 5: our generic baseline is attackable
+### 🟢 Blocker 5: our generic baseline is attackable — FIXED
 
 A reviewer will say: *"line-level ddmin on `.ll` obviously produces invalid code
 — that's a strawman."* And they have a point: 176 of its 183 attempts were
 invalid.
 
-**Fix (highest value per effort):** add **`llvm-reduce`** as a second baseline.
-It ships with LLVM and is a real reducer that understands IR but *not*
-counterexamples. That isolates the interesting variable —
-"counterexample-aware" — instead of the trivial one, "knows what IR is".
+**Fixed 2026-08-28:** [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py)
+wires in `llvm-reduce` (ships with LLVM, already built alongside `opt` in
+Blocker 1's run — no extra CMake flag or build step needed) as a second
+baseline, exposed as the `llvmreduce-plain`/`llvmreduce-structured`
+conditions (`ce/feedback.py`'s `REDUCTIONS` now has 4 levels, not 3).
+
+`llvm-reduce` reduces one file against one opaque interestingness test — it
+has no native notion of a src/tgt pair. [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py)
+supplies that pairing entirely from the outside (see both files' docstrings
+for the two-pass, budget-honoring, externally-counted design); `llvm-reduce`
+itself never sees more than a pass/fail bit per candidate.
+
+**Real result, run against the bundled sample (not simulated):**
+
+| condition | instructions after | reduction | oracle calls | seconds |
+|---|--:|--:|--:|--:|
+| `raw` | 28 | — | — | — |
+| `generic` | 28 | 0.000 | 183 | 4.7 |
+| `llvmreduce` | 5 | 0.821 | 351 | 32.5 |
+| `iraware` | 4 | 0.857 | 17 | 0.9 |
+
+This is the outcome that makes Blocker 5 worth having done: `llvmreduce`
+closes almost all of `generic`'s gap (IR-validity alone buys a lot — its
+oracle acceptance rate is ~65% vs `generic`'s ~4%), which is exactly the
+"maybe any real reducer would have done this" objection a reviewer would
+raise. But `iraware` still wins outright — smaller result, **20x fewer
+oracle calls** — showing counterexample-awareness adds real, separately
+measurable value beyond mere IR-validity, not just repeating what
+`llvmreduce` already shows. Verified end-to-end in the real container: 5 new
+integration tests in `tests/test_integration.py` pin this relationship, all
+passing against real `alive-tv` + `llvm-reduce`, plus the full 62-test suite.
 
 ---
 
@@ -808,15 +860,16 @@ migrated to `llvm-autofix`.
    the tests can't possibly catch.
    Run `scripts/bootstrap_first_repair.py` inside the container (see Blocker 1
    above) — it does exactly this, against a pre-selected simple candidate.
-2. **Decide the model and the knowledge-cutoff position** (Blocker 4). Affects
-   how we word every claim.
+2. ~~Decide the model and the knowledge-cutoff position (Blocker 4).~~ Done:
+   no legality claim, ever — relative comparisons under the same model only.
 3. ~~Decide the efficiency framing (Blocker 2).~~ Done: iterations, not
    tokens/seconds — see Blocker 2 above.
 
 ### To make the science defensible
 
-4. **Add `llvm-reduce` as a second generic baseline** (Blocker 5). Highest value
-   for the effort.
+4. ~~Add `llvm-reduce` as a second generic baseline (Blocker 5).~~ Done:
+   `llvmreduce-plain`/`llvmreduce-structured`, verified against the real
+   binary and real `alive-tv`.
 5. ~~Decide the sample~~ Done (Blocker 3): `data/experiment_sample.json`, 24
    bugs. **Still open: how many repeats (*k*, for pass@k) and what
    statistical test** — decide before running, not after.
