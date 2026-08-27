@@ -643,6 +643,30 @@ repair-rate number.
 decide how to scale. `ccache` is already configured, which makes later builds
 much cheaper since most commits are close together in history.
 
+**Status:** the mechanics for this now exist as scripts (branch
+`feat/e2e-bootstrap`), but nobody has actually executed them yet — that needs
+the real container, hours of build time, and (for the second script) an API
+key, none of which are available where these were written.
+
+- [`scripts/select_bootstrap_bug.py`](../scripts/select_bootstrap_bug.py) —
+  scans the dataset for bugs that qualify for `repair_experiment.py` at all
+  (miscompilation, single-function fix, checked by Alive2 not just `lli`) and
+  ranks them by simplicity. Picked `115575` (VectorCombine, 3-instruction
+  reproducer, one lit dir) as the bootstrap candidate.
+- [`scripts/bootstrap_first_repair.py`](../scripts/bootstrap_first_repair.py) —
+  run inside the container. Phase 1 (default, no API key needed) resets to
+  `115575`'s `base_commit`, builds `opt`, and confirms the bug actually
+  reproduces there — the first time this has ever been attempted, and the
+  literal content of this blocker. Phase 2 (`--full`, needs `LAB_LLM_TOKEN`)
+  runs the real repair loop against that same build via
+  `examples/repair_experiment.py`'s own `repair()`, unmodified, for one
+  condition.
+
+**Next actual step:** on a machine with Docker, `docker compose up -d`, `docker
+compose exec better-compiler python3 scripts/bootstrap_first_repair.py`, and
+report what happens — that run is what turns this from "the scripts exist"
+into "Blocker 1 is resolved."
+
 ---
 
 ### 🔴 Blocker 2: build time probably dwarfs what we're measuring
@@ -737,6 +761,8 @@ migrated to `llvm-autofix`.
 1. **Build `opt` for a single bug.** Not all of them — one. Get one end-to-end
    repair running under one condition. This will surface integration problems
    the tests can't possibly catch.
+   Run `scripts/bootstrap_first_repair.py` inside the container (see Blocker 1
+   above) — it does exactly this, against a pre-selected simple candidate.
 2. **Decide the model and the knowledge-cutoff position** (Blocker 4). Affects
    how we word every claim.
 3. **Decide the efficiency framing** (Blocker 2). Iterations, not tokens.

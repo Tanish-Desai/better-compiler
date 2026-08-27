@@ -132,4 +132,10 @@ Not yet run: the end-to-end repair experiment. It needs a built `opt` per
 (`/workspace/llvm-build` is empty). Until it runs, there are no repair-rate
 numbers — only the mechanism.
 
+`feat/e2e-bootstrap` adds the scripts to actually attempt this for one bug —
+`scripts/bootstrap_first_repair.py` (build `opt`, confirm the bug reproduces,
+optionally run one real repair) and `scripts/select_bootstrap_bug.py` (how the
+bootstrap bug was picked). They still need to be run inside the real container
+to mean anything; see `docs/IMPLEMENTATION.md`'s Blocker 1.
+
 Read [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) before writing any of this up.
