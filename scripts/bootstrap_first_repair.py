@@ -87,7 +87,10 @@ def phase1_build_and_verify(bug_id: str, build_jobs: int):
     (the repair loop, the six conditions) has been ready and untested until
     this runs.
     """
-    from lab_env import Environment as Env  # noqa: PLC0415 (deferred: see repair_experiment.py)
+    import repair_experiment as rx  # noqa: PLC0415 (needs env vars set first)
+
+    rx._import_benchmark()  # puts llvm-apr-benchmark/scripts on sys.path
+    Env = rx.Env
 
     env = Env(bug_id, base_model_knowledge_cutoff="2099-01-01Z",
               max_build_jobs=build_jobs)
