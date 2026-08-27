@@ -135,7 +135,10 @@ numbers — only the mechanism.
 `feat/e2e-bootstrap` adds the scripts to actually attempt this for one bug —
 `scripts/bootstrap_first_repair.py` (build `opt`, confirm the bug reproduces,
 optionally run one real repair) and `scripts/select_bootstrap_bug.py` (how the
-bootstrap bug was picked). They still need to be run inside the real container
-to mean anything; see `docs/IMPLEMENTATION.md`'s Blocker 1.
+bootstrap bug was picked). **As of 2026-08-27, phase 1 has actually been run**:
+`opt` built successfully for bug `115575` in ~1h53m and the bug reproduces as
+expected — `/workspace/llvm-build` is no longer empty. See
+`docs/IMPLEMENTATION.md`'s Blocker 1 for the full transcript. Phase 2 (an
+actual LLM repair attempt) still needs `LAB_LLM_TOKEN` and hasn't run yet.
 
 Read [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) before writing any of this up.

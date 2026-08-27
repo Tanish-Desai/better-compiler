@@ -643,10 +643,10 @@ repair-rate number.
 decide how to scale. `ccache` is already configured, which makes later builds
 much cheaper since most commits are close together in history.
 
-**Status:** the mechanics for this now exist as scripts (branch
-`feat/e2e-bootstrap`), but nobody has actually executed them yet — that needs
-the real container, hours of build time, and (for the second script) an API
-key, none of which are available where these were written.
+**Status (2026-08-27): resolved for one bug.** `opt` has been built for real,
+inside a real container (Docker Engine + Compose v2 in a WSL2 Ubuntu distro),
+and the bootstrap bug reproduces as expected. `/workspace/llvm-build` (the
+`llvm_build` volume) is no longer empty.
 
 - [`scripts/select_bootstrap_bug.py`](../scripts/select_bootstrap_bug.py) —
   scans the dataset for bugs that qualify for `repair_experiment.py` at all
@@ -654,18 +654,31 @@ key, none of which are available where these were written.
   ranks them by simplicity. Picked `115575` (VectorCombine, 3-instruction
   reproducer, one lit dir) as the bootstrap candidate.
 - [`scripts/bootstrap_first_repair.py`](../scripts/bootstrap_first_repair.py) —
-  run inside the container. Phase 1 (default, no API key needed) resets to
-  `115575`'s `base_commit`, builds `opt`, and confirms the bug actually
-  reproduces there — the first time this has ever been attempted, and the
-  literal content of this blocker. Phase 2 (`--full`, needs `LAB_LLM_TOKEN`)
-  runs the real repair loop against that same build via
-  `examples/repair_experiment.py`'s own `repair()`, unmodified, for one
-  condition.
+  run inside the container. Phase 1 (no API key needed) resets to `115575`'s
+  `base_commit`, builds `opt`, and confirms the bug actually reproduces there.
+  Phase 2 (`--full`, needs `LAB_LLM_TOKEN`) runs the real repair loop against
+  that same build via `examples/repair_experiment.py`'s own `repair()`,
+  unmodified, for one condition.
 
-**Next actual step:** on a machine with Docker, `docker compose up -d`, `docker
-compose exec better-compiler python3 scripts/bootstrap_first_repair.py`, and
-report what happens — that run is what turns this from "the scripts exist"
-into "Blocker 1 is resolved."
+**What actually happened, for real, on 2026-08-27:**
+```
+$ docker compose exec better-compiler python3 scripts/bootstrap_first_repair.py --build-jobs 4
+[115575] base_commit=6fb2a6044f11e251c3847d227049d9dae8b87796 bug_type=miscompilation
+[115575] resetting llvm-project to base_commit...
+[115575] building opt...
+[115575] check_fast finished in 6831s (builds so far: 1, build failures: 0)
+[115575] opt builds, and the bug reproduces as expected at base_commit.
+```
+~1h53m wall clock at `--build-jobs 4` (chosen deliberately low: the container
+had 18 cores but only ~7.6GB RAM available, and full parallelism risks OOM —
+peak usage during the build topped out around 6.1GB, so 4 jobs was the right
+call, not just a conservative guess). No build failures, first attempt.
+Phase 2 (`--full`, an actual LLM repair attempt) has **not** been run yet — it
+needs `LAB_LLM_TOKEN`, which nobody has supplied.
+
+**Next actual step:** decide whether to spend API budget on Phase 2 for this
+bug (`--full --condition <name>`), or move on to picking the sample for
+Blocker 3 now that the mechanics are proven end-to-end for one bug.
 
 ---
 
