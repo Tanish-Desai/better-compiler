@@ -192,13 +192,17 @@ outside the slice is (probably) irrelevant clutter.
    ┌──────────────────────────│──────────────────────────────│─────┐
    │  ce/  ← EVERYTHING WE BUILT LIVES HERE                  ▼     │
    │                                                               │
-   │   ┌─────────────────────┐        ┌──────────────────────┐     │
-   │   │  KNOB 1: shrink it  │        │ KNOB 2: organise it  │     │
-   │   │                     │        │                      │     │
-   │   │  raw    (no change) │  then  │  plain  (as-is)      │     │
-   │   │  generic (text)     │   ──►  │  structured (labels) │     │
-   │   │  iraware (smart)    │        │                      │     │
-   │   └─────────────────────┘        └──────────────────────┘     │
+   │   ┌───────────────────────┐      ┌──────────────────────┐     │
+   │   │  KNOB 1: shrink it    │      │ KNOB 2: organise it  │     │
+   │   │                       │      │                      │     │
+   │   │  raw       (no change)│ then │  plain  (as-is)      │     │
+   │   │  generic   (text)     │  ──► │  structured (labels) │     │
+   │   │  llvmreduce(IR-valid, │      │                      │     │
+   │   │             blind)*   │      │                      │     │
+   │   │  iraware   (smart)    │      │                      │     │
+   │   └───────────────────────┘      └──────────────────────┘     │
+   │   * bonus baseline, added later — not part of the lettered    │
+   │     matrix (§7, Blocker 5)                                    │
    │                                                               │
    │        every edit checked by the ORACLE: still same bug?      │
    └───────────────────────────────────────────────────────────────┘
@@ -314,7 +318,7 @@ The generic one deletes a line, the code no longer parses, Alive2 rejects it —
 ```
 better-compiler/
 ├── ce/                    ← the library (everything we built)
-├── tests/                 ← 57 tests
+├── tests/                 ← 63 tests
 ├── scripts/               ← safety checks
 ├── examples/              ← the experiment runner
 ├── data/samples/          ← real Alive2 output, saved for tests
@@ -443,6 +447,31 @@ budget**. Its only handicap is ignorance — the variable under test.
 
 ---
 
+#### [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py) — the second baseline (Blocker 5)
+
+Wires in LLVM's own `llvm-reduce` binary rather than reimplementing a
+reducer. Runs it twice — once per side of the src/tgt pair, chained so a
+smaller `src` can permit removing more of `tgt` — then re-verifies the pair
+together, since `llvm-reduce` itself only ever checks one side at a time.
+
+Real, IR-valid-by-construction, but has **no idea the two files are related**
+or what the counterexample says — that gap is exactly what separates this
+row from `iraware` in the results table. See
+[`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) next.
+
+---
+
+#### [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) — the interestingness test (Blocker 5)
+
+`llvm-reduce` needs an external "is this candidate still interesting?"
+script; this is it. Runs as a **separate subprocess per candidate** — so
+`llvm-reduce` never receives more than that process's exit code, nothing
+about the violation itself. Its own `alive-tv` calls don't go through the
+calling `Oracle` directly; `Oracle.record_external()` merges them back in
+afterward so `.stats()` still reports the true total cost.
+
+---
+
 #### [`ce/reduce_iraware.py`](../ce/reduce_iraware.py) — the smart shrinker ⭐
 
 **The research contribution.** Three ideas make it work:
@@ -538,14 +567,24 @@ Also holds `RunLog` / `Iteration` (the experiment record) and `summarize()`.
 
 \* the 1462-reproducer corpus test needs `LAB_DATASET_DIR`.
 
-**57 tests, all passing.**
+**63 tests, all passing.**
 
 ### Scripts — [`scripts/`](../scripts/)
 
 - **`check_ir_roundtrip.py`** — the safety check. Expects `1462 ok, 0 mismatched`.
 - **`smoke_reduce_dataset.py`** — runs the shrinker on real messy dataset IR.
-  Fakes the "after" version (since `opt` isn't built), so it proves *robustness*,
-  not a research result.
+  Fakes the "after" version, so it proves *robustness*, not a research
+  result. (Originally justified as "since `opt` isn't built" — that's no
+  longer literally true, Blocker 1 built it for one bug, but this script
+  scans hundreds of dataset bugs at once, each needing its own hours-long
+  build, so faking is still the right call *here*.)
+- **`select_bootstrap_bug.py`** — picked the Blocker 1 bootstrap candidate
+  (`115575`) by scanning the dataset for bugs that qualify for
+  `repair_experiment.py` at all, ranked by simplicity.
+- **`bootstrap_first_repair.py`** — builds `opt` for that bug and confirms it
+  reproduces (Blocker 1); `--full` additionally runs one real repair attempt.
+- **`select_experiment_sample.py`** — picked the Blocker 3 stratified 24-bug
+  sample committed at `data/experiment_sample.json`.
 
 ### Examples — [`examples/`](../examples/)
 
@@ -567,12 +606,21 @@ Also holds `RunLog` / `Iteration` (the experiment record) and `summarize()`.
 
 Plus `baseline` — no counterexample at all.
 
+Plus, added afterward for Blocker 5, two more cells outside this core
+grid — `llvmreduce-plain`/`llvmreduce-structured` — a second, IR-valid but
+counterexample-blind reduction baseline (`ce/reduce_llvmreduce.py`). It's
+deliberately not folded into the table above or given a matrix letter
+(`docs/METHODOLOGY.md` §1): it answers "wouldn't any real reducer have done
+this?", a different question from the 3x2 grid's own comparisons. 9
+conditions total; see `ce/feedback.py`'s `CONDITIONS`.
+
 **Why a grid and not "ours vs theirs":** a grid can answer *why* something
 helped.
 
 - Does shrinking help? → compare **rows**
 - Does layout help? → compare **columns**
 - Does LLVM knowledge beat generic shrinking? → **generic row vs iraware row** ← *the actual research question*
+- Is it just IR-validity, not counterexample-awareness? → **`llvmreduce` vs `iraware`** (Blocker 5) — the sharper version of the same question
 - Do they help more together? → `iraware-structured` vs each alone
 
 **What counts as a fix:** the patch builds, fixes the bug, **and** breaks none
@@ -596,7 +644,7 @@ no rebuild needed.
 ```bash
 # 1. Tests
 docker compose exec better-compiler python3 -m pytest tests -q
-# expect: 57 passed
+# expect: 63 passed
 
 # 2. Safety check
 docker compose exec better-compiler python3 scripts/check_ir_roundtrip.py
@@ -616,12 +664,15 @@ docker compose exec better-compiler python3 -m ce.cli \
     reduce data/samples/poison.src.ll data/samples/poison.tgt.ll --strategy iraware
 ```
 
-The real experiment (**needs `opt` built + an API key**):
+The real experiment (**needs `opt` built + an API key**) — `--all` means all
+100 usable bugs; pass `bug_ids` as positional arguments instead (reading
+`data/experiment_sample.json`'s `bug_ids` list) to run only the Blocker 3
+sample:
 
 ```bash
 export LAB_LLM_TOKEN=...
-for c in raw-plain generic-plain iraware-plain \
-         raw-structured generic-structured iraware-structured; do
+for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
+         raw-structured generic-structured llvmreduce-structured iraware-structured; do
     python3 examples/repair_experiment.py --condition "$c" --all --out results/
 done
 python3 examples/summarize_results.py results/
@@ -676,9 +727,11 @@ call, not just a conservative guess). No build failures, first attempt.
 Phase 2 (`--full`, an actual LLM repair attempt) has **not** been run yet — it
 needs `LAB_LLM_TOKEN`, which nobody has supplied.
 
-**Next actual step:** decide whether to spend API budget on Phase 2 for this
-bug (`--full --condition <name>`), or move on to picking the sample for
-Blocker 3 now that the mechanics are proven end-to-end for one bug.
+**Next actual step (updated 2026-08-28):** Blockers 2–8 below are now all
+resolved or decided, so the only thing actually left blocking a real sweep is
+supplying `LAB_LLM_TOKEN` and choosing to spend the API budget — either
+Phase 2 for this one bootstrap bug (`--full --condition <name>`), or the real
+24-bug sweep against `data/experiment_sample.json` (Blocker 3).
 
 ---
 
@@ -949,8 +1002,12 @@ own tooling left to go stale the way the upstream README did.
 ## The honest summary
 
 **What we have:** a working, tested mechanism. 85.7% reduction on the sample,
-bug provably preserved, 10× fewer verifier calls than the generic baseline, and
-an IR reader validated against all 1462 real reproducers.
+bug provably preserved, 10× fewer verifier calls than the generic baseline,
+20× fewer than the real `llvm-reduce` baseline (Blocker 5 — so the advantage
+is counterexample-awareness, not just IR-validity), and an IR reader
+validated against all 1462 real reproducers. `opt` has been built for real,
+for one bug (Blocker 1), confirming the build/verify machinery itself works
+end-to-end, not just the reduction mechanism in isolation.
 
 **What we don't have:** any evidence that this makes an AI fix more bugs.
 

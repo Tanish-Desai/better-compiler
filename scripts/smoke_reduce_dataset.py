@@ -4,8 +4,10 @@
 THE PROBLEM THIS WORKS AROUND
 -----------------------------
 To test the shrinker on a *real* bug we would need real ``opt`` output, and
-that means building LLVM at each bug's specific commit -- hours of work that
-has not been done yet.
+that means building LLVM at each bug's specific commit -- hours of work per
+commit (docs/IMPLEMENTATION.md Blocker 1). That's been done for exactly one
+bug so far; this script exercises hundreds of dataset entries at once, each
+of which would need its own build, so faking is still the right call here.
 
 So this script fakes the "after" version instead.  It takes a genuine bug
 reproducer from the dataset and attaches an ``nsw`` flag that the original code

@@ -138,8 +138,8 @@ Needs `opt` built for each bug's `base_commit` and an LLM API key:
 
 ```bash
 export LAB_LLM_TOKEN=...            # LAB_LLVM_* are already set in the image
-for c in raw-plain generic-plain iraware-plain \
-         raw-structured generic-structured iraware-structured; do
+for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
+         raw-structured generic-structured llvmreduce-structured iraware-structured; do
     python3 examples/repair_experiment.py --condition "$c" --all --out results/
 done
 python3 examples/summarize_results.py results/
