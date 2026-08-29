@@ -1,5 +1,15 @@
 # Master Research Context
 
+> **Status update (2026-08-27):** the "Blocker 1" hindrance referenced in
+> `docs/IMPLEMENTATION.md` §9 — `opt` was never built, so nothing ran
+> end-to-end — is **resolved for one bug**. On branch `feat/e2e-bootstrap`,
+> `opt` was built for real for issue `115575` (a VectorCombine
+> miscompilation) and the bug was confirmed to reproduce against that build.
+> See `docs/IMPLEMENTATION.md` §9 for the full transcript and
+> `scripts/bootstrap_first_repair.py` for the script that did it. Still
+> outstanding: Phase 2 (an actual LLM repair attempt, needs `LAB_LLM_TOKEN`)
+> and scaling past this one bug (Blocker 3).
+
 ## 1. Research Project
 
 We are working on a research project in **automated program repair (APR) for compiler bugs**, specifically **real-world LLVM middle-end/optimization bugs**.
@@ -37,6 +47,14 @@ The benchmark consists of real LLVM middle-end bugs. The benchmark repository st
 * 106 miscompilation bugs
 * 181 crash bugs
 * 8 hang bugs
+
+> **Correction (2026-08-28, Blocker 8, `docs/IMPLEMENTATION.md` §9): this
+> quote is stale.** The dataset actually checked out in this repo has grown
+> to **491 issues** — 142 miscompilation, 340 crash, 9 hang (counted live
+> from `llvm-apr-benchmark/dataset/*.json`, the same method
+> `scripts/select_bootstrap_bug.py` and `scripts/select_experiment_sample.py`
+> use — neither hardcodes a total). Never quote the README's number; count
+> from the dataset.
 
 The benchmark provides, depending on the issue:
 
@@ -211,7 +229,19 @@ Instead, we should modify one important part of the loop:
 
 # 6. Existing LLM Compiler Repair Work: llvm-autofix
 
-A major existing baseline is **llvm-autofix**, introduced in the paper *Agentic Harness for Real-World Compilers*.
+> **Correction (2026-08-28, Blocker 6, `docs/IMPLEMENTATION.md` §9):** this
+> section originally named llvm-autofix as *the* baseline our repair loop
+> runs against. It is not — our code builds on `llvm-apr-benchmark`'s much
+> simpler `examples/baseline.py` (checked directly: a single chat loop with
+> two tool calls, no specialized agentic scaffolding). Integrating with
+> llvm-autofix for real was considered and rejected as disproportionate — a
+> second unfamiliar harness we don't have access to or have audited, for a
+> project already carrying several other open issues. llvm-autofix remains
+> exactly what it should: the strongest published prior result, cited below
+> to justify that LLM-based LLVM repair is worth attempting at all — not a
+> system this repository runs against or improves on directly.
+
+A major existing **published result** is **llvm-autofix**, introduced in the paper *Agentic Harness for Real-World Compilers*.
 
 The work argues that compiler bugs are unusually difficult for generic LLM agents because they require:
 
@@ -222,11 +252,11 @@ The work argues that compiler bugs are unusually difficult for generic LLM agent
 
 It provides an LLVM-specific agentic harness, LLVM tools, and a benchmark of reproducible LLVM bugs. The published evaluation reports that frontier models experience a substantial performance drop on compiler bugs compared with common software bugs, and that the specialized minimal agent improves over the prior state of the art.
 
-This is an essential baseline for our project.
+This is essential **related work** to cite, not the system this project extends — see the correction above.
 
 We should therefore frame our work as:
 
-> **An investigation into improving the feedback channel inside an existing LLVM-specific LLM repair workflow.**
+> **An investigation into how verification-feedback representation affects an already-plausible, `llvm-apr-benchmark`-baseline-level LLM repair loop for LLVM — not a claim of improving on llvm-autofix specifically.**
 
 The contribution is not “LLMs can fix LLVM bugs.” That has already been demonstrated.
 
@@ -553,13 +583,20 @@ Does IR-aware reduction outperform generic/textual reduction?
 
 ### RQ4 — Efficiency
 
-Does minimization reduce:
+**Decided 2026-08-27 (Blocker 2, `docs/IMPLEMENTATION.md` §9):** each repair
+iteration means an LLVM rebuild — minutes, not the seconds a prompt-token
+difference would cost. Saving a few hundred prompt tokens is statistical
+noise against that, so this RQ is claimed in terms of:
 
-* LLM iterations?
-* tokens?
-* number of builds?
-* number of Alive2 calls?
-* wall-clock repair time?
+* **LLM iterations to fix** (primary — the thing an extra build actually costs)
+* **number of builds** and **number of Alive2 calls** (both proportional to
+  iterations, reported as corroborating detail)
+
+Tokens and wall-clock time are still recorded (`ce/benchmark.py`'s `RunLog`),
+but are **not** the efficiency claim — report them as descriptive context
+only, never as the headline "X% more efficient" number.
+
+Does minimization reduce these?
 
 ### RQ5 — Feedback Representation
 
@@ -744,12 +781,11 @@ Combining semantic minimization and structured annotation provides the strongest
 
 ### H5
 
-The proposed method reduces repair cost, including:
-
-* LLM iterations
-* context/token consumption
-* verification cycles
-* total time
+The proposed method reduces repair cost. Per the RQ4 decision above, this is
+claimed primarily as **fewer LLM iterations** (and the build/verification
+cycles that scale with iteration count), not as fewer tokens or less
+wall-clock time — those are recorded but are noise next to per-iteration
+LLVM rebuild time.
 
 The AI should treat these as **hypotheses to test**, not established facts.
 
@@ -783,7 +819,11 @@ original reproducer passes
 
 The repair should satisfy the benchmark's appropriate validation criteria, including broader regression testing and formal verification where applicable.
 
-Secondary metrics:
+Secondary metrics — **efficiency claims are made via `number of iterations`
+(and the correlated `total builds`/`total verifier calls`), per the RQ4
+decision above; `wall-clock time` and `LLM token usage` are recorded but are
+descriptive context, not the efficiency claim, since one iteration is an LLVM
+rebuild measured in minutes**:
 
 * repair success rate
 * pass@k / success within N attempts
@@ -1153,9 +1193,20 @@ The preferred conceptual comparison is:
 | Existing baseline     |               ✓ |                 — |                       — |                   — |
 | Raw Alive2            |               ✓ |                 — |                       — |                   — |
 | Generic reduction     |               ✓ |                 ✓ |                       — |                   — |
+| IR-valid, CE-blind reduction (`llvm-reduce`) | ✓ | — |         ✓ (partially) |                   — |
 | IR-aware reduction    |               ✓ |                 — |                       ✓ |                   — |
 | Structured feedback   |               ✓ |                 — |                       — |                   ✓ |
 | IR-aware + structured |               ✓ |                 — |                       ✓ |                   ✓ |
+
+The `llvm-reduce` row (added for Blocker 5, `docs/IMPLEMENTATION.md` §9) is
+marked "IR-aware (partially)" deliberately: it produces well-formed IR by
+construction, same as the IR-aware row, but has zero notion of the
+src/tgt pairing or the counterexample itself — that is exactly the
+distinction the two rows exist to separate. On the bundled sample it closes
+most of `generic`'s gap (28→5 instructions, vs 28→4 for IR-aware, vs 28→28
+for `generic`) while still costing far more oracle calls than IR-aware
+(351 vs 17) — evidence that IR-validity and counterexample-awareness are
+separately-contributing factors, not one thing measured twice.
 
 The exact implementation details can vary, but the scientific comparison should isolate the contribution of each factor.
 

@@ -29,8 +29,10 @@ comparison needed to find out whether that helps.
 | [`examples/repair_experiment.py`](examples/repair_experiment.py) | the repair loop, parameterised by condition |
 | [`examples/summarize_results.py`](examples/summarize_results.py) | aggregates run records into the experiment table |
 | [`scripts/check_ir_roundtrip.py`](scripts/check_ir_roundtrip.py) | validates the IR model against every dataset reproducer |
+| [`scripts/select_experiment_sample.py`](scripts/select_experiment_sample.py) | picks the stratified bug sample for the real sweep (Blocker 3) |
 | [`tests/`](tests/) | unit tests plus `alive-tv` integration tests |
 | [`data/samples/`](data/samples/) | real `alive-tv` outputs, used as parser fixtures |
+| [`data/experiment_sample.json`](data/experiment_sample.json) | the picked 24-bug sample, stratified by complexity and component |
 | [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) | **start here** — full walkthrough, glossary, blockers |
 | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | what the results do and do not support |
 | [`llvm-apr-benchmark/`](llvm-apr-benchmark/) | upstream benchmark, unmodified |
@@ -43,6 +45,7 @@ comparison needed to find out whether that helps.
 | [`irmodel.py`](ce/irmodel.py) | edit-oriented model of textual LLVM IR: blocks, def-use, slicing, edits |
 | [`oracle.py`](ce/oracle.py) | "is this still the same violation?", with strictness levels and cost accounting |
 | [`reduce_generic.py`](ce/reduce_generic.py) | IR-blind line-level ddmin — the baseline that controls for prompt length |
+| [`reduce_llvmreduce.py`](ce/reduce_llvmreduce.py) | second baseline: LLVM's own `llvm-reduce` — IR-valid, but counterexample-blind |
 | [`reduce_iraware.py`](ce/reduce_iraware.py) | the proposed reducer: tandem, dependency-closed, counterexample-seeded |
 | [`structured.py`](ce/structured.py) | the structured feedback rendering |
 | [`feedback.py`](ce/feedback.py) | the experimental conditions; one call produces one LLM message |
@@ -83,6 +86,30 @@ from its source is the offending flag. Line-level ddmin removes nothing
 structural in ten times the verifier calls, because almost every candidate it
 proposes is invalid IR — it has no way to know the two files are one function.
 
+**Is that just because `generic` is a strawman?** Add `llvm-reduce` — a real,
+IR-valid-by-construction reducer with zero counterexample awareness
+(`ce/reduce_llvmreduce.py`, docs/IMPLEMENTATION.md Blocker 5):
+
+```bash
+docker compose exec better-compiler python3 -m ce.cli \
+    compare data/samples/poison.src.ll data/samples/poison.tgt.ll \
+    --conditions raw-plain generic-plain llvmreduce-plain iraware-plain
+```
+
+```
+condition               prompt_tok  shown_in  shown_l  reduction_  oracle_c  seconds
+raw-plain               378         28        40       -           -         -
+generic-plain           375         28        38       0.000       183       4.744
+llvmreduce-plain        173         5         13       0.821       351       32.545
+iraware-plain           148         4         10       0.857       17        0.919
+```
+
+`llvmreduce` closes almost all of `generic`'s gap (0.821 vs 0.000 reduction —
+IR-validity alone buys a lot), which is the honest answer to "wouldn't any
+real reducer have done this?" But `iraware` still reaches a smaller result
+using **20x fewer oracle calls**, showing counterexample-awareness adds real
+value beyond IR-validity, not just repeating what `llvmreduce` already shows.
+
 **This is one hand-built example, not a result.** It shows the mechanism works;
 it says nothing yet about repair rates on real bugs.
 
@@ -111,8 +138,8 @@ Needs `opt` built for each bug's `base_commit` and an LLM API key:
 
 ```bash
 export LAB_LLM_TOKEN=...            # LAB_LLVM_* are already set in the image
-for c in raw-plain generic-plain iraware-plain \
-         raw-structured generic-structured iraware-structured; do
+for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
+         raw-structured generic-structured llvmreduce-structured iraware-structured; do
     python3 examples/repair_experiment.py --condition "$c" --all --out results/
 done
 python3 examples/summarize_results.py results/
@@ -131,5 +158,14 @@ Not yet run: the end-to-end repair experiment. It needs a built `opt` per
 `base_commit`, which is hours of compute per commit and has not been done yet
 (`/workspace/llvm-build` is empty). Until it runs, there are no repair-rate
 numbers — only the mechanism.
+
+`feat/e2e-bootstrap` adds the scripts to actually attempt this for one bug —
+`scripts/bootstrap_first_repair.py` (build `opt`, confirm the bug reproduces,
+optionally run one real repair) and `scripts/select_bootstrap_bug.py` (how the
+bootstrap bug was picked). **As of 2026-08-27, phase 1 has actually been run**:
+`opt` built successfully for bug `115575` in ~1h53m and the bug reproduces as
+expected — `/workspace/llvm-build` is no longer empty. See
+`docs/IMPLEMENTATION.md`'s Blocker 1 for the full transcript. Phase 2 (an
+actual LLM repair attempt) still needs `LAB_LLM_TOKEN` and hasn't run yet.
 
 Read [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) before writing any of this up.

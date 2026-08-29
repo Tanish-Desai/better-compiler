@@ -192,13 +192,17 @@ outside the slice is (probably) irrelevant clutter.
    ┌──────────────────────────│──────────────────────────────│─────┐
    │  ce/  ← EVERYTHING WE BUILT LIVES HERE                  ▼     │
    │                                                               │
-   │   ┌─────────────────────┐        ┌──────────────────────┐     │
-   │   │  KNOB 1: shrink it  │        │ KNOB 2: organise it  │     │
-   │   │                     │        │                      │     │
-   │   │  raw    (no change) │  then  │  plain  (as-is)      │     │
-   │   │  generic (text)     │   ──►  │  structured (labels) │     │
-   │   │  iraware (smart)    │        │                      │     │
-   │   └─────────────────────┘        └──────────────────────┘     │
+   │   ┌───────────────────────┐      ┌──────────────────────┐     │
+   │   │  KNOB 1: shrink it    │      │ KNOB 2: organise it  │     │
+   │   │                       │      │                      │     │
+   │   │  raw       (no change)│ then │  plain  (as-is)      │     │
+   │   │  generic   (text)     │  ──► │  structured (labels) │     │
+   │   │  llvmreduce(IR-valid, │      │                      │     │
+   │   │             blind)*   │      │                      │     │
+   │   │  iraware   (smart)    │      │                      │     │
+   │   └───────────────────────┘      └──────────────────────┘     │
+   │   * bonus baseline, added later — not part of the lettered    │
+   │     matrix (§7, Blocker 5)                                    │
    │                                                               │
    │        every edit checked by the ORACLE: still same bug?      │
    └───────────────────────────────────────────────────────────────┘
@@ -314,7 +318,7 @@ The generic one deletes a line, the code no longer parses, Alive2 rejects it —
 ```
 better-compiler/
 ├── ce/                    ← the library (everything we built)
-├── tests/                 ← 57 tests
+├── tests/                 ← 63 tests
 ├── scripts/               ← safety checks
 ├── examples/              ← the experiment runner
 ├── data/samples/          ← real Alive2 output, saved for tests
@@ -443,6 +447,31 @@ budget**. Its only handicap is ignorance — the variable under test.
 
 ---
 
+#### [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py) — the second baseline (Blocker 5)
+
+Wires in LLVM's own `llvm-reduce` binary rather than reimplementing a
+reducer. Runs it twice — once per side of the src/tgt pair, chained so a
+smaller `src` can permit removing more of `tgt` — then re-verifies the pair
+together, since `llvm-reduce` itself only ever checks one side at a time.
+
+Real, IR-valid-by-construction, but has **no idea the two files are related**
+or what the counterexample says — that gap is exactly what separates this
+row from `iraware` in the results table. See
+[`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) next.
+
+---
+
+#### [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) — the interestingness test (Blocker 5)
+
+`llvm-reduce` needs an external "is this candidate still interesting?"
+script; this is it. Runs as a **separate subprocess per candidate** — so
+`llvm-reduce` never receives more than that process's exit code, nothing
+about the violation itself. Its own `alive-tv` calls don't go through the
+calling `Oracle` directly; `Oracle.record_external()` merges them back in
+afterward so `.stats()` still reports the true total cost.
+
+---
+
 #### [`ce/reduce_iraware.py`](../ce/reduce_iraware.py) — the smart shrinker ⭐
 
 **The research contribution.** Three ideas make it work:
@@ -538,14 +567,24 @@ Also holds `RunLog` / `Iteration` (the experiment record) and `summarize()`.
 
 \* the 1462-reproducer corpus test needs `LAB_DATASET_DIR`.
 
-**57 tests, all passing.**
+**63 tests, all passing.**
 
 ### Scripts — [`scripts/`](../scripts/)
 
 - **`check_ir_roundtrip.py`** — the safety check. Expects `1462 ok, 0 mismatched`.
 - **`smoke_reduce_dataset.py`** — runs the shrinker on real messy dataset IR.
-  Fakes the "after" version (since `opt` isn't built), so it proves *robustness*,
-  not a research result.
+  Fakes the "after" version, so it proves *robustness*, not a research
+  result. (Originally justified as "since `opt` isn't built" — that's no
+  longer literally true, Blocker 1 built it for one bug, but this script
+  scans hundreds of dataset bugs at once, each needing its own hours-long
+  build, so faking is still the right call *here*.)
+- **`select_bootstrap_bug.py`** — picked the Blocker 1 bootstrap candidate
+  (`115575`) by scanning the dataset for bugs that qualify for
+  `repair_experiment.py` at all, ranked by simplicity.
+- **`bootstrap_first_repair.py`** — builds `opt` for that bug and confirms it
+  reproduces (Blocker 1); `--full` additionally runs one real repair attempt.
+- **`select_experiment_sample.py`** — picked the Blocker 3 stratified 24-bug
+  sample committed at `data/experiment_sample.json`.
 
 ### Examples — [`examples/`](../examples/)
 
@@ -567,12 +606,21 @@ Also holds `RunLog` / `Iteration` (the experiment record) and `summarize()`.
 
 Plus `baseline` — no counterexample at all.
 
+Plus, added afterward for Blocker 5, two more cells outside this core
+grid — `llvmreduce-plain`/`llvmreduce-structured` — a second, IR-valid but
+counterexample-blind reduction baseline (`ce/reduce_llvmreduce.py`). It's
+deliberately not folded into the table above or given a matrix letter
+(`docs/METHODOLOGY.md` §1): it answers "wouldn't any real reducer have done
+this?", a different question from the 3x2 grid's own comparisons. 9
+conditions total; see `ce/feedback.py`'s `CONDITIONS`.
+
 **Why a grid and not "ours vs theirs":** a grid can answer *why* something
 helped.
 
 - Does shrinking help? → compare **rows**
 - Does layout help? → compare **columns**
 - Does LLVM knowledge beat generic shrinking? → **generic row vs iraware row** ← *the actual research question*
+- Is it just IR-validity, not counterexample-awareness? → **`llvmreduce` vs `iraware`** (Blocker 5) — the sharper version of the same question
 - Do they help more together? → `iraware-structured` vs each alone
 
 **What counts as a fix:** the patch builds, fixes the bug, **and** breaks none
@@ -596,7 +644,7 @@ no rebuild needed.
 ```bash
 # 1. Tests
 docker compose exec better-compiler python3 -m pytest tests -q
-# expect: 57 passed
+# expect: 63 passed
 
 # 2. Safety check
 docker compose exec better-compiler python3 scripts/check_ir_roundtrip.py
@@ -616,12 +664,15 @@ docker compose exec better-compiler python3 -m ce.cli \
     reduce data/samples/poison.src.ll data/samples/poison.tgt.ll --strategy iraware
 ```
 
-The real experiment (**needs `opt` built + an API key**):
+The real experiment (**needs `opt` built + an API key**) — `--all` means all
+100 usable bugs; pass `bug_ids` as positional arguments instead (reading
+`data/experiment_sample.json`'s `bug_ids` list) to run only the Blocker 3
+sample:
 
 ```bash
 export LAB_LLM_TOKEN=...
-for c in raw-plain generic-plain iraware-plain \
-         raw-structured generic-structured iraware-structured; do
+for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
+         raw-structured generic-structured llvmreduce-structured iraware-structured; do
     python3 examples/repair_experiment.py --condition "$c" --all --out results/
 done
 python3 examples/summarize_results.py results/
@@ -643,20 +694,69 @@ repair-rate number.
 decide how to scale. `ccache` is already configured, which makes later builds
 much cheaper since most commits are close together in history.
 
+**Status (2026-08-27): resolved for one bug.** `opt` has been built for real,
+inside a real container (Docker Engine + Compose v2 in a WSL2 Ubuntu distro),
+and the bootstrap bug reproduces as expected. `/workspace/llvm-build` (the
+`llvm_build` volume) is no longer empty.
+
+- [`scripts/select_bootstrap_bug.py`](../scripts/select_bootstrap_bug.py) —
+  scans the dataset for bugs that qualify for `repair_experiment.py` at all
+  (miscompilation, single-function fix, checked by Alive2 not just `lli`) and
+  ranks them by simplicity. Picked `115575` (VectorCombine, 3-instruction
+  reproducer, one lit dir) as the bootstrap candidate.
+- [`scripts/bootstrap_first_repair.py`](../scripts/bootstrap_first_repair.py) —
+  run inside the container. Phase 1 (no API key needed) resets to `115575`'s
+  `base_commit`, builds `opt`, and confirms the bug actually reproduces there.
+  Phase 2 (`--full`, needs `LAB_LLM_TOKEN`) runs the real repair loop against
+  that same build via `examples/repair_experiment.py`'s own `repair()`,
+  unmodified, for one condition.
+
+**What actually happened, for real, on 2026-08-27:**
+```
+$ docker compose exec better-compiler python3 scripts/bootstrap_first_repair.py --build-jobs 4
+[115575] base_commit=6fb2a6044f11e251c3847d227049d9dae8b87796 bug_type=miscompilation
+[115575] resetting llvm-project to base_commit...
+[115575] building opt...
+[115575] check_fast finished in 6831s (builds so far: 1, build failures: 0)
+[115575] opt builds, and the bug reproduces as expected at base_commit.
+```
+~1h53m wall clock at `--build-jobs 4` (chosen deliberately low: the container
+had 18 cores but only ~7.6GB RAM available, and full parallelism risks OOM —
+peak usage during the build topped out around 6.1GB, so 4 jobs was the right
+call, not just a conservative guess). No build failures, first attempt.
+Phase 2 (`--full`, an actual LLM repair attempt) has **not** been run yet — it
+needs `LAB_LLM_TOKEN`, which nobody has supplied.
+
+**Next actual step (updated 2026-08-28):** Blockers 2–8 below are now all
+resolved or decided, so the only thing actually left blocking a real sweep is
+supplying `LAB_LLM_TOKEN` and choosing to spend the API budget — either
+Phase 2 for this one bootstrap bug (`--full --condition <name>`), or the real
+24-bug sweep against `data/experiment_sample.json` (Blocker 3).
+
 ---
 
-### 🔴 Blocker 2: build time probably dwarfs what we're measuring
+### 🟢 Blocker 2: build time probably dwarfs what we're measuring — DECIDED
 
 We planned to measure efficiency in tokens saved. But if one iteration = one
 LLVM rebuild (minutes), then saving 200 prompt tokens is **statistical noise**
 in wall-clock terms.
 
-**Fix:** reframe the efficiency claim around **fewer iterations**, not fewer
-tokens or seconds. Decide this now — it changes what we claim in the paper.
+**Decided 2026-08-27:** the efficiency claim is reframed around **fewer LLM
+iterations to fix** (and the build/oracle-call counts that scale with
+iterations), not fewer tokens or seconds. Reflected in `context.md` (RQ4, H5,
+§18) and `docs/METHODOLOGY.md` §5. Tokens and wall-clock time are still
+recorded in every `RunLog` (`ce/benchmark.py`) and still worth reporting —
+just as descriptive context beside the repair-rate/iteration numbers, never
+as the headline "N% more efficient" claim.
+
+This was a documentation decision, not a code change — `ce/benchmark.py`'s
+`totals()`/`summarize()` already computed `mean_iterations` alongside the
+token/time fields; nothing there needed touching, only which number the
+prose leads with.
 
 ---
 
-### 🟠 Blocker 3: scale
+### 🟢 Blocker 3: scale — SAMPLE PICKED
 
 Real numbers from the dataset:
 
@@ -666,67 +766,199 @@ Real numbers from the dataset:
 | Crash bugs (no counterexample) | 340 |
 | Hang bugs (no counterexample) | 9 |
 | Miscompilations | 142 |
-| — of which checked by Alive2 | **135 ← what we can use** |
+| — of which checked by Alive2 | 135 |
 | — checked only by `lli` | 7 |
+| — of the 135, also `is_single_func_fix` | **100 ← what we can actually use** |
 
-135 bugs × 6 conditions × *k* repeats (AI is nondeterministic, so we need
+The 135 figure this blocker was originally written against overcounts: multi-
+function fixes are skipped by `repair_experiment.py`'s `repair()` (its
+`is_single_func_fix()` check) regardless of Alive2 coverage, so the real pool
+is **100**, not 135.
+
+100 bugs × 6 conditions × *k* repeats (AI is nondeterministic, so we need
 repeats for pass@k) × one LLVM build per iteration = **thousands of builds**.
 
-**Fix:** pick a stratified subsample of bugs, justify it, and say so plainly.
+**Decided 2026-08-27:** [`scripts/select_experiment_sample.py`](../scripts/select_experiment_sample.py)
+picks a stratified 24-bug sample (8 each easy/medium/hard by hint-region +
+reproducer size, maximizing distinct `hints.components` within each tier
+before repeating one — InstCombine alone is 45% of the pool, so an unweighted
+pick would be mostly InstCombine at every tier). Selection is fully
+deterministic — score, then component, then bug_id as tiebreak — so it's
+reproducible from the dataset alone, not "some random sample." The committed
+result is [`data/experiment_sample.json`](../data/experiment_sample.json):
+`115575` (the Blocker 1 bootstrap bug) is excluded by default since it's
+already been build-tested in isolation.
+
+24 is a starting point for a pilot, not a derived sufficient-power number —
+see the script's docstring for the reasoning, and re-run with a larger `--n`
+once Phase 2 gives a real per-iteration wall-clock estimate to budget
+against. **Still undecided:** *k* (the repeat count for pass@k) — that's a
+compute-budget call the sampling script deliberately leaves open; see "What
+needs doing" below.
 
 ---
 
-### 🟠 Blocker 4: benchmark rules conflict with using a good model
+### 🟢 Blocker 4: benchmark rules conflict with using a good model — DECIDED
 
 The benchmark says you may only use a model whose training cutoff is *earlier*
 than the bug. Bugs run into 2025. Any frontier model we'd want to use likely
 **violates that rule**, so we can't claim benchmark-legal fixes.
 
-**Fix:** this is mostly fine, but must be stated. We are measuring **relative
-differences between conditions** with the same model throughout — that
-comparison stays valid even if absolute numbers aren't leaderboard-eligible.
-Just never present them as leaderboard numbers.
+**Decided 2026-08-27, grounded in the actual sample** (not a general
+statement — checked against `data/experiment_sample.json`'s real
+`knowledge_cutoff` fields): the 24 picked bugs span **2024-02-24 to
+2026-02-11**. No model that exists today can honestly claim a training
+cutoff before the latest of those — so for this sample specifically, "legal"
+is off the table, not just improbable.
+
+There is a second, sharper problem underneath the first: the harness's
+legality check (`lab_env.Environment.use_knowledge()`) only compares a
+**self-declared** cutoff string against each bug's date — it has no way to
+verify that a model's real training data actually respects it.
+`examples/repair_experiment.py`'s existing default,
+`LAB_LLM_BASEMODEL_CUTOFF=2023-12-31`, paired with `deepseek-reasoner`
+(DeepSeek-R1, released January 2025), is almost certainly **not** an honest
+claim about that model's real training data — it would make every one of the
+24 bugs look "legal" to the harness's bookkeeping without that meaning
+anything. Flagged in the code itself now (see the comment above `Model.__init__`
+in `repair_experiment.py`) so nobody mistakes passing the harness's check for
+an actual legality guarantee.
+
+**The decision, unchanged from the original proposed fix, now stated
+explicitly:** we do not claim benchmark-legal or leaderboard-eligible
+absolute repair rates, for any model. Every claim is a **relative
+comparison between conditions run under the same model** — that comparison's
+validity does not depend on the model's knowledge cutoff at all, since every
+condition gets identical (and identically "illegal") access to post-cutoff
+knowledge. State the model and its actual (best-effort, not
+harness-verified) release/training date plainly in the writeup; never quote
+the run against the benchmark's own leaderboard.
 
 ---
 
-### 🟠 Blocker 5: our generic baseline is attackable
+### 🟢 Blocker 5: our generic baseline is attackable — FIXED
 
 A reviewer will say: *"line-level ddmin on `.ll` obviously produces invalid code
 — that's a strawman."* And they have a point: 176 of its 183 attempts were
 invalid.
 
-**Fix (highest value per effort):** add **`llvm-reduce`** as a second baseline.
-It ships with LLVM and is a real reducer that understands IR but *not*
-counterexamples. That isolates the interesting variable —
-"counterexample-aware" — instead of the trivial one, "knows what IR is".
+**Fixed 2026-08-28:** [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py)
+wires in `llvm-reduce` (ships with LLVM, already built alongside `opt` in
+Blocker 1's run — no extra CMake flag or build step needed) as a second
+baseline, exposed as the `llvmreduce-plain`/`llvmreduce-structured`
+conditions (`ce/feedback.py`'s `REDUCTIONS` now has 4 levels, not 3).
+
+`llvm-reduce` reduces one file against one opaque interestingness test — it
+has no native notion of a src/tgt pair. [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py)
+supplies that pairing entirely from the outside (see both files' docstrings
+for the two-pass, budget-honoring, externally-counted design); `llvm-reduce`
+itself never sees more than a pass/fail bit per candidate.
+
+**Real result, run against the bundled sample (not simulated):**
+
+| condition | instructions after | reduction | oracle calls | seconds |
+|---|--:|--:|--:|--:|
+| `raw` | 28 | — | — | — |
+| `generic` | 28 | 0.000 | 183 | 4.7 |
+| `llvmreduce` | 5 | 0.821 | 351 | 32.5 |
+| `iraware` | 4 | 0.857 | 17 | 0.9 |
+
+This is the outcome that makes Blocker 5 worth having done: `llvmreduce`
+closes almost all of `generic`'s gap (IR-validity alone buys a lot — its
+oracle acceptance rate is ~65% vs `generic`'s ~4%), which is exactly the
+"maybe any real reducer would have done this" objection a reviewer would
+raise. But `iraware` still wins outright — smaller result, **20x fewer
+oracle calls** — showing counterexample-awareness adds real, separately
+measurable value beyond mere IR-validity, not just repeating what
+`llvmreduce` already shows. Verified end-to-end in the real container: 5 new
+integration tests in `tests/test_integration.py` pin this relationship, all
+passing against real `alive-tv` + `llvm-reduce`, plus the full 62-test suite.
 
 ---
 
-### 🟡 Blocker 6: the claimed baseline isn't the implemented one
+### 🟢 Blocker 6: the claimed baseline isn't the implemented one — RESTATED
 
 `context.md` names **llvm-autofix** as the primary baseline. Our code builds on
 llvm-apr-benchmark's much simpler `baseline.py`. Those are different systems.
 
-**Fix:** either integrate with llvm-autofix properly, or restate in writing what
-we are actually comparing against.
+**Decided 2026-08-28 (the "restate" branch of the fix, not the "integrate"
+one):** integrating with llvm-autofix would mean standing up a second,
+unfamiliar agentic harness (specialized tools, its own prompting, its own
+repair loop) we don't have access to and haven't audited — swapping one
+undocumented gap for a much larger, riskier one, for a project already
+carrying five other blockers. Restating what we actually compare against is
+the honest, bounded fix.
+
+Checked `llvm-apr-benchmark/examples/baseline.py` directly rather than
+assuming: it's a single OpenAI-compatible chat loop with two tool calls
+(`get_source`, and an optional bisection helper), no compiler-specific
+scaffolding beyond what the benchmark harness itself provides (the
+build/test/Alive2 plumbing in `llvm_helper.py`/`lab_env.py`). That is a real
+system, but a much simpler one than `llvm-autofix` is described as being in
+`context.md` §6 (specialized tools, sparse-report understanding, a published
+agentic-harness paper).
+
+`context.md` §6 has been corrected: it no longer claims llvm-autofix as
+*the* baseline our repair loop runs against. llvm-autofix stays exactly what
+it always should have been — the strongest published prior result to cite in
+related work, framing why an LLM-repair-for-LLVM approach is worth trying at
+all — while `examples/repair_experiment.py` (a one-line-changed fork of
+`baseline.py`) is named as what this project's numbers are actually measured
+against. The narrower, honest framing (`context.md` §6, revised): *how does
+verification-feedback representation affect an already-plausible,
+`baseline.py`-level compiler-repair loop* — not a claim about improving on
+llvm-autofix specifically.
 
 ---
 
-### 🟡 Blocker 7: `promote-operands` generalises the program
+### 🟢 Blocker 7: `promote-operands` generalises the program — FIXED
 
 See [`reduce_iraware.py`](#cereduce_irawarepy--the-smart-shrinker-) above.
 
-**Fix:** already switchable via `--no-promotion`. Run both and report both as an
-ablation.
+**Fixed 2026-08-28:** `--no-promotion` already existed, but "switchable"
+undersold a real gap — `RunLog.write()` and `repair_experiment.py`'s
+"already done" pre-check both keyed the output filename by `(bug_id,
+condition)` only. Running the ablation for a bug/condition already run would
+either **silently overwrite** the paired result, or (worse) get **skipped
+entirely** by the pre-check thinking it was already done — either way, "run
+both and report both" was not actually possible without manually renaming
+files between runs.
+
+Fixed with one shared function,
+[`run_record_path`](../ce/benchmark.py) (`ce/benchmark.py`), used by both
+`RunLog.write()` and `repair_experiment.py`'s pre-check so they can't drift
+apart again: the default (promotion-on) filename is unchanged
+(`<bug_id>.<condition>.json`), and `--no-promotion` runs get a
+`.no-promotion` suffix instead of colliding.
+[`examples/summarize_results.py`](../examples/summarize_results.py) now
+keeps the ablation out of the main comparison tables (it's a separate axis,
+not another condition) and prints it as its own labeled table when present,
+so "report both as an ablation" is now something running the sweep with and
+without `--no-promotion` actually produces, not just permits. Pinned by
+`test_no_promotion_ablation_does_not_collide_with_the_default_run` in
+`tests/test_integration.py`.
 
 ---
 
-### 🟡 Blocker 8: stale numbers everywhere
+### 🟢 Blocker 8: stale numbers everywhere — FIXED
 
 The benchmark README says 295 issues; there are actually **491**. Upstream also
 migrated to `llvm-autofix`.
 
-**Fix:** never quote the README. Count from the dataset.
+**Fixed 2026-08-28:** `context.md` §2 itself had exactly this stale quote —
+"295 verified issues... 106 miscompilation / 181 crash / 8 hang" — sitting
+uncorrected since it was written. Added a footnote there with the live count
+(same method as Blocker 3's sample selection: counted from the dataset
+directory, not read off a doc): **491 total — 142 miscompilation, 340 crash,
+9 hang.** No other stale count found elsewhere in this repo's own docs
+(`grep -rn "295"` across `README.md`/`context.md`/`docs/`/`examples/`/`ce/`/
+`scripts/` turns up only this one, now-annotated, spot).
+
+The practice going forward is already structural, not just a reminder:
+`scripts/select_bootstrap_bug.py` and `scripts/select_experiment_sample.py`
+both compute their counts live from `llvm-apr-benchmark/dataset/*.json` every
+time they run — neither hardcodes a total, so there is nothing in this repo's
+own tooling left to go stale the way the upstream README did.
 
 ---
 
@@ -737,17 +969,24 @@ migrated to `llvm-autofix`.
 1. **Build `opt` for a single bug.** Not all of them — one. Get one end-to-end
    repair running under one condition. This will surface integration problems
    the tests can't possibly catch.
-2. **Decide the model and the knowledge-cutoff position** (Blocker 4). Affects
-   how we word every claim.
-3. **Decide the efficiency framing** (Blocker 2). Iterations, not tokens.
+   Run `scripts/bootstrap_first_repair.py` inside the container (see Blocker 1
+   above) — it does exactly this, against a pre-selected simple candidate.
+2. ~~Decide the model and the knowledge-cutoff position (Blocker 4).~~ Done:
+   no legality claim, ever — relative comparisons under the same model only.
+3. ~~Decide the efficiency framing (Blocker 2).~~ Done: iterations, not
+   tokens/seconds — see Blocker 2 above.
 
 ### To make the science defensible
 
-4. **Add `llvm-reduce` as a second generic baseline** (Blocker 5). Highest value
-   for the effort.
-5. **Decide the sample and the statistics.** Which bugs, how many repeats, what
-   test. Do this *before* running, not after.
-6. **Run the `--no-promotion` ablation** alongside the main sweep.
+4. ~~Add `llvm-reduce` as a second generic baseline (Blocker 5).~~ Done:
+   `llvmreduce-plain`/`llvmreduce-structured`, verified against the real
+   binary and real `alive-tv`.
+5. ~~Decide the sample~~ Done (Blocker 3): `data/experiment_sample.json`, 24
+   bugs. **Still open: how many repeats (*k*, for pass@k) and what
+   statistical test** — decide before running, not after.
+6. **Run the `--no-promotion` ablation** alongside the main sweep. (Blocker 7
+   fixed the filename collision that would have silently broken this — this
+   item is still open because the sweep itself hasn't run yet.)
 
 ### Nice to have
 
@@ -763,8 +1002,12 @@ migrated to `llvm-autofix`.
 ## The honest summary
 
 **What we have:** a working, tested mechanism. 85.7% reduction on the sample,
-bug provably preserved, 10× fewer verifier calls than the generic baseline, and
-an IR reader validated against all 1462 real reproducers.
+bug provably preserved, 10× fewer verifier calls than the generic baseline,
+20× fewer than the real `llvm-reduce` baseline (Blocker 5 — so the advantage
+is counterexample-awareness, not just IR-validity), and an IR reader
+validated against all 1462 real reproducers. `opt` has been built for real,
+for one bug (Blocker 1), confirming the build/verify machinery itself works
+end-to-end, not just the reduction mechanism in isolation.
 
 **What we don't have:** any evidence that this makes an AI fix more bugs.
 

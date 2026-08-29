@@ -192,6 +192,26 @@ class Oracle:
             return fn
         return None
 
+    def record_external(
+        self, *, calls: int = 0, accepted: int = 0, rejected: int = 0,
+        tool_failures: int = 0, seconds: float = 0.0,
+    ) -> None:
+        """Merge in alive-tv calls this oracle didn't make itself.
+
+        ``llvm-reduce`` (``reduce_llvmreduce.py``) spawns its own subprocess
+        per candidate, each running an independent interestingness-test check
+        against the *same* violation criteria this oracle enforces — but in a
+        separate process, so those calls can't go through ``check()``
+        directly. Without merging their tallies in, ``.stats()`` would
+        undercount the true verifier cost and violate the "every condition
+        gets the same recorded budget" fairness rule (docs/METHODOLOGY.md §4).
+        """
+        self.calls += calls
+        self.accepted += accepted
+        self.rejected += rejected
+        self.tool_failures += tool_failures
+        self.seconds += seconds
+
     def stats(self) -> dict:
         return {
             "oracle_calls": self.calls,

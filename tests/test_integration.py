@@ -22,21 +22,29 @@ Alive2 at all.
 
 from __future__ import annotations
 
+import json
 import os
 
 import pytest
 
 from ce.alive import run_alive_tv
-from ce.benchmark import RunLog, Iteration, normalize_feedback, summarize
+from ce.benchmark import RunLog, Iteration, normalize_feedback, run_record_path, summarize
 from ce.feedback import MATRIX_LETTERS, build_feedback, resolve_condition
 from ce.oracle import establish
 from ce.reduce_generic import reduce_generic
 from ce.reduce_iraware import reduce_iraware
+from ce.reduce_llvmreduce import default_llvm_reduce, reduce_llvmreduce
 
 ALIVE_TV = os.environ.get("LAB_LLVM_ALIVE_TV")
 requires_alive = pytest.mark.skipif(
     not (ALIVE_TV and os.access(ALIVE_TV, os.X_OK)),
     reason="LAB_LLVM_ALIVE_TV is not set to an executable alive-tv",
+)
+
+LLVM_REDUCE = default_llvm_reduce()
+requires_llvm_reduce = pytest.mark.skipif(
+    not (LLVM_REDUCE and os.access(LLVM_REDUCE, os.X_OK)),
+    reason="llvm-reduce not found under $LAB_LLVM_BUILD_DIR/bin (or $LAB_LLVM_LLVM_REDUCE)",
 )
 
 SAMPLES = os.path.join(os.path.dirname(__file__), os.pardir, "data", "samples")
@@ -112,6 +120,73 @@ def test_iraware_beats_generic_on_the_same_budget(pair):
 
     assert ir_aware.size_after["instructions"] < generic.size_after["instructions"]
     assert ir_aware.oracle_stats["oracle_calls"] < generic.oracle_stats["oracle_calls"]
+
+
+@requires_alive
+@requires_llvm_reduce
+def test_llvmreduce_reduction_preserves_the_violation_and_shrinks(pair):
+    src, tgt = pair
+    _, violation, oracle = establish(src, tgt)
+    assert oracle is not None
+
+    result = reduce_llvmreduce(src, tgt, oracle)
+    assert result.error is None
+    assert result.size_after["instructions"] < result.size_before["instructions"]
+
+    rerun = run_alive_tv(result.src, result.tgt)
+    again = rerun.first_violation()
+    assert again is not None
+    assert again.error_class == violation.error_class
+
+
+@requires_alive
+@requires_llvm_reduce
+def test_llvmreduce_has_far_higher_oracle_acceptance_than_generic(pair):
+    """Blocker 5's whole point: llvm-reduce is IR-aware, so almost every
+    candidate it proposes is valid IR -- unlike generic's line-level ddmin,
+    where 176 of 183 attempts were invalid in the README's worked example."""
+    src, tgt = pair
+    _, _, o1 = establish(src, tgt, max_calls=400)
+    llvmreduce = reduce_llvmreduce(src, tgt, o1)
+
+    _, _, o2 = establish(src, tgt, max_calls=400)
+    generic = reduce_generic(src, tgt, o2)
+
+    def acceptance_rate(stats):
+        calls = stats["oracle_calls"]
+        return stats["oracle_accepted"] / calls if calls else 0.0
+
+    assert acceptance_rate(llvmreduce.oracle_stats) > acceptance_rate(generic.oracle_stats)
+    assert llvmreduce.size_after["instructions"] < generic.size_after["instructions"]
+
+
+@requires_alive
+@requires_llvm_reduce
+def test_iraware_still_beats_llvmreduce_on_the_same_budget(pair):
+    """The comparison Blocker 5 exists to enable: llvm-reduce closes most of
+    the gap to generic (it IS IR-aware), but counterexample-awareness still
+    adds real value beyond that -- iraware reaches a smaller (or equal) result
+    using far fewer oracle calls."""
+    src, tgt = pair
+    _, violation, o1 = establish(src, tgt, max_calls=400)
+    ir_aware = reduce_iraware(src, tgt, o1, violation)
+
+    _, _, o2 = establish(src, tgt, max_calls=400)
+    llvmreduce = reduce_llvmreduce(src, tgt, o2)
+
+    assert ir_aware.size_after["instructions"] <= llvmreduce.size_after["instructions"]
+    assert ir_aware.oracle_stats["oracle_calls"] < llvmreduce.oracle_stats["oracle_calls"]
+
+
+@requires_alive
+@requires_llvm_reduce
+@pytest.mark.parametrize("condition", ["llvmreduce-plain", "llvmreduce-structured"])
+def test_llvmreduce_conditions_render(pair, condition):
+    src, tgt = pair
+    fb = build_feedback(src, tgt, condition, oracle_budget=400)
+    assert fb.error is None
+    assert fb.text.strip()
+    assert fb.condition == condition
 
 
 @requires_alive
@@ -205,6 +280,37 @@ def test_run_log_totals_and_summary(tmp_path):
     table = summarize([run.as_dict()])
     assert table["iraware-structured"]["repair_rate"] == 1.0
     assert table["iraware-structured"]["mean_iterations"] == 2.0
+
+
+def test_no_promotion_ablation_does_not_collide_with_the_default_run(tmp_path):
+    """Blocker 7: running the --no-promotion ablation for a bug/condition
+    already run must not silently overwrite (or get skipped in favor of) the
+    paired result -- the two need distinct paths."""
+    assert run_record_path(str(tmp_path), "121459", "iraware-structured") == \
+        run_record_path(str(tmp_path), "121459", "iraware-structured", allow_promotion=True)
+    assert run_record_path(str(tmp_path), "121459", "iraware-structured") != \
+        run_record_path(str(tmp_path), "121459", "iraware-structured", allow_promotion=False)
+
+    default_run = RunLog(bug_id="121459", condition="iraware-structured",
+                         notes={"allow_promotion": True})
+    default_run.record(Iteration(0, "iraware-structured", fixed=True))
+    ablation_run = RunLog(bug_id="121459", condition="iraware-structured",
+                          notes={"allow_promotion": False})
+    ablation_run.record(Iteration(0, "iraware-structured", fixed=False))
+
+    default_path = default_run.write(str(tmp_path))
+    ablation_path = ablation_run.write(str(tmp_path))
+
+    assert default_path != ablation_path
+    assert default_path.endswith("121459.iraware-structured.json")
+    assert ablation_path.endswith("121459.iraware-structured.no-promotion.json")
+
+    # Both files actually exist and hold their own (different) content --
+    # the old scheme would have had the second write clobber the first.
+    with open(default_path, encoding="utf-8") as f:
+        assert json.load(f)["totals"]["fixed"] is True
+    with open(ablation_path, encoding="utf-8") as f:
+        assert json.load(f)["totals"]["fixed"] is False
 
 
 def test_summary_separates_conditions():

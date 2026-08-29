@@ -16,11 +16,17 @@ Two orthogonal factors:
 
 | factor | levels |
 | --- | --- |
-| reduction | `raw`, `generic`, `iraware` |
+| reduction | `raw`, `generic`, `llvmreduce`, `iraware` |
 | structure | `plain`, `structured` |
 
-giving the 2x3 matrix in `context.md` §16, plus a `baseline` condition that
-receives no counterexample at all.
+giving the 2x3 matrix in `context.md` §16 (`raw`/`generic`/`iraware`), plus a
+`baseline` condition that receives no counterexample at all, plus two more
+cells — `llvmreduce-plain`/`llvmreduce-structured` — added afterward for
+Blocker 5 (`docs/IMPLEMENTATION.md` §9) and not part of either of
+`context.md`'s original letter schemes; refer to them only by full name.
+`llvmreduce` is a second reduction-only baseline, not a claim about
+structure, so the headline Blocker-5 comparison holds structure fixed (at
+`plain`) and reads `generic` vs `llvmreduce` vs `iraware`.
 
 `context.md` letters the conditions twice, and the two letterings disagree
 (§15 prose vs §16 table). The code implements the §16 factorial, exposes those
@@ -71,6 +77,34 @@ Three design commitments distinguish this from generic reduction:
    values (slice seeds), the executed blocks (branch-folding direction) and
    every value's type (promotion). None of that is rediscovered by trial.
 
+## 3b. What the `llvm-reduce` baseline does
+
+Added for Blocker 5 (`docs/IMPLEMENTATION.md` §9); numbered "3b" rather than
+renumbering §4 onward, since those are referenced by number elsewhere
+(e.g. `ce/oracle.py`).
+
+`ce/reduce_llvmreduce.py` runs LLVM's own `llvm-reduce` twice — once per side
+— rather than modifying it or teaching it about the src/tgt pairing:
+
+1. reduce `src`, holding `tgt` fixed at its **original** text
+2. reduce `tgt`, holding `src` fixed at the **already-reduced** result of
+   step 1 (chaining: a smaller `src` can permit removing more of `tgt`)
+3. re-verify the pair **together** before accepting it, since steps 1-2 only
+   ever checked one side against a fixed partner
+
+Each step is `llvm-reduce`'s own delta-debugging over IR-valid candidates
+(functions, blocks, instructions, operands, attributes, flags — its built-in
+passes, unmodified), driven by an opaque interestingness test
+(`ce/_llvmreduce_test.py`) that runs in a **separate subprocess per
+candidate**. `llvm-reduce` never receives more than that test's exit code —
+it has no access to the oracle, the violation, or the other file. That
+opacity is deliberate: it is what makes this baseline "IR-aware, not
+counterexample-aware" rather than a weaker version of `iraware`.
+
+Because those subprocesses call alive-tv independently, their tallies don't
+go through the calling `Oracle` directly; `Oracle.record_external()` merges
+them in afterward so `.stats()` still reports the true total cost.
+
 ## 4. Threats to validity this implementation creates
 
 Beyond those in `context.md` §28:
@@ -112,8 +146,17 @@ Primary metric: correct repair rate under the benchmark's own criterion
 merely compiles, or that only fixes the reproducer, does not count; this is
 enforced by the benchmark, not by this code.
 
-Secondary: iterations, estimated prompt tokens, LLM tokens, oracle calls,
-reduction time, wall time, and the size metrics before/after reduction.
+Secondary, and **not all equally weighted as efficiency claims**
+(`context.md` RQ4/H5, decided 2026-08-27 — see `docs/IMPLEMENTATION.md`
+Blocker 2): one repair iteration is one LLVM rebuild, minutes of wall time, so
+a difference of a few hundred prompt tokens or a few seconds is noise next to
+that. The efficiency claim is **iterations to fix** (and the build/oracle-call
+counts that scale with it) — report those as the "condition X is more
+efficient" number. Estimated prompt tokens, LLM tokens, reduction time, and
+wall time are still recorded and worth showing, but as descriptive context
+beside the repair-rate/iteration numbers, not as the headline efficiency
+result. The size metrics before/after reduction are separate again — they
+describe the reducer, not the repair loop's cost.
 
 `examples/summarize_results.py` also prints a **paired** table restricted to
 bugs attempted under every condition. Prefer it: an unpaired table can credit a
