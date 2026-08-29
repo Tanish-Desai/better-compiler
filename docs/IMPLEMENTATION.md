@@ -1,52 +1,209 @@
-# What We Built, How It Works, and What Still Needs Doing
+# Implementation Guide
 
 **Audience:** our team. Assumes no compiler background. Read top to bottom.
 
----
-
-## Table of contents
-
-1. [The problem, in plain terms](#1-the-problem-in-plain-terms)
-2. [What our research actually claims](#2-what-our-research-actually-claims)
-3. [Glossary — read this before the code](#3-glossary)
-4. [The system in one picture](#4-the-system-in-one-picture)
-5. [A worked example](#5-a-worked-example-the-whole-thing-in-one-page)
-6. [The codebase, file by file](#6-the-codebase-file-by-file)
-7. [The experiment design](#7-the-experiment-design)
-8. [How to run things](#8-how-to-run-things)
-9. [Hindrances — what is blocking us](#9-hindrances--what-is-blocking-us)
-10. [What needs doing, in order](#10-what-needs-doing-in-order)
+**Last updated:** 2026-08-29 (after merging PR #1: `feat/e2e-bootstrap` → `feat/counterexample-toolkit`)
 
 ---
 
-## 1. The problem, in plain terms
+## Table of Contents
 
-A **compiler** turns source code into machine code. On the way it **optimizes** —
-rewrites your code to be faster while (supposedly) keeping the behaviour
-identical.
-
-Sometimes it gets that wrong. The rewritten code is faster *and different*.
-Your program now does the wrong thing, and nothing warned you. This is called a
-**miscompilation**, and it is nasty because everything looks fine — it compiles,
-it runs, it just silently produces wrong answers.
-
-LLVM is one of the most widely used compilers in the world (Clang, Rust, Swift
-all build on it). It has these bugs. Fixing them is slow, expert work.
-
-There is a tool called **Alive2** that can *mathematically prove* a specific
-optimization is wrong. When it finds a problem it prints a **counterexample** —
-a specific input where the before-code and after-code disagree.
-
-So a natural idea: give an AI model the buggy compiler code plus Alive2's
-counterexample, and ask it to fix the bug. **People are already doing this.**
-That is the `llvm-autofix` project, and it works reasonably well.
+1. [Current status — where we are right now](#1-current-status)
+2. [What needs doing next](#2-what-needs-doing-next)
+3. [Commands to run and verify](#3-commands-to-run-and-verify)
+4. [The problem, in plain terms](#4-the-problem-in-plain-terms)
+5. [What our research actually claims](#5-what-our-research-actually-claims)
+6. [Glossary](#6-glossary)
+7. [The system in one picture](#7-the-system-in-one-picture)
+8. [A worked example](#8-a-worked-example)
+9. [The codebase, file by file](#9-the-codebase-file-by-file)
+10. [The experiment design](#10-the-experiment-design)
+11. [Decisions made (log)](#11-decisions-made)
+12. [Nice-to-haves](#12-nice-to-haves)
 
 ---
 
-## 2. What our research actually claims
+## 1. Current Status
 
-This is the part it is easiest to get wrong when explaining the project, so
-here it is explicitly.
+### What works
+
+- ✅ **The entire `ce/` toolkit** — parser, IR model, oracle, all 3 reducers (generic, llvm-reduce, IR-aware), structured renderer, feedback grid, CLI
+- ✅ **63 tests passing** — unit tests (no Alive2 needed) + integration tests (need Alive2, which the Docker image has)
+- ✅ **IR model validated** against all 1,462 real reproducers in the dataset (byte-exact round-trip)
+- ✅ **`opt` built for 1 bug** (`115575`, VectorCombine) — confirmed the bug reproduces inside the Docker container
+- ✅ **24-bug sample selected** and committed at `data/experiment_sample.json`
+- ✅ **Experiment runner written** (`examples/repair_experiment.py`) — ready to go
+- ✅ **Result aggregator written** (`examples/summarize_results.py`) — reads run records into a comparison table
+- ✅ **Scripts** — `scripts/check_ir_roundtrip.py` (IR safety check), `scripts/bootstrap_first_repair.py` (build `opt` + reproduce a bug), `scripts/select_experiment_sample.py` (picked the 24-bug sample), `scripts/smoke_reduce_dataset.py` (stress-tests the shrinker on real dataset IR), `scripts/select_bootstrap_bug.py` (picked the bootstrap candidate)
+- ✅ **Tests** — 4 test files in `tests/`: `test_alive.py` (parser), `test_irmodel.py` (round-trip, def-use, slicing), `test_reduction.py` (ddmin, oracle rules, structured output), `test_integration.py` (end-to-end shrinking with real Alive2 + llvm-reduce)
+- ✅ **llvm-apr-benchmark/** — the upstream benchmark repo, checked out and **unmodified**. Provides the 491 real LLVM bugs, the build/test harness (`lab_env.py`, `llvm_helper.py`), and the `baseline.py` repair loop we forked
+- ✅ **All 8 blockers resolved** (decisions documented in [§11](#11-decisions-made))
+
+### What doesn't work yet
+
+- ❌ **No repair-rate numbers exist.** The AI experiment has never run. It needs `LAB_LLM_TOKEN` (an API key).
+- ❌ **`opt` built for only 1 of 24 bugs.** Each build takes ~2 hours. The other 23 bugs need their own builds.
+- ❌ **Repeat count (*k* for pass@k) undecided.** Must choose before running.
+- ❌ **Statistical test undecided.** Must choose before running.
+- ❌ **`results/` directory is empty.** No experiment data.
+
+### The one result we have (mechanism demo, not science)
+
+On the bundled sample (`data/samples/poison.src.ll` / `poison.tgt.ll`):
+
+| condition | instructions after | reduction | oracle calls | seconds |
+|---|--:|--:|--:|--:|
+| `raw` | 28 | — | — | — |
+| `generic` | 28 | 0.000 | 183 | ~4.7 |
+| `llvmreduce` | 5 | 0.821 | 351 | ~32.5 |
+| `iraware` | 4 | 0.857 | 17 | ~0.9 |
+
+This shows the mechanism works. It says nothing about whether the AI fixes more bugs.
+
+---
+
+## 2. What Needs Doing Next
+
+### Critical (blocking the experiment)
+
+#### Step 1: Get an API key and run one real repair
+
+The experiment runner is ready. It just needs an API key:
+
+```bash
+# Inside the Docker container:
+export LAB_LLM_TOKEN=<your-deepseek-or-openai-key>
+
+# Run one bug, one condition (the bootstrap bug we already built opt for):
+python3 examples/repair_experiment.py --condition iraware-structured 115575
+```
+
+This will validate the full end-to-end pipeline: LLM → patch → LLVM build → test → Alive2 → feedback → retry.
+
+#### Step 2: Decide repeat count (*k*)
+
+This is a compute-budget decision. The experiment needs repeats because AI is nondeterministic:
+
+- *k* = 1: pilot run, ~24 bugs × 9 conditions = 216 runs
+- *k* = 3: standard, ~648 runs  
+- *k* = 5: stronger, ~1080 runs
+
+Each run includes an LLVM build (~2 hours first time, faster with ccache for nearby commits).
+
+**Decide this before running, not after.**
+
+#### Step 3: Decide the statistical test
+
+With 24 bugs:
+- **McNemar's test** — standard for paired binary outcomes in APR
+- **Fisher's exact test** — for small samples
+- Choose before running so the analysis plan isn't cherry-picked
+
+#### Step 4: Build `opt` for the rest of the sample
+
+Only bug `115575` has a built `opt`. The other 23 need theirs:
+
+```bash
+# The experiment runner handles the build automatically per bug,
+# but each first build is ~2 hours. Plan accordingly.
+# ccache is configured, so close-together commits build faster.
+```
+
+#### Step 5: Run the full sweep
+
+```bash
+export LAB_LLM_TOKEN=...
+for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
+         raw-structured generic-structured llvmreduce-structured iraware-structured; do
+    python3 examples/repair_experiment.py --condition "$c" --out results/ \
+        115575 89390 165878 135182 ...  # or use the bug_ids from experiment_sample.json
+done
+python3 examples/summarize_results.py results/
+```
+
+#### Step 6: Run the `--no-promotion` ablation
+
+Same sweep but with `--no-promotion` added. This tests whether the `promote-operands` pass (which generalizes the program) affects results:
+
+```bash
+python3 examples/repair_experiment.py --condition iraware-structured --no-promotion --out results/ ...
+```
+
+The filenames won't collide (this was fixed in Blocker 7).
+
+---
+
+## 3. Commands to Run and Verify
+
+### Start the container
+
+```bash
+docker compose up -d
+```
+
+Code is live-mounted — edits on your machine take effect immediately.
+
+### Run the test suite
+
+```bash
+docker compose exec better-compiler python3 -m pytest tests -q
+# Expected: 63 passed (the integration tests need alive-tv, which the image has)
+```
+
+### Run the IR round-trip safety check
+
+```bash
+docker compose exec better-compiler python3 scripts/check_ir_roundtrip.py
+# Expected: 1462 ok, 0 mismatched, 0 crashed
+```
+
+### See all conditions side by side (quick demo)
+
+```bash
+docker compose exec better-compiler python3 -m ce.cli \
+    compare data/samples/poison.src.ll data/samples/poison.tgt.ll
+```
+
+### See what the AI would receive under a specific condition
+
+```bash
+docker compose exec better-compiler python3 -m ce.cli \
+    feedback data/samples/poison.src.ll data/samples/poison.tgt.ll \
+    --condition iraware-structured
+```
+
+### Shrink a counterexample (verbose)
+
+```bash
+docker compose exec better-compiler python3 -m ce.cli \
+    reduce data/samples/poison.src.ll data/samples/poison.tgt.ll --strategy iraware
+```
+
+### Include `llvm-reduce` in the comparison
+
+```bash
+docker compose exec better-compiler python3 -m ce.cli \
+    compare data/samples/poison.src.ll data/samples/poison.tgt.ll \
+    --conditions raw-plain generic-plain llvmreduce-plain iraware-plain
+```
+
+---
+
+## 4. The Problem, in Plain Terms
+
+A **compiler** turns source code into machine code. On the way it **optimizes** — rewrites your code to be faster while (supposedly) keeping the behaviour identical.
+
+Sometimes it gets that wrong. The rewritten code is faster *and different*. Your program now does the wrong thing, and nothing warned you. This is called a **miscompilation**.
+
+LLVM is one of the most widely used compilers in the world (Clang, Rust, Swift all build on it). It has these bugs. Fixing them is slow, expert work.
+
+There is a tool called **Alive2** that can *mathematically prove* a specific optimization is wrong. When it finds a problem it prints a **counterexample** — a specific input where the before-code and after-code disagree.
+
+So a natural idea: give an AI the buggy compiler code plus Alive2's counterexample, and ask it to fix the bug. **People are already doing this.** That is the `llvm-autofix` project.
+
+---
+
+## 5. What Our Research Actually Claims
 
 **We are NOT claiming any of these:**
 
@@ -58,117 +215,61 @@ here it is explicitly.
 
 **What we are actually asking:**
 
-> Alive2's counterexample is cluttered — most of it has nothing to do with the
-> bug. If we clean it up **using knowledge of how LLVM code works**, does the AI
-> fix more bugs than if we clean it up with a generic, compiler-unaware method?
+> Alive2's counterexample is cluttered. If we clean it up **using knowledge of how LLVM code works**, does the AI fix more bugs than if we clean it up with a generic, compiler-unaware method?
 
-That is a narrow question, and narrow is good. It is answerable, and nobody has
-answered it.
-
-There are really **two separate ideas** bundled in there, and a big part of the
-design is keeping them apart:
+Two separate ideas, tested independently:
 
 - **Idea 1 — shrink it.** Less clutter, less for the model to wade through.
 - **Idea 2 — organise it.** Same information, laid out in labelled sections.
 
-These could have completely different effects. Maybe only one matters. Maybe
-neither matters alone but together they do. Our experiment is built to tell
-those cases apart, which is why it is a grid rather than an "ours vs theirs".
+The experiment grid separates them (see [§10](#10-the-experiment-design)).
 
 ---
 
-## 3. Glossary
-
-Every term you will hit in the code. Skim now, come back later.
+## 6. Glossary
 
 ### Compiler terms
 
-**LLVM IR**
-: The intermediate language LLVM optimizes. Lower-level than C, higher-level
-than assembly. Everything in this project operates on IR, not C++ source.
-
-**`opt`**
-: LLVM's command-line optimizer. Feed it IR, name a pass, get optimized IR out.
-This is what actually triggers the bugs.
-
-**pass**
-: One optimization. `InstCombine`, `LoopVectorize`, `SLPVectorizer` are the
-ones that show up most in our dataset.
-
-**middle-end**
-: The optimizer part of a compiler — the bit between the language frontend and
-machine-code generation. All our bugs are here.
+| Term | Meaning |
+|---|---|
+| **LLVM IR** | The intermediate language LLVM optimizes. Lower-level than C, higher-level than assembly. |
+| **`opt`** | LLVM's command-line optimizer. Feed it IR, name a pass, get optimized IR out. |
+| **pass** | One optimization. `InstCombine`, `LoopVectorize`, `SLPVectorizer` show up most in our dataset. |
+| **middle-end** | The optimizer part of a compiler — the bit between the language frontend and machine-code generation. |
 
 ### LLVM IR structure
 
-**SSA (Static Single Assignment)**
-: Every named value is assigned **exactly once**. `%a` refers to one specific
-computation, forever. Hugely convenient for us: names are stable identifiers.
-
-**basic block**
-: A straight run of instructions with a label, ending in exactly one
-jump/return. Control flow only happens at block ends.
-
-**terminator**
-: The last instruction of a block — `ret`, `br`, `switch`.
-
-**def-use**
-: "def" = the instruction that creates a value. "use" = an instruction that
-reads it. Following these links tells us what depends on what.
-
-**phi node**
-: At a point where two paths merge, `phi` picks a value based on which block
-you came from. `%p = phi i8 [ %r1, %then ], [ %r2, %else ]`.
-
-**flags** — `nsw`, `nuw`, `inbounds`, `exact`
-: Promises attached to an instruction. `nsw` = "this addition never overflows".
-The optimizer attaches these to unlock further optimizations. **Attaching one
-that isn't actually justified is one of the most common miscompilation bugs.**
+| Term | Meaning |
+|---|---|
+| **SSA** | Every named value is assigned **exactly once**. `%a` refers to one specific computation, forever. |
+| **basic block** | A straight run of instructions with a label, ending in exactly one jump/return. |
+| **terminator** | The last instruction of a block — `ret`, `br`, `switch`. |
+| **def-use** | "def" = the instruction that creates a value. "use" = an instruction that reads it. |
+| **phi node** | At a point where two paths merge, `phi` picks a value based on which block you came from. |
+| **flags** (`nsw`, `nuw`, `inbounds`, `exact`) | Promises attached to an instruction. `nsw` = "this addition never overflows". Attaching one that isn't justified is a common bug. |
 
 ### Correctness concepts
 
-**poison**
-: LLVM's marker for "this value is garbage because a promise was broken". Not a
-number. Spreads to anything computed from it.
-
-**UB (undefined behaviour)**
-: "The program did something illegal, all bets are off." An optimization may
-never *introduce* UB into a program that didn't have it.
-
-**refinement**
-: The rule an optimization must obey: the new code must behave the same as the
-old, or be *more* defined — never less. "Doesn't verify" = this rule was broken.
-
-**counterexample**
-: A concrete input where before-code and after-code disagree. Alive2's output
-when it finds a bug.
-
-**src / tgt**
-: "source" and "target" — the code before and after the optimization. These
-appear constantly in the code.
+| Term | Meaning |
+|---|---|
+| **poison** | LLVM's marker for "this value is garbage because a promise was broken". Spreads to anything computed from it. |
+| **UB** | Undefined behaviour. An optimization may never *introduce* UB. |
+| **refinement** | The rule an optimization must obey: the new code must behave the same, or be *more* defined — never less. |
+| **counterexample** | A concrete input where before-code and after-code disagree. Alive2's output when it finds a bug. |
+| **src / tgt** | "source" and "target" — the code before and after the optimization. |
 
 ### Our terms
 
-**oracle**
-: The referee. After every edit we make while shrinking, the oracle re-runs
-Alive2 and answers "is this still the same bug?" Standard term in program
-reduction research.
-
-**ddmin (delta debugging minimization)**
-: The classic shrinking algorithm. "Some subset of these items causes the
-failure — find a small subset that still does." Removes big chunks first, then
-narrows down.
-
-**slice**
-: The set of instructions a particular value actually depends on. Everything
-outside the slice is (probably) irrelevant clutter.
-
-**condition**
-: One cell of our experiment grid, e.g. `iraware-structured`.
+| Term | Meaning |
+|---|---|
+| **oracle** | The referee. After every edit, the oracle re-runs Alive2 and answers "is this still the same bug?" |
+| **ddmin** | The classic shrinking algorithm. Removes big chunks first, then narrows down. |
+| **slice** | The set of instructions a particular value depends on. Everything outside the slice is probably irrelevant. |
+| **condition** | One cell of our experiment grid, e.g. `iraware-structured`. |
 
 ---
 
-## 4. The system in one picture
+## 7. The System in One Picture
 
 ```
    ┌───────────────────────────────────────────────────────────────┐
@@ -198,52 +299,23 @@ outside the slice is (probably) irrelevant clutter.
    │   │  raw       (no change)│ then │  plain  (as-is)      │     │
    │   │  generic   (text)     │  ──► │  structured (labels) │     │
    │   │  llvmreduce(IR-valid, │      │                      │     │
-   │   │             blind)*   │      │                      │     │
+   │   │             blind)    │      │                      │     │
    │   │  iraware   (smart)    │      │                      │     │
    │   └───────────────────────┘      └──────────────────────┘     │
-   │   * bonus baseline, added later — not part of the lettered    │
-   │     matrix (§7, Blocker 5)                                    │
    │                                                               │
    │        every edit checked by the ORACLE: still same bug?      │
    └───────────────────────────────────────────────────────────────┘
 ```
 
-**The key structural point:** we did not build a repair agent. One already
-exists. We built the box in the middle and a way to A/B test what comes out of
-it.
+**The key point:** we did not build a repair agent. One already exists. We built the box in the middle and a way to A/B test what comes out of it.
 
 ---
 
-## 5. A worked example (the whole thing in one page)
+## 8. A Worked Example
 
 ### Step 1 — Alive2 finds a bug
 
-We give it two versions of the same function. Before:
-
-```llvm
-define i8 @f(i8 %x, i8 %y, i8 %z) {
-entry:
-  %a = add nsw i8 %x, 1
-  %b = mul i8 %y, 3
-  %c = sub i8 %a, %b
-  %d = xor i8 %z, 7
-  %e = and i8 %c, %d
-  %cmp = icmp slt i8 %x, 0
-  br i1 %cmp, label %t, label %f
-t:
-  %r1 = shl i8 %e, 1
-  br label %join
-f:
-  %r2 = ashr i8 %e, 1
-  br label %join
-join:
-  %p = phi i8 [ %r1, %t ], [ %r2, %f ]
-  %out = add nuw i8 %p, %a       ← after "optimization" this gains `nsw`
-  ret i8 %out
-}
-```
-
-Alive2 says:
+Two versions of the same function. Before and after an optimization. Alive2 says:
 
 ```
 ERROR: Target is more poisonous than source
@@ -255,16 +327,11 @@ Source:  i8 %out = #x82 (130, -126)
 Target:  i8 %out = poison
 ```
 
-Translated: *with x=126, the original code computes 130. The "optimized" code
-produces poison — garbage. That is not allowed.*
+Translation: *with x=126, the original code computes 130. The "optimized" code produces poison — garbage.*
 
 ### Step 2 — Our shrinker goes to work
 
-It notices `%b`, `%c`, `%d`, `%e`, both branches, and the phi node have nothing
-to do with why `%out` became poison. It deletes them — **checking with Alive2
-after every single deletion** that the bug is still there.
-
-Result:
+It notices most of the 28 instructions have nothing to do with why `%out` became poison. It deletes them — **checking with Alive2 after every single deletion** — and gets:
 
 ```llvm
 ; source
@@ -274,9 +341,7 @@ Result:
 %out = add nsw i8 %ce.arg5, %ce.arg0
 ```
 
-**28 instructions → 4.** The entire bug is now one visible difference: the
-optimizer attached `nsw` — promising the addition never overflows — when it had
-no right to.
+**28 instructions → 4.** The entire bug is one visible difference: the optimizer attached `nsw` without justification.
 
 ### Step 3 — We format it for the AI
 
@@ -294,41 +359,37 @@ INTERPRETATION:
     The target attaches 'nsw' to %out, which the source does not.
 ```
 
-### Step 4 — Compare against the dumb baseline
+### Step 4 — Compare against baselines
 
-Same input, generic text-based shrinker:
+| | instructions after | Alive2 calls | reduction |
+|---|--:|--:|--:|
+| **generic (text)** | 28 | 183 | 0.000 |
+| **llvmreduce (IR-valid)** | 5 | 351 | 0.821 |
+| **iraware (smart)** | 4 | 17 | 0.857 |
 
-| | instructions after | Alive2 calls used |
-|---|---|---|
-| **generic (text)** | 28 (nothing removed) | 183 |
-| **iraware (smart)** | 4 | 17 |
+Generic deletes lines and hopes — most become invalid IR. llvm-reduce does much better (it knows IR structure) but still uses 20× the oracle calls because it doesn't know about the counterexample. iraware uses the counterexample to guide its search.
 
-The generic one deletes a line, the code no longer parses, Alive2 rejects it —
-176 out of 183 times. It has no way to know that deleting the line defining
-`%a` breaks the five lines that use it.
-
-> ⚠️ **This is one hand-built example.** It shows the mechanism works. It says
-> nothing about whether the AI actually fixes more bugs — that experiment has
-> not run yet.
+> ⚠️ **This is one hand-built example.** It shows the mechanism works. It says nothing about whether the AI actually fixes more bugs.
 
 ---
 
-## 6. The codebase, file by file
+## 9. The Codebase, File by File
 
 ```
 better-compiler/
 ├── ce/                    ← the library (everything we built)
 ├── tests/                 ← 63 tests
-├── scripts/               ← safety checks
-├── examples/              ← the experiment runner
-├── data/samples/          ← real Alive2 output, saved for tests
+├── scripts/               ← build/validation/selection scripts
+├── examples/              ← the experiment runner + results aggregator
+├── data/                  ← experiment sample + test fixtures
 ├── docs/                  ← this file + METHODOLOGY.md
+├── context.md             ← research framing (research questions, hypotheses, related work)
 └── llvm-apr-benchmark/    ← upstream, untouched
 ```
 
 ### The library: `ce/`
 
-Files are listed in dependency order — each builds on the ones above.
+Files in dependency order — each builds on the ones above.
 
 ---
 
@@ -344,17 +405,13 @@ Runs `alive-tv` and turns its text output into Python objects.
 | `FunctionResult` | One function's verdict: error class, counterexample, traces |
 | `Assignment` | One `type %name = value` line |
 
-**Why it's tricky:** Alive2's format isn't documented — it's just what the tool
-prints. So parsing is best-effort, and anything unrecognised is kept as raw
-text rather than crashing. We built this against **real captured output**, not
-guesses.
+**Why it's tricky:** Alive2's format isn't documented — it's just what the tool prints. So parsing is best-effort, and anything unrecognised is kept as raw text rather than crashing.
 
 ---
 
 #### [`ce/irmodel.py`](../ce/irmodel.py) — read and edit LLVM IR
 
-The foundation of everything "IR-aware". Reads `.ll` text into
-functions → blocks → instructions.
+The foundation of everything "IR-aware". Reads `.ll` text into functions → blocks → instructions.
 
 | Thing | What it does |
 |---|---|
@@ -365,27 +422,15 @@ functions → blocks → instructions.
 | `remove_instructions`, `substitute`, `drop_params`, `remove_blocks` | The edits |
 | `measure(text)` | Size: lines, instructions, blocks, values |
 
-**The one safety rule:** anything we don't understand must survive
-parse-then-print **byte for byte**. We only model a fraction of LLVM IR; real
-reproducers are full of vectors, metadata, attribute groups. If we silently
-mangled those we'd corrupt code we only meant to shrink.
+**Safety rule:** anything we don't understand must survive parse-then-print **byte for byte**. Verified against all 1,462 real reproducers.
 
-> ✅ Verified against **all 1462 real reproducers** in the dataset. This check
-> already caught three genuine bugs.
-
-**Nice detail:** `backward_slice` also follows *control* dependence. If you need
-a value, you also need the branch condition that got you to it. Miss that and
-your slice is wrong.
+`backward_slice` also follows *control* dependence — if you need a value, you also need the branch condition that got you to it.
 
 ---
 
 #### [`ce/oracle.py`](../ce/oracle.py) — the referee ⭐
 
-**The most important file in the project.**
-
-Shrinking is easy if you don't care about correctness — delete everything, get
-an empty file. What makes it *useful* is that the result still demonstrates the
-same bug. So every proposed edit goes through:
+**The most important file.** Every proposed edit goes through:
 
 ```
 propose edit → re-run Alive2 → still the same bug?
@@ -393,104 +438,58 @@ propose edit → re-run Alive2 → still the same bug?
                                  no  → throw it away
 ```
 
-Because every edit is checked, the shrunk counterexample isn't *probably* still
-valid — it's **provably** still valid, confirmed by the same formal tool that
-found the bug.
-
-"The same bug" has three definitions you can pick between:
+Three definitions of "the same bug":
 
 | Setting | Requires |
 |---|---|
-| `any_failure` | Some failure still happens (weakest — can drift onto a different bug) |
+| `any_failure` | Some failure still happens (weakest — can drift) |
 | `error_class` ← default | Same error type, same function |
 | `error_class_and_kind` | Also same failure kind (poison stays poison, UB stays UB) |
 
-It also **counts its own cost** (`.calls`, `.seconds`). That's experiment data —
-one of our research questions is how expensive each strategy is.
+Counts its own cost (`.calls`, `.seconds`) — that's experiment data.
 
 ---
 
 #### [`ce/reduction.py`](../ce/reduction.py) — shared machinery
 
-`Reduction` (the report card both shrinkers fill in) and `ddmin` (the shrinking
-algorithm).
-
-ddmin removes big chunks first and only narrows when a big removal fails — much
-faster than removing items one at a time. Both shrinkers use it, just over
-different kinds of item:
+`Reduction` (the report card both shrinkers fill in) and `ddmin` (the shrinking algorithm). Both shrinkers use ddmin but over different items:
 
 - generic → over **lines of text**
 - iraware → over **instructions** and **flags**
-
-That difference is essentially the whole experiment.
 
 ---
 
 #### [`ce/reduce_generic.py`](../ce/reduce_generic.py) — the dumb shrinker (control group)
 
-~70 lines. Treats the two files as plain text, ddmin over the lines. Knows
-nothing about LLVM.
+~70 lines. Treats the two files as plain text, ddmin over the lines. Knows nothing about LLVM.
 
-**Why build something bad on purpose?** Because without it the experiment
-proves nothing. If our smart shrinker helps, a reviewer will immediately ask:
-
-> "Is that because your shrinking is clever, or just because shorter prompts
-> help? Any shrinking would have done that."
-
-Fair question. So we need a version that shrinks *without* LLVM knowledge:
-
-- generic helps just as much → the benefit is short prompts
-- iraware helps much more → the benefit is understanding
-
-For that to be honest, this baseline gets **the same oracle and the same
-budget**. Its only handicap is ignorance — the variable under test.
+**Why build something bad on purpose?** Without it, if our smart shrinker helps, a reviewer will ask: *"Is that because your shrinking is clever, or just because shorter prompts help?"* This baseline answers that.
 
 ---
 
-#### [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py) — the second baseline (Blocker 5)
+#### [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py) — the second baseline
 
-Wires in LLVM's own `llvm-reduce` binary rather than reimplementing a
-reducer. Runs it twice — once per side of the src/tgt pair, chained so a
-smaller `src` can permit removing more of `tgt` — then re-verifies the pair
-together, since `llvm-reduce` itself only ever checks one side at a time.
+Wires in LLVM's own `llvm-reduce` binary. Runs it twice (once per side of the src/tgt pair), then re-verifies together. Produces IR-valid reductions, but has **no idea the two files are related** or what the counterexample says.
 
-Real, IR-valid-by-construction, but has **no idea the two files are related**
-or what the counterexample says — that gap is exactly what separates this
-row from `iraware` in the results table. See
-[`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) next.
+Added to answer: *"Wouldn't any real reducer have done this?"* — IR-validity alone buys a lot (0.821 reduction), but iraware still wins outright with 20× fewer oracle calls.
 
 ---
 
-#### [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) — the interestingness test (Blocker 5)
+#### [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py) — the interestingness test
 
-`llvm-reduce` needs an external "is this candidate still interesting?"
-script; this is it. Runs as a **separate subprocess per candidate** — so
-`llvm-reduce` never receives more than that process's exit code, nothing
-about the violation itself. Its own `alive-tv` calls don't go through the
-calling `Oracle` directly; `Oracle.record_external()` merges them back in
-afterward so `.stats()` still reports the true total cost.
+`llvm-reduce` needs an external "is this candidate still interesting?" script; this is it. Runs as a **separate subprocess per candidate** — so `llvm-reduce` never receives more than that process's exit code, nothing about the violation itself. Its own `alive-tv` calls don't go through the calling `Oracle` directly; `Oracle.record_external()` merges them back in afterward so `.stats()` still reports the true total cost.
 
 ---
 
 #### [`ce/reduce_iraware.py`](../ce/reduce_iraware.py) — the smart shrinker ⭐
 
-**The research contribution.** Three ideas make it work:
+**The research contribution.** Three design ideas:
 
-**1. The two files are one function, twice.**
-`src` and `tgt` are before/after versions of the same code, so every edit
-applies to *both*, matched by SSA name. A text shrinker can't even express this.
+1. **The two files are one function, twice.** Every edit applies to *both*, matched by SSA name.
+2. **Only propose valid code.** Pick the values to *keep*, then add everything they depend on. Valid IR by construction.
+3. **Let the counterexample guide the search.** Alive2 already told us which values disagree, which blocks ran, and every value's type.
 
-**2. Only propose valid code.**
-The generic shrinker deletes a line and hopes. This one works backwards: pick
-the values to *keep*, then automatically add everything they depend on. Results
-are valid IR **by construction** — which is why it needs 17 Alive2 calls where
-generic burns 183.
-
-**3. Let the counterexample guide the search.**
-Alive2 already told us which values disagree, which blocks ran, and every
-value's type. We use all three instead of guessing.
-
-The passes, applied in order and repeated until nothing more can go:
+The passes, in order (repeated until nothing more can go):
 
 | Pass | What it does |
 |---|---|
@@ -499,62 +498,39 @@ The passes, applied in order and repeated until nothing more can go:
 | `prune-blocks` | Delete now-unreachable blocks |
 | `simplify-cfg` | Collapse leftover trivial blocks and phis |
 | `slice` | Protect bug-related values, ddmin the rest |
-| `promote-operands` | Replace a computed value with a plain argument, letting its whole producer chain be deleted |
+| `promote-operands` | Replace a computed value with a plain argument (**see warning**) |
 | `drop-params` | Remove unused arguments |
 | `strip-flags` | Find the smallest set of `nsw`/`nuw`/`inbounds` that still fails |
 
-> ⚠️ **`promote-operands` is our most aggressive pass and a genuine validity
-> concern.** Turning a computed value into a free parameter *generalises* the
-> program — the value can now be anything. The bug is still provably there, but
-> the counterexample might describe a situation that couldn't actually happen in
-> the original program. Switch it off with `--no-promotion` and report both.
+> ⚠️ **`promote-operands` generalises the program.** The bug is still provably there, but the counterexample might describe a situation that couldn't actually happen in the original program. Run `--no-promotion` as an ablation and report both.
 
 ---
 
 #### [`ce/structured.py`](../ce/structured.py) — the second idea
 
-Reorganises the counterexample into labelled sections: `VIOLATED PROPERTY`,
-`WHAT THE TRANSFORMATION CHANGED`, `CRITICAL VALUES`, `DEPENDENCY CHAIN`,
-`DIVERGENCE`, `INTERPRETATION`, and so on.
+Reorganises the counterexample into labelled sections: `VIOLATED PROPERTY`, `WHAT THE TRANSFORMATION CHANGED`, `CRITICAL VALUES`, `DEPENDENCY CHAIN`, `DIVERGENCE`, `INTERPRETATION`.
 
-**Nice trick:** the diff matches instructions **by value name, not line
-number**. Optimizers reorder and renumber constantly, which makes a normal diff
-enormous and useless. Matching `%out` to `%out` shows the one real change.
-
-> **Nothing here is AI-generated.** It would be easy and wrong to have a model
-> write the explanation — then we'd be testing *that model*, not our format.
-> `INTERPRETATION` is a fixed template chosen by error class, filled with real
-> values. It never states anything Alive2 didn't.
+**Nothing here is AI-generated.** `INTERPRETATION` is a fixed template chosen by error class, filled with real values. It never states anything Alive2 didn't.
 
 ---
 
 #### [`ce/feedback.py`](../ce/feedback.py) — the experiment grid
 
-Combines both knobs into seven conditions. One call: bug in, AI message out.
+Combines both knobs into nine conditions. One call: bug in, AI message out.
 
-> ⚠️ **`context.md` letters the conditions two different, contradictory ways**
-> (§15 prose vs §16 table). We implement the §16 grid; §15's letters still
-> resolve via `LEGACY_LETTERS`.
-> **Always write full condition names. A bare "condition C" is ambiguous here.**
+> ⚠️ `context.md` letters the conditions two different, contradictory ways (§15 prose vs §16 table). We implement the §16 grid. `llvmreduce` conditions have no letter — always use full names.
 
 ---
 
 #### [`ce/benchmark.py`](../ce/benchmark.py) — the plug
 
-`normalize_feedback()` — a drop-in replacement for the one line in the
-benchmark's loop that pastes failure text into the prompt.
-
-Not every failure is a miscompilation — patches fail to compile, crash, break
-regression tests. Those have no counterexample, so they pass through unchanged.
-That means a repair loop can route **all** its feedback through this one call.
-
-Also holds `RunLog` / `Iteration` (the experiment record) and `summarize()`.
+`normalize_feedback()` — a drop-in replacement for the benchmark's feedback line. Non-miscompilation failures pass through unchanged. Also holds `RunLog` / `Iteration` (the experiment record).
 
 ---
 
 #### [`ce/cli.py`](../ce/cli.py) — command-line access
 
-`check` · `reduce` · `feedback` · `compare`. See [§8](#8-how-to-run-things).
+`check` · `reduce` · `feedback` · `compare`. See [§3](#3-commands-to-run-and-verify).
 
 ### Tests — [`tests/`](../tests/)
 
@@ -567,198 +543,155 @@ Also holds `RunLog` / `Iteration` (the experiment record) and `summarize()`.
 
 \* the 1462-reproducer corpus test needs `LAB_DATASET_DIR`.
 
-**63 tests, all passing.**
+---
 
-### Scripts — [`scripts/`](../scripts/)
+#### [`tests/test_alive.py`](../tests/test_alive.py) — parser tests
 
-- **`check_ir_roundtrip.py`** — the safety check. Expects `1462 ok, 0 mismatched`.
-- **`smoke_reduce_dataset.py`** — runs the shrinker on real messy dataset IR.
-  Fakes the "after" version, so it proves *robustness*, not a research
-  result. (Originally justified as "since `opt` isn't built" — that's no
-  longer literally true, Blocker 1 built it for one bug, but this script
-  scans hundreds of dataset bugs at once, each needing its own hours-long
-  build, so faking is still the right call *here*.)
-- **`select_bootstrap_bug.py`** — picked the Blocker 1 bootstrap candidate
-  (`115575`) by scanning the dataset for bugs that qualify for
-  `repair_experiment.py` at all, ranked by simplicity.
-- **`bootstrap_first_repair.py`** — builds `opt` for that bug and confirms it
-  reproduces (Blocker 1); `--full` additionally runs one real repair attempt.
-- **`select_experiment_sample.py`** — picked the Blocker 3 stratified 24-bug
-  sample committed at `data/experiment_sample.json`.
-
-### Examples — [`examples/`](../examples/)
-
-- **`repair_experiment.py`** — the actual experiment. `baseline.py` with one
-  line changed.
-- **`summarize_results.py`** — results table. **Read the second ("paired")
-  table** — it only counts bugs every condition attempted, so nobody gets
-  credit for having faced an easier subset.
+6 tests. Parses real Alive2 output saved in `data/samples/` (poison, value-mismatch, UB, multi-function, correct, garbage). No Alive2 binary needed — it tests parsing of already-captured text. If you change `ce/alive.py`'s parsing logic, these catch regressions.
 
 ---
 
-## 7. The experiment design
+#### [`tests/test_irmodel.py`](../tests/test_irmodel.py) — IR model tests
+
+~16 tests (some parametrized). Covers: byte-exact round-trip on sample IR, structure recovery (blocks, instructions), label vs value-operand distinction, flag detection/removal, backward slicing (including control dependence), dead-name detection, substitution, block removal (phi pruning), entry-block protection, reachability, parameter dropping, switch instructions, and the `measure()` function. Also includes the 1462-reproducer corpus round-trip check (needs `LAB_DATASET_DIR`).
+
+---
+
+#### [`tests/test_reduction.py`](../tests/test_reduction.py) — reduction + structured output tests
+
+~16 tests. Covers: ddmin algorithm (isolation, minimal pair, everything-required, budget enforcement), oracle violation matching at all three strictness levels, seed extraction (diverging values, value types), structured-output formatting (all fields present, interpretation names the flag, divergence shows both sides), and plain rendering. No Alive2 binary needed — uses mock oracles.
+
+---
+
+#### [`tests/test_integration.py`](../tests/test_integration.py) — end-to-end tests ⭐
+
+~18 tests. Runs the full pipeline against real `alive-tv` and `llvm-reduce` (both must be in the container). Covers: Alive2 round-trip verification, IR-aware reduction (preserves violation, shrinks, isolates the flag), generic-vs-iraware comparison on the same budget, llvm-reduce reduction (preserves violation, higher acceptance rate than generic, still loses to iraware), all matrix conditions rendering, structured feedback accuracy, non-Alive2 feedback passthrough, truncation, run-log totals, `--no-promotion` filename non-collision, summary separation, unknown-condition rejection, and legacy letter resolution.
+
+**If you touch any reducer or the feedback pipeline, run these tests first.**
+
+---
+
+### Scripts — [`scripts/`](../scripts/)
+
+---
+
+#### [`scripts/check_ir_roundtrip.py`](../scripts/check_ir_roundtrip.py) — IR safety check
+
+Parses every `.ll` reproducer in the dataset through `ce/irmodel.py` and confirms the output is **byte-identical** to the input. Expected result: `1462 ok, 0 mismatched, 0 crashed`. If this ever reports a mismatch, the IR model has a parsing bug that could corrupt counterexamples during reduction. Run this after changing `irmodel.py`.
+
+---
+
+#### [`scripts/smoke_reduce_dataset.py`](../scripts/smoke_reduce_dataset.py) — robustness stress test
+
+Runs the IR-aware shrinker on real dataset reproducers with a **faked "after" version** (copies the src and tweaks it). This doesn't test scientific correctness — it tests that the shrinker doesn't crash on the variety of real-world IR in the dataset (vectors, metadata, attribute groups, intrinsics). Useful for catching parser limitations before a long experiment run.
+
+---
+
+#### [`scripts/select_bootstrap_bug.py`](../scripts/select_bootstrap_bug.py) — picked the bootstrap candidate
+
+Scans all `llvm-apr-benchmark/dataset/*.json` files and filters for bugs that: (a) are miscompilations, (b) are checked by Alive2, (c) have a single-function fix. Ranks by simplicity (hint-region size + reproducer size). Picked `115575` (VectorCombine, 3-instruction reproducer, one lit dir). Already run; its output informed the bootstrap choice. You'd re-run this only to pick a different bootstrap candidate.
+
+---
+
+#### [`scripts/bootstrap_first_repair.py`](../scripts/bootstrap_first_repair.py) — build `opt` + reproduce
+
+The script that actually builds LLVM. Phase 1 (no API key needed): resets `llvm-project` to the bug's `base_commit`, runs `cmake` + `ninja` to build `opt`, then runs the bug's reproducer to confirm it fails as expected. Phase 2 (`--full`, needs `LAB_LLM_TOKEN`): runs one real repair attempt via `examples/repair_experiment.py`'s `repair()` function. Phase 1 was successfully run on 2026-08-27 for bug `115575` (~1h53m at `--build-jobs 4`). Phase 2 has not been run.
+
+---
+
+#### [`scripts/select_experiment_sample.py`](../scripts/select_experiment_sample.py) — picked the 24-bug sample
+
+Stratified sampling from the 100 usable bugs. Splits into 3 tiers (easy/medium/hard) by hint-region size + reproducer size, then picks 8 per tier, maximizing distinct `hints.components` within each tier before repeating any (since InstCombine alone is 45% of the pool). Selection is fully deterministic (score → component → bug_id as tiebreak). Output committed at `data/experiment_sample.json`. Re-run with `--n <larger>` to pick a bigger sample.
+
+---
+
+### Examples — [`examples/`](../examples/)
+
+---
+
+#### [`examples/repair_experiment.py`](../examples/repair_experiment.py) — the experiment runner ⭐
+
+**This is the main script you run to get results.** It is `llvm-apr-benchmark/examples/baseline.py` with exactly one line changed: the line that turns a failure into text for the next prompt now calls `ce.benchmark.normalize_feedback()` instead of pasting the raw log.
+
+What it does for one bug: show the AI the buggy C++ code → AI replies with a patch → build LLVM → run tests + Alive2 → fixed? stop : feed failure back → repeat up to `--max-iterations` times.
+
+Key arguments: `--condition` (which of the 9 conditions), `--max-iterations` (default 4), `--oracle-budget` (default 400), `--strictness`, `--no-promotion`, `--out` (directory for run records).
+
+Writes `<bug_id>.<condition>.json` per run. Skips bugs that already have a record (use `--overwrite` to redo).
+
+---
+
+#### [`examples/summarize_results.py`](../examples/summarize_results.py) — result aggregation
+
+Reads all `*.json` run records from a directory, groups by condition, and prints two tables:
+
+1. **Unpaired table** — all bugs each condition attempted (can be misleading if conditions faced different subsets).
+2. **Paired table** — only bugs attempted under *every* condition (the one you should read — nobody gets credit for an easier subset).
+
+Also separates `--no-promotion` ablation results into their own table when present.
+
+---
+
+### Upstream benchmark — [`llvm-apr-benchmark/`](../llvm-apr-benchmark/)
+
+This is the upstream benchmark repo, checked out **unmodified**. We do not edit it. The key files:
+
+---
+
+#### [`llvm-apr-benchmark/scripts/llvm_helper.py`](../llvm-apr-benchmark/scripts/llvm_helper.py) — LLVM build/test plumbing
+
+The workhorse. Provides `git_execute()` (run git commands on the llvm-project checkout), `build_opt()` (cmake + ninja), `alive2_check()` (run `alive-tv` on src/tgt IR and return `{"src", "tgt", "log"}`), `verify_dispatch()` / `verify_test_group()` (run the bug's reproducer + regression tests). Reads `LAB_LLVM_DIR`, `LAB_LLVM_BUILD_DIR`, `LAB_LLVM_ALIVE_TV`, `LAB_DATASET_DIR` from environment at import time.
+
+---
+
+#### [`llvm-apr-benchmark/scripts/lab_env.py`](../llvm-apr-benchmark/scripts/lab_env.py) — the Environment class
+
+`Environment(bug_id, cutoff)` loads a bug's JSON from the dataset and provides: `reset()` (git-reset to base_commit), `check_fast()` (reproducer only), `check_full()` (reproducer + regression tests), `get_bug_type()`, `get_hint_components()`, `get_hint_line_level_bug_locations()`, `is_single_func_fix()`, `use_knowledge()` (knowledge-cutoff bookkeeping), `dump()` (save the full run). Our `repair_experiment.py` instantiates this class directly.
+
+---
+
+#### [`llvm-apr-benchmark/examples/baseline.py`](../llvm-apr-benchmark/examples/baseline.py) — the original repair loop
+
+The upstream's own repair agent. A single OpenAI-compatible chat loop with two tool calls (`get_source` and optional bisection). Our `examples/repair_experiment.py` is a simplified fork of this with one change: the feedback call. We do **not** run `baseline.py` directly — it's here as the reference for what we forked from.
+
+---
+
+#### [`llvm-apr-benchmark/dataset/`](../llvm-apr-benchmark/dataset/) — the 491 bug JSONs
+
+One `.json` file per bug. Each contains: `bug_id`, `bug_type` (miscompilation/crash/hang), `base_commit`, `knowledge_cutoff`, reproducer paths, `hints` (components, files, functions, line ranges), `check_with` (alive2 or lli), `is_single_func_fix`, and the reference patch. Our scripts (`select_bootstrap_bug.py`, `select_experiment_sample.py`) scan this directory directly — they never hardcode counts.
+
+---
+
+## 10. The Experiment Design
+
+### The 9 conditions
 
 |  | plain | structured |
 |---|---|---|
 | **raw** (no shrinking) | `raw-plain` | `raw-structured` |
 | **generic** (text shrink) | `generic-plain` | `generic-structured` |
+| **llvmreduce** (IR-valid, CE-blind) | `llvmreduce-plain` | `llvmreduce-structured` |
 | **iraware** (smart shrink) | `iraware-plain` | **`iraware-structured`** |
 
-Plus `baseline` — no counterexample at all.
+Plus `baseline` (no counterexample at all).
 
-Plus, added afterward for Blocker 5, two more cells outside this core
-grid — `llvmreduce-plain`/`llvmreduce-structured` — a second, IR-valid but
-counterexample-blind reduction baseline (`ce/reduce_llvmreduce.py`). It's
-deliberately not folded into the table above or given a matrix letter
-(`docs/METHODOLOGY.md` §1): it answers "wouldn't any real reducer have done
-this?", a different question from the 3x2 grid's own comparisons. 9
-conditions total; see `ce/feedback.py`'s `CONDITIONS`.
-
-**Why a grid and not "ours vs theirs":** a grid can answer *why* something
-helped.
+### What the grid tells you
 
 - Does shrinking help? → compare **rows**
 - Does layout help? → compare **columns**
 - Does LLVM knowledge beat generic shrinking? → **generic row vs iraware row** ← *the actual research question*
-- Is it just IR-validity, not counterexample-awareness? → **`llvmreduce` vs `iraware`** (Blocker 5) — the sharper version of the same question
+- Is it just IR-validity, not counterexample-awareness? → **`llvmreduce` vs `iraware`**
 - Do they help more together? → `iraware-structured` vs each alone
 
-**What counts as a fix:** the patch builds, fixes the bug, **and** breaks none
-of LLVM's existing regression tests. Enforced by the benchmark, not us.
+### What counts as a fix
 
-**Fairness rules:** every condition gets the same model, prompt, iteration
-budget, and Alive2 budget. All recorded per run so it can be checked, not
-assumed.
+The patch builds, fixes the bug, **and** breaks none of LLVM's existing regression tests. Enforced by the benchmark.
 
----
+### Fairness
 
-## 8. How to run things
+Every condition gets the same model, prompt, iteration budget, and Alive2 budget. All recorded per run.
 
-```bash
-docker compose up -d
-```
-
-Your code is live-mounted, so edits on your machine take effect immediately —
-no rebuild needed.
-
-```bash
-# 1. Tests
-docker compose exec better-compiler python3 -m pytest tests -q
-# expect: 63 passed
-
-# 2. Safety check
-docker compose exec better-compiler python3 scripts/check_ir_roundtrip.py
-# expect: 1462 ok, 0 mismatched, 0 crashed
-
-# 3. See the six conditions side by side  ← best first thing to try
-docker compose exec better-compiler python3 -m ce.cli \
-    compare data/samples/poison.src.ll data/samples/poison.tgt.ll
-
-# 4. See what the AI would actually receive
-docker compose exec better-compiler python3 -m ce.cli \
-    feedback data/samples/poison.src.ll data/samples/poison.tgt.ll \
-    --condition iraware-structured
-
-# 5. Shrink something, verbosely
-docker compose exec better-compiler python3 -m ce.cli \
-    reduce data/samples/poison.src.ll data/samples/poison.tgt.ll --strategy iraware
-```
-
-The real experiment (**needs `opt` built + an API key**) — `--all` means all
-100 usable bugs; pass `bug_ids` as positional arguments instead (reading
-`data/experiment_sample.json`'s `bug_ids` list) to run only the Blocker 3
-sample:
-
-```bash
-export LAB_LLM_TOKEN=...
-for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
-         raw-structured generic-structured llvmreduce-structured iraware-structured; do
-    python3 examples/repair_experiment.py --condition "$c" --all --out results/
-done
-python3 examples/summarize_results.py results/
-```
-
----
-
-## 9. Hindrances — what is blocking us
-
-### 🔴 Blocker 1: `opt` isn't built, so nothing runs end-to-end
-
-`/workspace/llvm-build` is empty. Every bug needs LLVM built at its own specific
-commit, and **every repair attempt rebuilds it**.
-
-This is *the* blocker. Everything else works; none of it has produced a single
-repair-rate number.
-
-**Fix:** build LLVM for one bug, get one end-to-end repair working, then
-decide how to scale. `ccache` is already configured, which makes later builds
-much cheaper since most commits are close together in history.
-
-**Status (2026-08-27): resolved for one bug.** `opt` has been built for real,
-inside a real container (Docker Engine + Compose v2 in a WSL2 Ubuntu distro),
-and the bootstrap bug reproduces as expected. `/workspace/llvm-build` (the
-`llvm_build` volume) is no longer empty.
-
-- [`scripts/select_bootstrap_bug.py`](../scripts/select_bootstrap_bug.py) —
-  scans the dataset for bugs that qualify for `repair_experiment.py` at all
-  (miscompilation, single-function fix, checked by Alive2 not just `lli`) and
-  ranks them by simplicity. Picked `115575` (VectorCombine, 3-instruction
-  reproducer, one lit dir) as the bootstrap candidate.
-- [`scripts/bootstrap_first_repair.py`](../scripts/bootstrap_first_repair.py) —
-  run inside the container. Phase 1 (no API key needed) resets to `115575`'s
-  `base_commit`, builds `opt`, and confirms the bug actually reproduces there.
-  Phase 2 (`--full`, needs `LAB_LLM_TOKEN`) runs the real repair loop against
-  that same build via `examples/repair_experiment.py`'s own `repair()`,
-  unmodified, for one condition.
-
-**What actually happened, for real, on 2026-08-27:**
-```
-$ docker compose exec better-compiler python3 scripts/bootstrap_first_repair.py --build-jobs 4
-[115575] base_commit=6fb2a6044f11e251c3847d227049d9dae8b87796 bug_type=miscompilation
-[115575] resetting llvm-project to base_commit...
-[115575] building opt...
-[115575] check_fast finished in 6831s (builds so far: 1, build failures: 0)
-[115575] opt builds, and the bug reproduces as expected at base_commit.
-```
-~1h53m wall clock at `--build-jobs 4` (chosen deliberately low: the container
-had 18 cores but only ~7.6GB RAM available, and full parallelism risks OOM —
-peak usage during the build topped out around 6.1GB, so 4 jobs was the right
-call, not just a conservative guess). No build failures, first attempt.
-Phase 2 (`--full`, an actual LLM repair attempt) has **not** been run yet — it
-needs `LAB_LLM_TOKEN`, which nobody has supplied.
-
-**Next actual step (updated 2026-08-28):** Blockers 2–8 below are now all
-resolved or decided, so the only thing actually left blocking a real sweep is
-supplying `LAB_LLM_TOKEN` and choosing to spend the API budget — either
-Phase 2 for this one bootstrap bug (`--full --condition <name>`), or the real
-24-bug sweep against `data/experiment_sample.json` (Blocker 3).
-
----
-
-### 🟢 Blocker 2: build time probably dwarfs what we're measuring — DECIDED
-
-We planned to measure efficiency in tokens saved. But if one iteration = one
-LLVM rebuild (minutes), then saving 200 prompt tokens is **statistical noise**
-in wall-clock terms.
-
-**Decided 2026-08-27:** the efficiency claim is reframed around **fewer LLM
-iterations to fix** (and the build/oracle-call counts that scale with
-iterations), not fewer tokens or seconds. Reflected in `context.md` (RQ4, H5,
-§18) and `docs/METHODOLOGY.md` §5. Tokens and wall-clock time are still
-recorded in every `RunLog` (`ce/benchmark.py`) and still worth reporting —
-just as descriptive context beside the repair-rate/iteration numbers, never
-as the headline "N% more efficient" claim.
-
-This was a documentation decision, not a code change — `ce/benchmark.py`'s
-`totals()`/`summarize()` already computed `mean_iterations` alongside the
-token/time fields; nothing there needed touching, only which number the
-prose leads with.
-
----
-
-### 🟢 Blocker 3: scale — SAMPLE PICKED
-
-Real numbers from the dataset:
+### Dataset numbers (counted live, not from README)
 
 | | count |
 |---|---|
@@ -766,253 +699,86 @@ Real numbers from the dataset:
 | Crash bugs (no counterexample) | 340 |
 | Hang bugs (no counterexample) | 9 |
 | Miscompilations | 142 |
-| — of which checked by Alive2 | 135 |
+| — checked by Alive2 | 135 |
 | — checked only by `lli` | 7 |
-| — of the 135, also `is_single_func_fix` | **100 ← what we can actually use** |
+| — Alive2 + single-function fix | **100 ← what we can actually use** |
 
-The 135 figure this blocker was originally written against overcounts: multi-
-function fixes are skipped by `repair_experiment.py`'s `repair()` (its
-`is_single_func_fix()` check) regardless of Alive2 coverage, so the real pool
-is **100**, not 135.
-
-100 bugs × 6 conditions × *k* repeats (AI is nondeterministic, so we need
-repeats for pass@k) × one LLVM build per iteration = **thousands of builds**.
-
-**Decided 2026-08-27:** [`scripts/select_experiment_sample.py`](../scripts/select_experiment_sample.py)
-picks a stratified 24-bug sample (8 each easy/medium/hard by hint-region +
-reproducer size, maximizing distinct `hints.components` within each tier
-before repeating one — InstCombine alone is 45% of the pool, so an unweighted
-pick would be mostly InstCombine at every tier). Selection is fully
-deterministic — score, then component, then bug_id as tiebreak — so it's
-reproducible from the dataset alone, not "some random sample." The committed
-result is [`data/experiment_sample.json`](../data/experiment_sample.json):
-`115575` (the Blocker 1 bootstrap bug) is excluded by default since it's
-already been build-tested in isolation.
-
-24 is a starting point for a pilot, not a derived sufficient-power number —
-see the script's docstring for the reasoning, and re-run with a larger `--n`
-once Phase 2 gives a real per-iteration wall-clock estimate to budget
-against. **Still undecided:** *k* (the repeat count for pass@k) — that's a
-compute-budget call the sampling script deliberately leaves open; see "What
-needs doing" below.
+The 24-bug sample was drawn from the pool of 100 (8 easy / 8 medium / 8 hard, stratified by component and complexity).
 
 ---
 
-### 🟢 Blocker 4: benchmark rules conflict with using a good model — DECIDED
+## 11. Decisions Made
 
-The benchmark says you may only use a model whose training cutoff is *earlier*
-than the bug. Bugs run into 2025. Any frontier model we'd want to use likely
-**violates that rule**, so we can't claim benchmark-legal fixes.
+A condensed log of every blocker that was identified and resolved. These are recorded here so future debugging has the decision context.
 
-**Decided 2026-08-27, grounded in the actual sample** (not a general
-statement — checked against `data/experiment_sample.json`'s real
-`knowledge_cutoff` fields): the 24 picked bugs span **2024-02-24 to
-2026-02-11**. No model that exists today can honestly claim a training
-cutoff before the latest of those — so for this sample specifically, "legal"
-is off the table, not just improbable.
+### Blocker 1: `opt` wasn't built (2026-08-27) → RESOLVED FOR ONE BUG
 
-There is a second, sharper problem underneath the first: the harness's
-legality check (`lab_env.Environment.use_knowledge()`) only compares a
-**self-declared** cutoff string against each bug's date — it has no way to
-verify that a model's real training data actually respects it.
-`examples/repair_experiment.py`'s existing default,
-`LAB_LLM_BASEMODEL_CUTOFF=2023-12-31`, paired with `deepseek-reasoner`
-(DeepSeek-R1, released January 2025), is almost certainly **not** an honest
-claim about that model's real training data — it would make every one of the
-24 bugs look "legal" to the harness's bookkeeping without that meaning
-anything. Flagged in the code itself now (see the comment above `Model.__init__`
-in `repair_experiment.py`) so nobody mistakes passing the harness's check for
-an actual legality guarantee.
+`/workspace/llvm-build` was empty — nothing could run end-to-end.
 
-**The decision, unchanged from the original proposed fix, now stated
-explicitly:** we do not claim benchmark-legal or leaderboard-eligible
-absolute repair rates, for any model. Every claim is a **relative
-comparison between conditions run under the same model** — that comparison's
-validity does not depend on the model's knowledge cutoff at all, since every
-condition gets identical (and identically "illegal") access to post-cutoff
-knowledge. State the model and its actual (best-effort, not
-harness-verified) release/training date plainly in the writeup; never quote
-the run against the benchmark's own leaderboard.
+**What was done:** `scripts/select_bootstrap_bug.py` picked bug `115575` (VectorCombine, 3-instruction reproducer). `scripts/bootstrap_first_repair.py` built `opt` at `--build-jobs 4` inside the Docker container. Took ~1h53m. The bug reproduces as expected.
 
----
+**What wasn't done:** Phase 2 (`--full`, an actual LLM repair) — needs `LAB_LLM_TOKEN`.
 
-### 🟢 Blocker 5: our generic baseline is attackable — FIXED
+### Blocker 2: Build time dwarfs token savings (2026-08-27) → DECIDED
 
-A reviewer will say: *"line-level ddmin on `.ll` obviously produces invalid code
-— that's a strawman."* And they have a point: 176 of its 183 attempts were
-invalid.
+One repair iteration = one LLVM rebuild (minutes). Saving 200 prompt tokens is noise.
 
-**Fixed 2026-08-28:** [`ce/reduce_llvmreduce.py`](../ce/reduce_llvmreduce.py)
-wires in `llvm-reduce` (ships with LLVM, already built alongside `opt` in
-Blocker 1's run — no extra CMake flag or build step needed) as a second
-baseline, exposed as the `llvmreduce-plain`/`llvmreduce-structured`
-conditions (`ce/feedback.py`'s `REDUCTIONS` now has 4 levels, not 3).
+**Decision:** Efficiency claim is about **iterations to fix**, not tokens or wall-clock time. Tokens and time are still recorded but aren't the headline metric.
 
-`llvm-reduce` reduces one file against one opaque interestingness test — it
-has no native notion of a src/tgt pair. [`ce/_llvmreduce_test.py`](../ce/_llvmreduce_test.py)
-supplies that pairing entirely from the outside (see both files' docstrings
-for the two-pass, budget-honoring, externally-counted design); `llvm-reduce`
-itself never sees more than a pass/fail bit per candidate.
+### Blocker 3: Scale — how many bugs? (2026-08-27) → SAMPLE PICKED
 
-**Real result, run against the bundled sample (not simulated):**
+100 usable bugs × 9 conditions × *k* repeats = too many builds for "all."
 
-| condition | instructions after | reduction | oracle calls | seconds |
-|---|--:|--:|--:|--:|
-| `raw` | 28 | — | — | — |
-| `generic` | 28 | 0.000 | 183 | 4.7 |
-| `llvmreduce` | 5 | 0.821 | 351 | 32.5 |
-| `iraware` | 4 | 0.857 | 17 | 0.9 |
+**Decision:** 24-bug stratified sample. Selection is fully deterministic (reproducible from the dataset alone). Committed at `data/experiment_sample.json`. Bug `115575` excluded (already build-tested). **Still undecided:** repeat count (*k*).
 
-This is the outcome that makes Blocker 5 worth having done: `llvmreduce`
-closes almost all of `generic`'s gap (IR-validity alone buys a lot — its
-oracle acceptance rate is ~65% vs `generic`'s ~4%), which is exactly the
-"maybe any real reducer would have done this" objection a reviewer would
-raise. But `iraware` still wins outright — smaller result, **20x fewer
-oracle calls** — showing counterexample-awareness adds real, separately
-measurable value beyond mere IR-validity, not just repeating what
-`llvmreduce` already shows. Verified end-to-end in the real container: 5 new
-integration tests in `tests/test_integration.py` pin this relationship, all
-passing against real `alive-tv` + `llvm-reduce`, plus the full 62-test suite.
+### Blocker 4: Model knowledge-cutoff legality (2026-08-27) → DECIDED
+
+The 24 bugs span 2024-02-24 to 2026-02-11. No current model can honestly claim a training cutoff before those dates.
+
+**Decision:** No benchmark-legal claims, ever. All claims are **relative comparisons between conditions** under the same model. State the model and release date plainly; never quote against the benchmark leaderboard.
+
+### Blocker 5: Generic baseline is a strawman (2026-08-28) → FIXED
+
+176 of 183 `generic` attempts produced invalid IR — it's attackable.
+
+**Fix:** Added `ce/reduce_llvmreduce.py` — wraps LLVM's own `llvm-reduce` as a second baseline. IR-valid-by-construction but counterexample-blind. On the bundled sample: `llvmreduce` gets 0.821 reduction (vs `generic`'s 0.000) but `iraware` still wins with 20× fewer oracle calls.
+
+### Blocker 6: Claimed baseline ≠ implemented one (2026-08-28) → RESTATED
+
+`context.md` named llvm-autofix as *the* baseline. Our code builds on `llvm-apr-benchmark/examples/baseline.py`, which is much simpler.
+
+**Fix:** Restated. llvm-autofix is cited as related work. Our repair loop is `baseline.py` with one line changed.
+
+### Blocker 7: `promote-operands` generalisation (2026-08-28) → FIXED
+
+Running with and without `--no-promotion` would silently overwrite each other's results.
+
+**Fix:** `run_record_path()` gives `--no-promotion` runs a `.no-promotion` suffix. `summarize_results.py` separates the ablation into its own table.
+
+### Blocker 8: Stale dataset numbers (2026-08-28) → FIXED
+
+Benchmark README says 295 issues; the dataset actually has 491.
+
+**Fix:** `context.md` corrected to the live count (491 total: 142 miscompilation, 340 crash, 9 hang). Scripts count from the dataset directory, not from docs.
 
 ---
 
-### 🟢 Blocker 6: the claimed baseline isn't the implemented one — RESTATED
+## 12. Nice-to-Haves
 
-`context.md` names **llvm-autofix** as the primary baseline. Our code builds on
-llvm-apr-benchmark's much simpler `baseline.py`. Those are different systems.
+These don't block the experiment. Do them if time permits.
 
-**Decided 2026-08-28 (the "restate" branch of the fix, not the "integrate"
-one):** integrating with llvm-autofix would mean standing up a second,
-unfamiliar agentic harness (specialized tools, its own prompting, its own
-repair loop) we don't have access to and haven't audited — swapping one
-undocumented gap for a much larger, riskier one, for a project already
-carrying five other blockers. Restating what we actually compare against is
-the honest, bounded fix.
-
-Checked `llvm-apr-benchmark/examples/baseline.py` directly rather than
-assuming: it's a single OpenAI-compatible chat loop with two tool calls
-(`get_source`, and an optional bisection helper), no compiler-specific
-scaffolding beyond what the benchmark harness itself provides (the
-build/test/Alive2 plumbing in `llvm_helper.py`/`lab_env.py`). That is a real
-system, but a much simpler one than `llvm-autofix` is described as being in
-`context.md` §6 (specialized tools, sparse-report understanding, a published
-agentic-harness paper).
-
-`context.md` §6 has been corrected: it no longer claims llvm-autofix as
-*the* baseline our repair loop runs against. llvm-autofix stays exactly what
-it always should have been — the strongest published prior result to cite in
-related work, framing why an LLM-repair-for-LLVM approach is worth trying at
-all — while `examples/repair_experiment.py` (a one-line-changed fork of
-`baseline.py`) is named as what this project's numbers are actually measured
-against. The narrower, honest framing (`context.md` §6, revised): *how does
-verification-feedback representation affect an already-plausible,
-`baseline.py`-level compiler-repair loop* — not a claim about improving on
-llvm-autofix specifically.
+1. **Multi-function modules.** The shrinker only touches the function with the bug; it never deletes other functions.
+2. **Real tokenizer.** `estimate_tokens` is chars ÷ 4 — fine for comparing conditions, wrong for absolute token counts.
+3. **Better `INTERPRETATION` templates** for error classes we haven't seen much of (memory mismatches especially).
 
 ---
 
-### 🟢 Blocker 7: `promote-operands` generalises the program — FIXED
+## The Honest Summary
 
-See [`reduce_iraware.py`](#cereduce_irawarepy--the-smart-shrinker-) above.
-
-**Fixed 2026-08-28:** `--no-promotion` already existed, but "switchable"
-undersold a real gap — `RunLog.write()` and `repair_experiment.py`'s
-"already done" pre-check both keyed the output filename by `(bug_id,
-condition)` only. Running the ablation for a bug/condition already run would
-either **silently overwrite** the paired result, or (worse) get **skipped
-entirely** by the pre-check thinking it was already done — either way, "run
-both and report both" was not actually possible without manually renaming
-files between runs.
-
-Fixed with one shared function,
-[`run_record_path`](../ce/benchmark.py) (`ce/benchmark.py`), used by both
-`RunLog.write()` and `repair_experiment.py`'s pre-check so they can't drift
-apart again: the default (promotion-on) filename is unchanged
-(`<bug_id>.<condition>.json`), and `--no-promotion` runs get a
-`.no-promotion` suffix instead of colliding.
-[`examples/summarize_results.py`](../examples/summarize_results.py) now
-keeps the ablation out of the main comparison tables (it's a separate axis,
-not another condition) and prints it as its own labeled table when present,
-so "report both as an ablation" is now something running the sweep with and
-without `--no-promotion` actually produces, not just permits. Pinned by
-`test_no_promotion_ablation_does_not_collide_with_the_default_run` in
-`tests/test_integration.py`.
-
----
-
-### 🟢 Blocker 8: stale numbers everywhere — FIXED
-
-The benchmark README says 295 issues; there are actually **491**. Upstream also
-migrated to `llvm-autofix`.
-
-**Fixed 2026-08-28:** `context.md` §2 itself had exactly this stale quote —
-"295 verified issues... 106 miscompilation / 181 crash / 8 hang" — sitting
-uncorrected since it was written. Added a footnote there with the live count
-(same method as Blocker 3's sample selection: counted from the dataset
-directory, not read off a doc): **491 total — 142 miscompilation, 340 crash,
-9 hang.** No other stale count found elsewhere in this repo's own docs
-(`grep -rn "295"` across `README.md`/`context.md`/`docs/`/`examples/`/`ce/`/
-`scripts/` turns up only this one, now-annotated, spot).
-
-The practice going forward is already structural, not just a reminder:
-`scripts/select_bootstrap_bug.py` and `scripts/select_experiment_sample.py`
-both compute their counts live from `llvm-apr-benchmark/dataset/*.json` every
-time they run — neither hardcodes a total, so there is nothing in this repo's
-own tooling left to go stale the way the upstream README did.
-
----
-
-## 10. What needs doing, in order
-
-### Before anything else
-
-1. **Build `opt` for a single bug.** Not all of them — one. Get one end-to-end
-   repair running under one condition. This will surface integration problems
-   the tests can't possibly catch.
-   Run `scripts/bootstrap_first_repair.py` inside the container (see Blocker 1
-   above) — it does exactly this, against a pre-selected simple candidate.
-2. ~~Decide the model and the knowledge-cutoff position (Blocker 4).~~ Done:
-   no legality claim, ever — relative comparisons under the same model only.
-3. ~~Decide the efficiency framing (Blocker 2).~~ Done: iterations, not
-   tokens/seconds — see Blocker 2 above.
-
-### To make the science defensible
-
-4. ~~Add `llvm-reduce` as a second generic baseline (Blocker 5).~~ Done:
-   `llvmreduce-plain`/`llvmreduce-structured`, verified against the real
-   binary and real `alive-tv`.
-5. ~~Decide the sample~~ Done (Blocker 3): `data/experiment_sample.json`, 24
-   bugs. **Still open: how many repeats (*k*, for pass@k) and what
-   statistical test** — decide before running, not after.
-6. **Run the `--no-promotion` ablation** alongside the main sweep. (Blocker 7
-   fixed the filename collision that would have silently broken this — this
-   item is still open because the sweep itself hasn't run yet.)
-
-### Nice to have
-
-7. **Multi-function modules.** The shrinker only touches the function with the
-   bug; it never deletes other functions from the file.
-8. **Real tokenizer.** `estimate_tokens` is chars ÷ 4 — fine for comparing
-   conditions, wrong for quoting absolute cost.
-9. **Better `INTERPRETATION` templates** for error classes we haven't seen much
-   of yet (memory mismatches especially).
-
----
-
-## The honest summary
-
-**What we have:** a working, tested mechanism. 85.7% reduction on the sample,
-bug provably preserved, 10× fewer verifier calls than the generic baseline,
-20× fewer than the real `llvm-reduce` baseline (Blocker 5 — so the advantage
-is counterexample-awareness, not just IR-validity), and an IR reader
-validated against all 1462 real reproducers. `opt` has been built for real,
-for one bug (Blocker 1), confirming the build/verify machinery itself works
-end-to-end, not just the reduction mechanism in isolation.
+**What we have:** a working, tested mechanism. 85.7% reduction on the sample, bug provably preserved, 10× fewer verifier calls than the generic baseline, 20× fewer than the `llvm-reduce` baseline, and an IR reader validated against all 1,462 real reproducers. `opt` has been built for one bug confirming the build/verify machinery works end-to-end.
 
 **What we don't have:** any evidence that this makes an AI fix more bugs.
 
-That is engineering evidence, not scientific evidence. Getting the second kind
-requires the repair loop to actually run, and that requires the LLVM build.
+That is engineering evidence, not scientific evidence. Getting the second kind requires the repair loop to actually run, and that requires an API key and compute budget.
 
-**Before writing any of this up, read [`METHODOLOGY.md`](METHODOLOGY.md)** — it
-records the limits that must go in the paper's threats-to-validity section.
+**Before writing any of this up, read [`METHODOLOGY.md`](METHODOLOGY.md)** — it records the limits that must go in the paper's threats-to-validity section.
