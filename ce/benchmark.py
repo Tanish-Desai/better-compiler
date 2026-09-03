@@ -110,8 +110,9 @@ def normalize_feedback(
 
 def run_record_path(
     directory: str, bug_id: str, condition: str, *, allow_promotion: bool = True,
+    trial: int = 1,
 ) -> str:
-    """Where a run record for ``(bug_id, condition, allow_promotion)`` lives.
+    """Where a run record for ``(bug_id, condition, allow_promotion, trial)`` lives.
 
     One file per ``(bug, condition)`` keeps different conditions from
     overwriting each other, which a single ``<bug_id>.json`` would do -- but
@@ -127,11 +128,20 @@ def run_record_path(
     ``<bug_id>.<condition>.json`` are unaffected; only the ablation variant
     gets a suffix.
 
+    ``trial`` is the pass@k repeat index (docs/ANALYSIS_PLAN.md). It gets the
+    same treatment for the same reason: without it, ``--repeat 3`` would write
+    all three samples of a (bug, condition) cell to one path, so the "already
+    done" check would stop after the first and k would silently collapse to 1.
+    Trial 1 keeps the unsuffixed name, so records written before repeats
+    existed are still read as what they are -- the first trial.
+
     ``examples/repair_experiment.py``'s own "already done" pre-check calls
     this directly (rather than duplicating the naming scheme) specifically so
     the two can never drift apart again.
     """
     suffix = "" if allow_promotion else ".no-promotion"
+    if trial and trial > 1:
+        suffix += f".t{trial}"
     return os.path.join(directory, f"{bug_id}.{condition}{suffix}.json")
 
 
@@ -171,6 +181,8 @@ class RunLog:
     condition: str
     model: str = ""
     max_iterations: int = 0
+    #: pass@k repeat index, 1-based. See ``run_record_path``.
+    trial: int = 1
     iterations: List[Iteration] = field(default_factory=list)
     fixed: bool = False
     #: Populated from ``lab_env.Environment.dump()``.
@@ -208,6 +220,7 @@ class RunLog:
             "condition": self.condition,
             "model": self.model,
             "max_iterations": self.max_iterations,
+            "trial": self.trial,
             "totals": self.totals(),
             "iterations": [i.as_dict() for i in self.iterations],
             "certificate": self.certificate,
@@ -220,6 +233,7 @@ class RunLog:
         path = run_record_path(
             directory, self.bug_id, self.condition,
             allow_promotion=self.notes.get("allow_promotion", True),
+            trial=self.trial,
         )
         with open(path, "w", encoding="utf-8") as f:
             json.dump(self.as_dict(), f, indent=2)
@@ -242,29 +256,69 @@ def load_runs(directory: str) -> List[dict]:
     return out
 
 
+def per_bug_outcomes(runs: Sequence[dict]) -> Dict[str, Dict[str, bool]]:
+    """``{condition: {bug_id: fixed_in_at_least_one_trial}}``.
+
+    This is the unit the significance test consumes (docs/ANALYSIS_PLAN.md):
+    one paired binary observation per bug, not one per run. With ``--repeat k``
+    a bug contributes k records to one cell, and collapsing them here -- rather
+    than in the caller -- keeps the summary table and the McNemar table
+    counting the same thing.
+    """
+    out: Dict[str, Dict[str, bool]] = {}
+    for run in runs:
+        cell = out.setdefault(run.get("condition", "?"), {})
+        bug = str(run.get("bug_id"))
+        cell[bug] = cell.get(bug, False) or bool(run.get("totals", {}).get("fixed"))
+    return out
+
+
 def summarize(runs: Sequence[dict]) -> Dict[str, Dict[str, object]]:
     """Aggregate run records by condition: the headline experiment table.
 
     Reports repair rate as the primary metric and the cost metrics beside it,
     because a condition that repairs more bugs while spending far more is a
     different finding from one that repairs more for less (``context.md`` s19).
+
+    With ``--repeat k`` there are k records per (bug, condition). The two rates
+    answer different questions and both are reported:
+
+    ``pass_at_k``
+        fraction of *bugs* fixed on at least one of the k trials. This is the
+        headline repair rate and the input to the significance test.
+    ``pass_at_1``
+        fraction of *runs* that fixed their bug -- the expected success of a
+        single attempt. Equal to ``pass_at_k`` when k = 1.
+
+    Reporting only the first would hide that a condition needed three tries;
+    reporting only the second would throw away the paired structure the test
+    needs.
     """
     by_condition: Dict[str, List[dict]] = {}
     for run in runs:
         by_condition.setdefault(run.get("condition", "?"), []).append(run)
+    outcomes = per_bug_outcomes(runs)
 
     table: Dict[str, Dict[str, object]] = {}
     for condition, group in sorted(by_condition.items()):
-        n = len(group)
-        fixed = sum(1 for r in group if r.get("totals", {}).get("fixed"))
+        runs_n = len(group)
+        run_fixed = sum(1 for r in group if r.get("totals", {}).get("fixed"))
+        bugs = outcomes.get(condition, {})
+        bugs_n = len(bugs)
+        bugs_fixed = sum(1 for v in bugs.values() if v)
         def mean(key: str) -> float:
             vals = [float(r.get("totals", {}).get(key, 0) or 0) for r in group]
             return round(sum(vals) / len(vals), 2) if vals else 0.0
 
         table[condition] = {
-            "bugs_attempted": n,
-            "bugs_fixed": fixed,
-            "repair_rate": round(fixed / n, 4) if n else 0.0,
+            "bugs_attempted": bugs_n,
+            "bugs_fixed": bugs_fixed,
+            "runs": runs_n,
+            "pass_at_k": round(bugs_fixed / bugs_n, 4) if bugs_n else 0.0,
+            "pass_at_1": round(run_fixed / runs_n, 4) if runs_n else 0.0,
+            # Kept under its original name so existing notes and tooling that
+            # read "repair_rate" still resolve; it is the pass@k number.
+            "repair_rate": round(bugs_fixed / bugs_n, 4) if bugs_n else 0.0,
             "mean_iterations": mean("iterations"),
             "mean_prompt_tokens_est": mean("prompt_tokens_est"),
             "mean_oracle_calls": mean("oracle_calls"),

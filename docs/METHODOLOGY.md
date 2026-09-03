@@ -162,6 +162,20 @@ describe the reducer, not the repair loop's cost.
 bugs attempted under every condition. Prefer it: an unpaired table can credit a
 condition for having faced an easier subset.
 
+**The inferential claims are preregistered.** `docs/ANALYSIS_PLAN.md`, dated and
+committed while `results/` still held no run records, fixes the repeat count
+(*k* = 3, outcome = pass@3), the test (McNemar's exact, one-sided, α = 0.05),
+and the exact four comparisons that count as primary, corrected together with
+Benjamini-Hochberg. `examples/analyze_significance.py` is the executable form of
+that document. Two constraints follow from it and bind any write-up:
+
+- The remaining 32 condition pairs are **exploratory**. Their p-values print
+  under `--all-pairs`, uncorrected, and are not evidence.
+- Power at n = 24 is roughly 0.33-0.57 even for a large effect. **A p above 0.05
+  means this sample cannot resolve the question, not that there is no effect.**
+  Report the discordant counts and the paired rate difference alongside every
+  p-value, as `agentic_harness` does for the same bug family.
+
 Note that `estimate_tokens` is a 4-chars-per-token approximation. It is
 consistent across conditions, which is all a comparison needs, but do not
 quote it as an absolute cost — substitute a real tokenizer first.

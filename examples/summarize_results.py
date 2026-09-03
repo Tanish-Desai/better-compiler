@@ -30,6 +30,15 @@ meaningless.
 The "paired" table fixes this by only counting bugs that **every** condition
 attempted, so all conditions are being scored on identical work.
 
+TWO RATES, BECAUSE k > 1
+------------------------
+With ``--repeat k`` each (bug, condition) cell holds k run records.
+``pass_at_k`` is the fraction of *bugs* fixed on at least one trial -- the
+headline repair rate, and the number ``analyze_significance.py`` tests.
+``pass_at_1`` is the fraction of *runs* that succeeded -- what a single attempt
+buys. They are equal when k = 1. ``bugs_attempted`` counts distinct bugs, not
+records, so it stays 24 however large k gets.
+
 THE PROMOTION ABLATION IS KEPT SEPARATE
 ----------------------------------------
 ``--no-promotion`` (docs/IMPLEMENTATION.md Blocker 7) is a separate ablation
@@ -58,7 +67,9 @@ COLUMNS = (
     ("condition", 24),
     ("bugs_attempted", 9),
     ("bugs_fixed", 7),
-    ("repair_rate", 11),
+    ("runs", 5),
+    ("pass_at_k", 9),
+    ("pass_at_1", 9),
     ("mean_iterations", 10),
     ("mean_prompt_tokens_est", 12),
     ("mean_oracle_calls", 11),

@@ -2,7 +2,7 @@
 
 **Audience:** our team. Assumes no compiler background. Read top to bottom.
 
-**Last updated:** 2026-08-29 (after merging PR #1: `feat/e2e-bootstrap` → `feat/counterexample-toolkit`)
+**Last updated:** 2026-09-04 (model chosen, *k* and the statistical test preregistered — see Blockers 10 and 11)
 
 ---
 
@@ -30,7 +30,7 @@
 - ✅ **The entire `ce/` toolkit** — parser, IR model, oracle, all 3 reducers (generic, llvm-reduce, IR-aware), structured renderer, feedback grid, CLI
 - ✅ **63 tests passing** — unit tests (no Alive2 needed) + integration tests (need Alive2, which the Docker image has)
 - ✅ **IR model validated** against all 1,462 real reproducers in the dataset (byte-exact round-trip)
-- ✅ **`opt` built for 1 bug** (`115575`, VectorCombine) — confirmed the bug reproduces inside the Docker container
+- ✅ **`opt` built for all 24 sample bugs**, plus `115575` (the bootstrap bug, excluded from the sample) — every bug confirmed to reproduce at its `base_commit`. Done on this machine at `--build-jobs 4` (see Blocker 9); per-bug logs in `results/build_logs/` (gitignored — regenerate, don't rely on this history persisting)
 - ✅ **24-bug sample selected** and committed at `data/experiment_sample.json`
 - ✅ **Experiment runner written** (`examples/repair_experiment.py`) — ready to go
 - ✅ **Result aggregator written** (`examples/summarize_results.py`) — reads run records into a comparison table
@@ -41,11 +41,11 @@
 
 ### What doesn't work yet
 
-- ❌ **No repair-rate numbers exist.** The AI experiment has never run. It needs `LAB_LLM_TOKEN` (an API key).
-- ❌ **`opt` built for only 1 of 24 bugs.** Each build takes ~2 hours. The other 23 bugs need their own builds.
-- ❌ **Repeat count (*k* for pass@k) undecided.** Must choose before running.
-- ❌ **Statistical test undecided.** Must choose before running.
-- ❌ **`results/` directory is empty.** No experiment data.
+- ❌ **No repair-rate numbers exist.** The AI experiment has never run. It needs a model endpoint (`LAB_LLM_URL` + `LAB_LLM_TOKEN`).
+- ❌ **`results/` holds no run records.** Only `results/build_logs/`, which are `opt` build transcripts.
+- ✅ **Repeat count decided: *k* = 3** (Blocker 10, [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md)).
+- ✅ **Statistical test decided: McNemar's exact**, one-sided, Benjamini-Hochberg over four preregistered comparisons (Blocker 10).
+- ✅ **Model chosen:** `Qwen3-Coder-30B-A3B-Instruct` on the H100, served by vLLM (Blocker 11, [`SLM_SELECTION.md`](SLM_SELECTION.md)).
 
 ### The one result we have (mechanism demo, not science)
 
@@ -66,70 +66,101 @@ This shows the mechanism works. It says nothing about whether the AI fixes more 
 
 ### Critical (blocking the experiment)
 
-#### Step 1: Get an API key and run one real repair
+#### Step 1: Stand up the model endpoint and run the nine-run pilot
 
-The experiment runner is ready. It just needs an API key:
+Serve the model on the H100 ([`SLM_SELECTION.md`](SLM_SELECTION.md) §8), point the runner at it, and check it answers before committing days of rebuilds:
 
 ```bash
-# Inside the Docker container:
-export LAB_LLM_TOKEN=<your-deepseek-or-openai-key>
+export LAB_LLM_URL=http://<h100-host>:8000/v1
+export LAB_LLM_TOKEN=local-sweep
+export LAB_LLM_MODEL=qwen3-coder-30b
+export LAB_LLM_TEMP=0.8            # must be > 0, or k = 3 buys three copies
 
-# Run one bug, one condition (the bootstrap bug we already built opt for):
-python3 examples/repair_experiment.py --condition iraware-structured 115575
+python3 scripts/check_llm_endpoint.py --repeat 3
 ```
 
-This will validate the full end-to-end pipeline: LLM → patch → LLVM build → test → Alive2 → feedback → retry.
+Then the pilot, on bug `115575` — build-verified, and deliberately **excluded** from the 24-bug sample, so it costs no sample data:
 
-#### Step 2: Decide repeat count (*k*)
+```bash
+python3 examples/repair_experiment.py --out results/pilot 115575 \
+    --condition baseline raw-plain generic-plain llvmreduce-plain iraware-plain \
+                raw-structured generic-structured llvmreduce-structured \
+                iraware-structured
+```
 
-This is a compute-budget decision. The experiment needs repeats because AI is nondeterministic:
+This validates the full pipeline: LLM → patch → LLVM build → lit → Alive2 → reduced feedback → retry. Read four things off it: does the loop complete; how often `apply_patch` fails (LLVM-Bench found patch invalidity to be a dominant failure mode); **minutes per iteration**, which is the only way to schedule the sweep honestly; and whether the model engages with the counterexample at all.
 
-- *k* = 1: pilot run, ~24 bugs × 9 conditions = 216 runs
-- *k* = 3: standard, ~648 runs  
-- *k* = 5: stronger, ~1080 runs
+#### Step 2: Decide repeat count (*k*) — ✅ DECIDED (2026-09-04): ***k* = 3**
 
-Each run includes an LLVM build (~2 hours first time, faster with ccache for nearby commits).
+*k* does not add statistical units — pass@k still yields one paired binary per bug, so n stays 24. What it buys is a less noisy outcome per cell. `scripts/power_analysis.py` simulates the difference: power roughly triples from *k* = 1 to *k* = 3, and *k* = 5 adds little (and in the highest-rate scenario *falls*, as pass@5 pushes both conditions toward a ceiling where nothing is discordant).
 
-**Decide this before running, not after.**
+| per-attempt rate, better vs worse | k=1 | k=3 | k=5 |
+|---|--:|--:|--:|
+| 0.20 vs 0.10 | 0.11 | 0.33 | 0.43 |
+| 0.25 vs 0.10 | 0.23 | 0.57 | 0.67 |
+| 0.35 vs 0.20 | 0.20 | 0.36 | 0.33 |
 
-#### Step 3: Decide the statistical test
+Full reasoning and the fallbacks if compute runs out: [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) §2 and §5.
 
-With 24 bugs:
-- **McNemar's test** — standard for paired binary outcomes in APR
-- **Fisher's exact test** — for small samples
-- Choose before running so the analysis plan isn't cherry-picked
+#### Step 3: Decide the statistical test — ✅ DECIDED (2026-09-04): **McNemar's exact**
 
-#### Step 4: Build `opt` for the rest of the sample
+One-sided at α = 0.05, Benjamini-Hochberg across four preregistered comparisons, implemented in `examples/analyze_significance.py`.
 
-Only bug `115575` has a built `opt`. The other 23 need theirs:
+Not Fisher's exact: the nine conditions run over the *same* 24 bugs, so the data are paired, and Fisher would discard the pairing that makes n = 24 workable at all. Every paper in `slm_research_papers/` testing paired binary repair outcomes uses McNemar — including `agentic_harness`, the closest existing work on this exact bug family. See [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) §3 and [`SLM_SELECTION.md`](SLM_SELECTION.md) §6.
+
+#### Step 4: Build `opt` for the rest of the sample — ✅ DONE (2026-09-03)
+
+All 24 sample bugs (plus `115575`) now have a build-verified `opt` on this
+machine. See Blocker 9 for how, and the `--build-jobs` gotcha to avoid
+repeating this. The experiment runner still rebuilds `opt` per bug on
+whatever machine it runs on — this step doesn't carry across machines
+(each teammate's `llvm-build`/`ccache` volumes are local), so re-run it
+first on any new machine:
 
 ```bash
 # The experiment runner handles the build automatically per bug,
-# but each first build is ~2 hours. Plan accordingly.
-# ccache is configured, so close-together commits build faster.
+# but each first build is ~2 hours (less with warm ccache for nearby
+# commits). Pass --build-jobs 4 (or lower) under the default 10g
+# container memory cap — see Blocker 9.
 ```
 
 #### Step 5: Run the full sweep
 
 ```bash
-export LAB_LLM_TOKEN=...
-for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
-         raw-structured generic-structured llvmreduce-structured iraware-structured; do
-    python3 examples/repair_experiment.py --condition "$c" --out results/ \
-        115575 89390 165878 135182 ...  # or use the bug_ids from experiment_sample.json
-done
-python3 examples/summarize_results.py results/
+python3 examples/repair_experiment.py --sample --repeat 3 --out results/ \
+    --condition baseline raw-plain generic-plain llvmreduce-plain iraware-plain \
+                raw-structured generic-structured llvmreduce-structured \
+                iraware-structured
 ```
+
+`--sample` reads the 24 bug ids from `data/experiment_sample.json`, so the sweep and the committed sample can never drift apart.
+
+Passing all nine conditions to **one** invocation is what makes this affordable. The runner then iterates **bug-major** — every condition and trial for one bug before moving to the next — because those share a `base_commit` and only need the patched translation unit rebuilt, whereas moving to the next bug is a near-full rebuild (Blocker 9 measured 18 min to 2h49m each). The old condition-major loop paid that switch 216·*k* times instead of 24.
+
+Before starting, raise `ccache -M` to 250G. It is at 40G holding 24 different `base_commit`s and has already run 44 cleanups — it is evicting entries it is about to need again, which is the single largest avoidable cost in this sweep.
+
+Every cell writes its own file and is skipped if that file exists, so an interrupted sweep resumes by rerunning the identical command.
 
 #### Step 6: Run the `--no-promotion` ablation
 
-Same sweep but with `--no-promotion` added. This tests whether the `promote-operands` pass (which generalizes the program) affects results:
+Tests whether `promote-operands` — which generalizes the program, weakening the witness's relevance to the original bug (METHODOLOGY.md §4) — is carrying the result:
 
 ```bash
-python3 examples/repair_experiment.py --condition iraware-structured --no-promotion --out results/ ...
+python3 examples/repair_experiment.py --sample --repeat 3 --out results/ \
+    --no-promotion --condition iraware-plain iraware-structured
 ```
 
-The filenames won't collide (this was fixed in Blocker 7).
+The filenames won't collide (Blocker 7 for the promotion axis, Blocker 10 for the trial index).
+
+#### Step 7: Read the results
+
+```bash
+python3 examples/summarize_results.py results/     # rates and costs, all + paired
+python3 examples/analyze_significance.py results/  # the four preregistered tests
+python3 examples/analyze_significance.py results/ --ablation
+```
+
+Report the discordant counts and rate differences whatever the p-values say — at n = 24 the counts carry more information than the p-value does ([`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) §2).
 
 ---
 
@@ -595,7 +626,7 @@ Scans all `llvm-apr-benchmark/dataset/*.json` files and filters for bugs that: (
 
 #### [`scripts/bootstrap_first_repair.py`](../scripts/bootstrap_first_repair.py) — build `opt` + reproduce
 
-The script that actually builds LLVM. Phase 1 (no API key needed): resets `llvm-project` to the bug's `base_commit`, runs `cmake` + `ninja` to build `opt`, then runs the bug's reproducer to confirm it fails as expected. Phase 2 (`--full`, needs `LAB_LLM_TOKEN`): runs one real repair attempt via `examples/repair_experiment.py`'s `repair()` function. Phase 1 was successfully run on 2026-08-27 for bug `115575` (~1h53m at `--build-jobs 4`). Phase 2 has not been run.
+The script that actually builds LLVM. Phase 1 (no API key needed): resets `llvm-project` to the bug's `base_commit`, runs `cmake` + `ninja` to build `opt`, then runs the bug's reproducer to confirm it fails as expected. Phase 2 (`--full`, needs `LAB_LLM_TOKEN`): runs one real repair attempt via `examples/repair_experiment.py`'s `repair()` function. Phase 1 was successfully run on 2026-08-27 for bug `115575` (~1h53m at `--build-jobs 4`), then for all 24 sample bugs between 2026-09-01 and 2026-09-03 (see Blocker 9 — `--build-jobs` must be capped well below `os.cpu_count()` or the container OOM-kills the compiler). Phase 2 has not been run.
 
 ---
 
@@ -761,6 +792,110 @@ Benchmark README says 295 issues; the dataset actually has 491.
 
 **Fix:** `context.md` corrected to the live count (491 total: 142 miscompilation, 340 crash, 9 hang). Scripts count from the dataset directory, not from docs.
 
+### Blocker 9: `opt` built for only 1 of 24 bugs (2026-09-01 – 2026-09-03) → RESOLVED
+
+Blocker 1 only ever covered `115575`. The other 23 sample bugs had never been
+built, and `bootstrap_first_repair.py --bug-id <id>` (default
+`--build-jobs=os.cpu_count()`) OOM-kills partway through the very first
+attempt: the container's `mem_limit: 10g` (`docker-compose.yml`, chosen
+deliberately to protect the host — see its comments) can't hold one compile
+job per core for LLVM's heaviest translation units (`SelectionDAGBuilder.cpp`,
+`DAGCombiner.cpp` in particular). Symptom: `ninja` fails ~10-20 minutes in
+with `c++: fatal error: Killed signal terminated program cc1plus` — easy to
+mistake for a real build failure since `bootstrap_first_repair.py` reports it
+identically (`SystemExit` with a build-log tail). All 10 bugs in a first
+batch failed exactly this way.
+
+**Fix:** `--build-jobs 4` keeps peak container memory around 3.5GB of the
+10GB cap (confirmed by watching `docker stats` live during a rebuild) —
+comfortable headroom without touching the shared `mem_limit`. Also bumped
+`ccache -M` from the 5GB default to 40GB, since the default was too small to
+hold much across builds for 24 different `base_commit`s.
+
+**Result:** all 24 sample bugs now have a build-verified `opt` on this
+machine (built in five batches: positions 15-24, 10-14, 5-9, 1-4 of
+`experiment_sample.json`'s `bug_ids` list). Per-bug wall time ranged
+~18 minutes to ~2h49m depending on ccache hit rate for that `base_commit`;
+total sequential compute was roughly 20 hours across all 24. Logs are at
+`results/build_logs/<bug_id>.log` (gitignored — this is a local record, not
+committed history; regenerate on any other machine).
+
+**Still true:** the build itself doesn't transfer between machines — the
+`llvm-build`/`ccache_data` volumes are per-machine
+(`docker-compose.yml`'s own comments say so explicitly). Anyone running the
+actual repair experiment on a different machine will trigger their own
+`opt` build per bug regardless of this history, and should pass
+`--build-jobs` sized to their own container's memory cap from the start.
+
+### Blocker 10: *k* and the statistical test were undecided (2026-09-04) → DECIDED
+
+Both were listed as "must choose before running" since Blocker 3, and both
+change what the sweep costs, so neither could be left to the moment the numbers
+land. Preregistered in [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md), written and dated
+while `results/` still held no run records.
+
+***k* = 3.** The key correction to the original framing: *k* is not "more data".
+Nine conditions over 24 bugs give one paired binary observation per bug, and
+pass@k keeps n at 24 however many times a cell is re-run. What *k* buys is a
+less noisy outcome per cell — at *k* = 1 and temperature 0.8 each cell is a
+single coin flip, so discordant pairs are mostly sampling noise, which inflates
+*b* and *c* symmetrically and biases the test toward false negatives.
+`scripts/power_analysis.py` puts numbers on it: power roughly triples from
+*k* = 1 (0.03–0.23) to *k* = 3 (0.10–0.57), while *k* = 5 adds little and in the
+highest-rate scenario *reduces* power, because pass@5 pushes both conditions
+toward a ceiling where nothing is discordant.
+
+**McNemar's exact, one-sided, BH-corrected over four preregistered
+comparisons.** Not Fisher's: the conditions share the same 24 bugs, so the data
+are paired, and Fisher discards exactly the structure that makes n = 24
+workable. `agentic_harness` (same LLVM middle-end bug family), `repair_llama`
+and `slm_as_a_judge` all use McNemar for this shape of data; Fisher appears
+once across the corpus, on genuinely unpaired contingency data
+([`SLM_SELECTION.md`](SLM_SELECTION.md) §6). Exact rather than χ², since
+*b* + *c* will not reach the ~15 the approximation needs.
+
+**Stated plainly in the plan:** even at *k* = 3 this is a pilot-scale
+comparison, power 0.33–0.57 for a large effect. A p above 0.05 means 24 bugs
+cannot resolve it, not that there is no effect.
+
+**Code changes this forced.** `--repeat` did not exist, and
+`run_record_path()` had no trial component — three trials of a cell would have
+written to one path, so the "already done" check would have stopped after the
+first and *k* would have silently collapsed to 1. `summarize()` counted
+records as bugs, which at *k* = 3 would have reported `bugs_attempted: 72` and
+a per-run rate labelled as a repair rate; it now reports `pass_at_k` and
+`pass_at_1` separately over distinct bugs. `repair_experiment.py` also stopped
+writing a run record when the provider fails before the model ever answers —
+that filed an infrastructure outage as a failed repair.
+
+### Blocker 11: no model chosen (2026-09-04) → DECIDED
+
+`LAB_LLM_MODEL` still defaulted to `deepseek-reasoner`, a paid API, against a
+requirement for free open weights on a single H100.
+
+**Decision:** `Qwen/Qwen3-Coder-30B-A3B-Instruct` (Apache 2.0), served by vLLM
+in FP8 so it coexists with other jobs on a shared card. Full reasoning,
+alternatives, and the serving configuration in
+[`SLM_SELECTION.md`](SLM_SELECTION.md).
+
+**The finding that drove it**, from reading `slm_research_papers/`: the SLM
+literature's headline — Phi-3 3.8B matching Codex — is measured on QuixBugs,
+40 one-line bugs in toy programs. On *this* task, `agentic_harness` measures
+frontier models losing 35–83% of their resolution rate when moved from
+SWE-bench Verified to LLVM middle-end bugs, and `llvm_bench` measures
+retrieval-augmented LLMs below 5%. A 3B model on LLVM `InstCombine` would sit
+on the floor — and a floor is not a null result, it is a failed experiment:
+nine identical all-zero cells give McNemar no discordant pairs to test. The
+selection rule is therefore "strongest open model that fits and runs fast
+enough", not "smallest that might work".
+
+Two supporting decisions: temperature stays at 0.8 (repeats at 0 would be three
+copies of one answer, so *k* = 3 would cost 3× for nothing — `scripts/check_llm_endpoint.py --repeat 3`
+checks this), and contamination is survivable because it inflates all nine
+conditions equally, leaving the between-condition differences — the entire
+result — intact. It threatens only the absolute rate, which Blocker 4 already
+forbids claiming.
+
 ---
 
 ## 12. Nice-to-Haves
@@ -775,7 +910,7 @@ These don't block the experiment. Do them if time permits.
 
 ## The Honest Summary
 
-**What we have:** a working, tested mechanism. 85.7% reduction on the sample, bug provably preserved, 10× fewer verifier calls than the generic baseline, 20× fewer than the `llvm-reduce` baseline, and an IR reader validated against all 1,462 real reproducers. `opt` has been built for one bug confirming the build/verify machinery works end-to-end.
+**What we have:** a working, tested mechanism. 85.7% reduction on the sample, bug provably preserved, 10× fewer verifier calls than the generic baseline, 20× fewer than the `llvm-reduce` baseline, and an IR reader validated against all 1,462 real reproducers. `opt` has been built and verified for all 24 sample bugs, confirming the build/verify machinery works end-to-end at the scale the real experiment needs — not just for one bootstrap bug.
 
 **What we don't have:** any evidence that this makes an AI fix more bugs.
 

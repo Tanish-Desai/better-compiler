@@ -41,10 +41,19 @@ Usage::
 
     export LAB_LLM_TOKEN=...            # plus the LAB_LLVM_* variables
     python3 examples/repair_experiment.py --condition iraware-structured 121459
-    python3 examples/repair_experiment.py --condition A --all --out results/
 
-Every run writes ``<bug_id>.<condition>.json`` into ``--out``; aggregate them
-with ``python3 examples/summarize_results.py results/``.
+    # the preregistered sweep: 9 conditions x 24 bugs x k, bug-major
+    python3 examples/repair_experiment.py --sample --repeat 3 --out results/         --condition baseline raw-plain generic-plain llvmreduce-plain iraware-plain                     raw-structured generic-structured llvmreduce-structured                     iraware-structured
+
+Every run writes ``<bug_id>.<condition>[.no-promotion][.tN].json`` into
+``--out``; aggregate them with ``python3 examples/summarize_results.py
+results/`` and test them with ``python3 examples/analyze_significance.py
+results/``.
+
+Passing several ``--condition`` values runs them **bug-major** -- every
+condition and trial for one bug before moving to the next -- because the
+base_commit switch between bugs is the expensive part of this sweep, not the
+per-iteration rebuild. See the comment in ``main`` for the arithmetic.
 """
 
 from __future__ import annotations
@@ -183,7 +192,8 @@ def bug_hunk(env, margin: int = 30) -> Tuple[str, str]:
 # The loop
 # --------------------------------------------------------------------------
 
-def repair(bug_id: str, condition: str, args, model: Model) -> Optional[RunLog]:
+def repair(bug_id: str, condition: str, args, model: Model,
+           trial: int = 1) -> Optional[RunLog]:
     cond = resolve_condition(condition)
     env = Env(bug_id, model.cutoff, max_build_jobs=args.build_jobs)
 
@@ -202,12 +212,15 @@ def repair(bug_id: str, condition: str, args, model: Model) -> Optional[RunLog]:
         condition=cond.name,
         model=model.name,
         max_iterations=args.max_iterations,
+        trial=trial,
         notes={
             "bug_type": env.get_bug_type(),
             "components": env.get_hint_components(),
             "oracle_budget": args.oracle_budget,
             "oracle_strictness": args.strictness,
             "allow_promotion": not args.no_promotion,
+            "temperature": model.temperature,
+            "trial": trial,
         },
     )
     env.use_knowledge("alive2", env.knowledge_cutoff)
@@ -273,7 +286,7 @@ def repair(bug_id: str, condition: str, args, model: Model) -> Optional[RunLog]:
             llm=llm_stats,
             seconds=time.time() - started,
         ))
-        print(f"[{bug_id}/{cond.name}] iteration {index + 1}: "
+        print(f"[{bug_id}/{cond.name}/t{trial}] iteration {index + 1}: "
               f"{'FIXED' if fixed else 'not fixed'}")
         if fixed:
             break
@@ -291,6 +304,17 @@ def repair(bug_id: str, condition: str, args, model: Model) -> Optional[RunLog]:
             + FORMAT_REQUIREMENT + context_requirement
         )})
 
+    if not run.iterations:
+        # The provider failed before the model ever answered, so nothing about
+        # this bug was tested.  Writing the record anyway would file an
+        # infrastructure outage as a failed repair and drag the condition's
+        # rate down; returning None leaves the cell empty, which the paired
+        # table already knows how to exclude.
+        print(f"[{bug_id}/{cond.name}/t{trial}] no iterations ran "
+              f"({run.notes.get('llm_error', 'unknown reason')}); not recorded",
+              file=sys.stderr)
+        return None
+
     try:
         run.certificate = env.dump(log={"model": model.name, "messages": messages})
     except Exception as e:  # noqa: BLE001
@@ -298,12 +322,32 @@ def repair(bug_id: str, condition: str, args, model: Model) -> Optional[RunLog]:
     return run
 
 
+def sample_bug_ids(path: str) -> List[str]:
+    """The stratified sample's bug ids, in ``select_experiment_sample.py`` order.
+
+    Accepts either that script's full output (``{"tiers": {...}}``) or a bare
+    list of ids, so a hand-written subset file works for a smoke run.
+    """
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    if isinstance(data, list):
+        return [str(x) for x in data]
+    if "bug_ids" in data:
+        return [str(x) for x in data["bug_ids"]]
+    return [str(row["bug_id"]) for tier in data["tiers"].values() for row in tier]
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("bug_ids", nargs="*", help="issue ids; omit with --all")
+    parser.add_argument("bug_ids", nargs="*", help="issue ids; omit with --all/--sample")
     parser.add_argument("--all", action="store_true", help="every issue in the dataset")
-    parser.add_argument("--condition", default="iraware-structured",
-                        help=f"one of {sorted(CONDITIONS)} or a matrix letter A-F")
+    parser.add_argument("--sample", nargs="?", const="data/experiment_sample.json",
+                        help="read bug ids from a sample file "
+                             "(default data/experiment_sample.json)")
+    parser.add_argument("--condition", nargs="+", default=["iraware-structured"],
+                        help=f"one or more of {sorted(CONDITIONS)} or a matrix letter A-F")
+    parser.add_argument("--repeat", type=int, default=1, metavar="K",
+                        help="pass@k repeats per (bug, condition); see docs/ANALYSIS_PLAN.md")
     parser.add_argument("--out", default="results", help="directory for run records")
     parser.add_argument("--max-iterations", type=int, default=4,
                         help="LLM turns per bug; identical across conditions")
@@ -314,14 +358,18 @@ def main(argv=None) -> int:
     parser.add_argument("--no-promotion", action="store_true")
     parser.add_argument("--build-jobs", type=int, default=os.cpu_count())
     parser.add_argument("--overwrite", action="store_true",
-                        help="redo bugs that already have a record")
+                        help="redo cells that already have a record")
     args = parser.parse_args(argv)
 
-    cond = resolve_condition(args.condition)
+    conditions = [resolve_condition(c).name for c in args.condition]
+    if args.repeat < 1:
+        parser.error("--repeat must be at least 1")
     args.oracle_budget = args.oracle_budget or None
     _import_benchmark()
 
-    if args.all:
+    if args.sample:
+        bug_ids = sample_bug_ids(args.sample)
+    elif args.all:
         bug_ids = sorted(
             f.removesuffix(".json") for f in os.listdir(llvm_helper.dataset_dir)
             if f.endswith(".json")
@@ -329,22 +377,48 @@ def main(argv=None) -> int:
     elif args.bug_ids:
         bug_ids = args.bug_ids
     else:
-        parser.error("pass bug ids or --all")
+        parser.error("pass bug ids, --sample, or --all")
 
+    # BUG-MAJOR ORDER, DELIBERATELY.
+    #
+    # Every cell of this sweep rebuilds LLVM, but not every rebuild costs the
+    # same. Within one bug, all conditions and all trials share a base_commit,
+    # so ninja and ccache only have to redo the one patched translation unit
+    # and a relink. Moving to the next bug means checking out a base_commit
+    # months away in LLVM's history, which is a near-full rebuild (Blocker 9
+    # measured 18 min to 2h49m each).
+    #
+    # Iterating condition-major -- the loop README.md used to show -- pays that
+    # switch once per (bug, condition, trial); iterating bug-major pays it once
+    # per bug. At 24 bugs x 9 conditions x k that is the difference between
+    # 24 expensive rebuilds and 216k of them.
+    #
+    # Trials sit outside conditions so that an interrupted sweep leaves whole
+    # (bug, trial) rows covering every condition, which is exactly what the
+    # paired table and the significance test can still use.
     model = Model()
+    total = len(bug_ids) * args.repeat * len(conditions)
+    done = 0
     for bug_id in bug_ids:
-        record = run_record_path(args.out, bug_id, cond.name,
-                                  allow_promotion=not args.no_promotion)
-        if os.path.exists(record) and not args.overwrite:
-            print(f"[{bug_id}] already done under {cond.name}")
-            continue
-        try:
-            run = repair(bug_id, cond.name, args, model)
-        except Exception as e:  # noqa: BLE001 - one bad bug must not end the sweep
-            print(f"[{bug_id}] error: {type(e).__name__}: {e}", file=sys.stderr)
-            continue
-        if run is not None:
-            print(f"[{bug_id}] -> {run.write(args.out)}")
+        for trial in range(1, args.repeat + 1):
+            for condition in conditions:
+                done += 1
+                record = run_record_path(args.out, bug_id, condition,
+                                         allow_promotion=not args.no_promotion,
+                                         trial=trial)
+                if os.path.exists(record) and not args.overwrite:
+                    print(f"[{done}/{total}] [{bug_id}] already done under "
+                          f"{condition} t{trial}")
+                    continue
+                print(f"[{done}/{total}] [{bug_id}/{condition}/t{trial}] starting")
+                try:
+                    run = repair(bug_id, condition, args, model, trial=trial)
+                except Exception as e:  # noqa: BLE001 - one bad cell must not end the sweep
+                    print(f"[{bug_id}/{condition}/t{trial}] error: "
+                          f"{type(e).__name__}: {e}", file=sys.stderr)
+                    continue
+                if run is not None:
+                    print(f"[{bug_id}] -> {run.write(args.out)}")
     return 0
 
 

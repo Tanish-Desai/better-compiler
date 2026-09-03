@@ -28,13 +28,18 @@ comparison needed to find out whether that helps.
 | [`ce/`](ce/) | the counterexample toolkit (see below) |
 | [`examples/repair_experiment.py`](examples/repair_experiment.py) | the repair loop, parameterised by condition |
 | [`examples/summarize_results.py`](examples/summarize_results.py) | aggregates run records into the experiment table |
+| [`examples/analyze_significance.py`](examples/analyze_significance.py) | the preregistered McNemar test over those records |
 | [`scripts/check_ir_roundtrip.py`](scripts/check_ir_roundtrip.py) | validates the IR model against every dataset reproducer |
+| [`scripts/check_llm_endpoint.py`](scripts/check_llm_endpoint.py) | preflight for the model endpoint, before a multi-day sweep |
+| [`scripts/power_analysis.py`](scripts/power_analysis.py) | the calculation *k* = 3 was chosen from |
 | [`scripts/select_experiment_sample.py`](scripts/select_experiment_sample.py) | picks the stratified bug sample for the real sweep (Blocker 3) |
 | [`tests/`](tests/) | unit tests plus `alive-tv` integration tests |
 | [`data/samples/`](data/samples/) | real `alive-tv` outputs, used as parser fixtures |
 | [`data/experiment_sample.json`](data/experiment_sample.json) | the picked 24-bug sample, stratified by complexity and component |
 | [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) | **start here** — full walkthrough, glossary, blockers |
 | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | what the results do and do not support |
+| [`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md) | preregistered *k* and statistical test, fixed before the sweep |
+| [`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md) | which open model drives the sweep, and what the papers say |
 | [`llvm-apr-benchmark/`](llvm-apr-benchmark/) | upstream benchmark, unmodified |
 
 ### The `ce` package
@@ -134,19 +139,42 @@ through unchanged, so a loop can route all its feedback through it.
 
 ## Running the experiment
 
-Needs `opt` built for each bug's `base_commit` and an LLM API key:
+Needs `opt` built for each bug's `base_commit` and a model endpoint. The
+runner is an OpenAI-compatible client, so a local vLLM server is a drop-in.
+See [`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md) for which model and how
+to serve it.
 
 ```bash
-export LAB_LLM_TOKEN=...            # LAB_LLVM_* are already set in the image
-for c in raw-plain generic-plain llvmreduce-plain iraware-plain \
-         raw-structured generic-structured llvmreduce-structured iraware-structured; do
-    python3 examples/repair_experiment.py --condition "$c" --all --out results/
-done
+export LAB_LLM_URL=http://<h100-host>:8000/v1   # LAB_LLVM_* are set in the image
+export LAB_LLM_TOKEN=... LAB_LLM_MODEL=... LAB_LLM_TEMP=0.8
+
+python3 scripts/check_llm_endpoint.py           # preflight, seconds not hours
+
+python3 examples/repair_experiment.py --sample --repeat 3 --out results/ \
+    --condition baseline raw-plain generic-plain llvmreduce-plain iraware-plain \
+                raw-structured generic-structured llvmreduce-structured \
+                iraware-structured
+
+python3 examples/repair_experiment.py --sample --repeat 3 --out results/ \
+    --no-promotion --condition iraware-plain iraware-structured
+
 python3 examples/summarize_results.py results/
+python3 examples/analyze_significance.py results/
 ```
 
+Passing every condition to one invocation runs the sweep **bug-major**: all
+conditions and trials for one bug before the next. That is not cosmetic. The
+conditions of a bug share a `base_commit`, so only the patched translation unit
+gets rebuilt, while moving to the next bug is a near-full rebuild.
+Condition-major would pay that switch 216*k times instead of 24.
+
+Every cell writes its own file and is skipped if it exists, so an interrupted
+sweep resumes by rerunning the identical command.
+
 Every condition gets the same iteration and oracle budget; both are recorded
-per run so the comparison can be checked rather than assumed.
+per run so the comparison can be checked rather than assumed. k = 3 and the
+significance test are fixed in advance in
+[`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md).
 
 ## Status
 
@@ -154,9 +182,15 @@ Built and tested: the parser, IR model, both reducers, the oracle, the
 structured renderer, the condition matrix, the CLI, and the benchmark adapter.
 The IR model round-trips all 1462 dataset reproducers byte-exactly.
 
-Not yet run: the end-to-end repair experiment. It needs a built `opt` per
-`base_commit`, which is hours of compute per commit and has not been done yet
-(`/workspace/llvm-build` is empty). Until it runs, there are no repair-rate
+Decided before running, so the analysis cannot be fitted to the results:
+k = 3 (pass@3) and McNemar's exact test over four preregistered comparisons.
+See [`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md), with the power
+calculation in `scripts/power_analysis.py`. The model is chosen in
+[`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md).
+
+Not yet run: the end-to-end repair experiment. `opt` is now built for all 24
+sample bugs (on one machine only: the build volumes do not transfer), so what
+is left is a model endpoint. Until the sweep runs there are no repair-rate
 numbers — only the mechanism.
 
 `feat/e2e-bootstrap` adds the scripts to actually attempt this for one bug —
