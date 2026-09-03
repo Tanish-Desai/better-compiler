@@ -5,6 +5,13 @@ __pycache__/
 # Experiment output: run records are data, regenerate them rather than commit
 results/
 
+# Reading material, not source. ~28MB of third-party PDFs, kept locally so
+# they don't sit in git history. docs/SLM_SELECTION.md cites every one of them
+# by filename and arXiv id, so its reasoning is followable without them here.
+ref_papers/
+slm_research_papers/
+compiler_papers.zip
+
 # Local scratch
 *.egg-info/
 .venv/
