@@ -101,8 +101,8 @@ nvidia-smi --query-gpu=memory.free --format=csv    # check the real number first
 vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
     --served-model-name qwen2.5-coder-14b \
     --quantization fp8 \
-    --max-model-len 8192 \
-    --gpu-memory-utilization 0.22 \
+    --max-model-len 4096 \
+    --gpu-memory-utilization 0.23 \
     --enforce-eager \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
@@ -129,6 +129,16 @@ the budget negative before KV cache got any memory at all (Blocker 13:
 `Available KV cache memory: -0.49 GiB`). `--enforce-eager` skips graph capture
 and `torch.compile`, trading inference throughput for that memory back —
 irrelevant here since inference is under 1% of this sweep's wall time.
+
+**Even with `--enforce-eager`, `--max-model-len` and `--gpu-memory-utilization`
+have to move together.** Weights (~15.4GB) plus ~2GB fixed overhead leave only
+whatever's left of the utilization budget for KV cache, and KV cache
+requirement scales with `--max-model-len` — vLLM states the exact tradeoff in
+its own error if you get it wrong (`"the estimated maximum model length is
+N"`). At `0.23` (~18.3GB budget), that leaves ~0.9GB for KV cache, enough for
+`--max-model-len 4096` (needs ~0.75GB) but not the full `8192` (needs 1.5GB).
+Raising `--max-model-len` back up requires raising `--gpu-memory-utilization`
+with it, within whatever's actually free.
 
 Detach with `Ctrl-b d`.
 

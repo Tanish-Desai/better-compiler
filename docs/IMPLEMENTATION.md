@@ -963,16 +963,39 @@ alone took 15.39GB — a bit over the ~14GB estimate — and default CUDA graph
 capture (49 compiled variants, sizes up to 512) consumed the remaining ~2GB
 before KV cache saw any of it.
 
-**Fix:** add `--enforce-eager`, which skips CUDA graph capture and
+**First fix:** add `--enforce-eager`, which skips CUDA graph capture and
 `torch.compile` entirely. Costs some inference throughput; free, in effect,
 since `SLM_SELECTION.md` already established inference is under 1% of this
-sweep's wall time — the LLVM rebuilds are what a slower decode step would be
-a rounding error against. `--gpu-memory-utilization` stayed at 0.22
-deliberately, rather than raising it to buy the same headroom: the margin
-under actual free memory is the thing protecting a multi-day unattended run
-from the neighboring tenant's usage growing, and that's worth more than a
-faster decode step. `RUNBOOK.md` and `RUNBOOK_NATIVE.md` now include the flag
-in their launch commands.
+sweep's wall time. This alone flipped `Available KV cache memory` from
+`-0.49 GiB` to `+0.1 GiB` — real progress, but 0.1GB isn't enough to serve
+even one request at `--max-model-len 8192` (needs 1.5GB): `ValueError: ...
+the estimated maximum model length is 544`.
+
+**Second fix, same launch attempt:** KV cache requirement scales linearly
+with `--max-model-len` (vLLM's own error confirms it: `1.5GB × 544/8192 ≈
+0.1GB`, matching exactly). Weights (~15.4GB) plus ~2GB fixed overhead —
+present even under `--enforce-eager` — leaves only what's left of the
+utilization budget for KV cache, so `--max-model-len` and
+`--gpu-memory-utilization` have to move together, not separately.
+`--gpu-memory-utilization 0.23` (~18.3GB budget) leaves ~0.9GB for KV cache;
+`--max-model-len 4096` needs ~0.75GB, fitting with a small margin.
+`--max-model-len` stayed well short of the original 32768 (and 8192)
+deliberately: `SLM_SELECTION.md` §8 already measured the longest real
+condition, `raw-structured`, at "a few thousand tokens", so 4096 stays
+generous for the actual task rather than trimmed to the memory limit's edge.
+
+`--gpu-memory-utilization` moved only from 0.22 to 0.23, not further, on the
+same reasoning as before: once vLLM successfully starts, its allocation is
+locked in and the neighboring tenant's growth afterward can't evict it — the
+real risk is only at the *next restart*, when free memory is re-checked
+against whatever's requested. Buying KV cache room from `--max-model-len`
+preserves that margin; buying it from `--gpu-memory-utilization` would spend
+it. `RUNBOOK.md` and `RUNBOOK_NATIVE.md` now carry both parameters.
+
+**Watch for during the pilot:** whether 4096 truncates `raw-structured`'s
+accumulated multi-turn context before `--max-iterations` (4) turns complete.
+Not yet observed either way — the pilot (Blocker-11-era instructions, this
+model, these parameters) hasn't been run.
 
 ---
 
