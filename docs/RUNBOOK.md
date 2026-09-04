@@ -9,6 +9,12 @@ the experiment *is*. [`SLM_SELECTION.md`](SLM_SELECTION.md) explains why this
 model. [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) fixes *k* and the statistical
 test. This file is only about operating the thing.
 
+**No Docker access on your server?** Some hosting setups grant container
+permissions but not the ability to start a Docker daemon inside them (no
+`--privileged`, no `docker.sock`). If `docker compose up` isn't an option for
+you, use [`RUNBOOK_NATIVE.md`](RUNBOOK_NATIVE.md) instead — same experiment,
+same reasoning, installed directly rather than through an image.
+
 ---
 
 ## 1. The decision, up front
