@@ -103,6 +103,7 @@ vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
     --quantization fp8 \
     --max-model-len 8192 \
     --gpu-memory-utilization 0.22 \
+    --enforce-eager \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
 ```
@@ -121,6 +122,13 @@ from [`SLM_SELECTION.md`](SLM_SELECTION.md) §8 instead — this substitution is
 a response to a specific memory shortage, not a standing preference for the
 smaller model. Re-check free memory before every restart; what fits depends
 on who else is on the card *right now*.
+
+**`--enforce-eager` matters at this margin.** Without it, weight loading
+(15.39GB, a bit over the ~14GB estimate) plus default CUDA graph capture ran
+the budget negative before KV cache got any memory at all (Blocker 13:
+`Available KV cache memory: -0.49 GiB`). `--enforce-eager` skips graph capture
+and `torch.compile`, trading inference throughput for that memory back —
+irrelevant here since inference is under 1% of this sweep's wall time.
 
 Detach with `Ctrl-b d`.
 

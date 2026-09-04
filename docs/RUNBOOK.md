@@ -162,6 +162,7 @@ vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
     --quantization fp8 \
     --max-model-len 8192 \
     --gpu-memory-utilization 0.22 \
+    --enforce-eager \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
 ```
@@ -175,6 +176,12 @@ connection drops and takes vLLM with it, the sweep goes down too.
 Blocker 12 in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). `Qwen2.5-Coder-14B-Instruct`
 at `--gpu-memory-utilization 0.22` targets ~17.4GB (≈14GB weights + headroom),
 which is what fit when a standing tenant on this H100 left only ~20GB free.
+`--enforce-eager` matters at this margin: weight loading alone took 15.39GB
+(a bit over the ~14GB estimate), and CUDA graph capture — the default —
+consumed the rest before KV cache got anything, failing with `Available KV
+cache memory: -0.49 GiB` (Blocker 13). Skipping graph capture trades some
+inference throughput for that memory back; irrelevant here since inference is
+under 1% of this sweep's wall time.
 **If you actually have the card to yourself**, `nvidia-smi --query-gpu=memory.free`
 will show close to the full ~80GB and you can both raise `--gpu-memory-utilization`
 (toward 0.9) and go back to the originally-chosen `Qwen/Qwen3-Coder-30B-A3B-Instruct`

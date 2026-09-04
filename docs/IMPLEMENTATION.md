@@ -950,6 +950,30 @@ further the value needs to come down with it.
 now against this model) to confirm repair rates aren't at the floor.
 `SLM_SELECTION.md` §9's screening criteria apply unchanged.
 
+### Blocker 13: Blocker 12's launch command OOM'd on KV cache, not weights (2026-09-04) → FIXED
+
+Blocker 12's command failed with `ValueError: No available memory for the
+cache blocks` and `Available KV cache memory: -0.49 GiB`. Not a repeat of
+Blocker 12's problem — this was *within* the 17.4GB budget
+`--gpu-memory-utilization 0.22` requested, which vLLM's upfront free-memory
+check accepted (17.4GB < the ~19GB actually free at the time).
+
+The budget just didn't add up the way Blocker 12 assumed. Weight loading
+alone took 15.39GB — a bit over the ~14GB estimate — and default CUDA graph
+capture (49 compiled variants, sizes up to 512) consumed the remaining ~2GB
+before KV cache saw any of it.
+
+**Fix:** add `--enforce-eager`, which skips CUDA graph capture and
+`torch.compile` entirely. Costs some inference throughput; free, in effect,
+since `SLM_SELECTION.md` already established inference is under 1% of this
+sweep's wall time — the LLVM rebuilds are what a slower decode step would be
+a rounding error against. `--gpu-memory-utilization` stayed at 0.22
+deliberately, rather than raising it to buy the same headroom: the margin
+under actual free memory is the thing protecting a multi-day unattended run
+from the neighboring tenant's usage growing, and that's worth more than a
+faster decode step. `RUNBOOK.md` and `RUNBOOK_NATIVE.md` now include the flag
+in their launch commands.
+
 ---
 
 ## 12. Nice-to-Haves
