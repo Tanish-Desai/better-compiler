@@ -98,11 +98,13 @@ pip install vllm          # first run downloads ~28GB of weights
 
 nvidia-smi --query-gpu=memory.free --format=csv    # check the real number first
 
+export VLLM_USE_FLASHINFER_SAMPLER=0
+
 vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
     --served-model-name qwen2.5-coder-14b \
     --quantization fp8 \
-    --max-model-len 4096 \
-    --gpu-memory-utilization 0.23 \
+    --max-model-len 12288 \
+    --gpu-memory-utilization 0.25 \
     --enforce-eager \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
@@ -123,6 +125,13 @@ a response to a specific memory shortage, not a standing preference for the
 smaller model. Re-check free memory before every restart; what fits depends
 on who else is on the card *right now*.
 
+**`VLLM_USE_FLASHINFER_SAMPLER=0` matters on this container specifically.**
+Without it, vLLM's default sampler tries to JIT-compile a CUDA kernel via
+`nvcc` on first use, which fails here (`Could not find nvcc`) — this
+container has CUDA runtime but not the full toolkit. The env var forces
+vLLM's built-in PyTorch sampler instead; no meaningful throughput cost at
+this sweep's request rate.
+
 **`--enforce-eager` matters at this margin.** Without it, weight loading
 (15.39GB, a bit over the ~14GB estimate) plus default CUDA graph capture ran
 the budget negative before KV cache got any memory at all (Blocker 13:
@@ -130,15 +139,22 @@ the budget negative before KV cache got any memory at all (Blocker 13:
 and `torch.compile`, trading inference throughput for that memory back —
 irrelevant here since inference is under 1% of this sweep's wall time.
 
-**Even with `--enforce-eager`, `--max-model-len` and `--gpu-memory-utilization`
-have to move together.** Weights (~15.4GB) plus ~2GB fixed overhead leave only
-whatever's left of the utilization budget for KV cache, and KV cache
-requirement scales with `--max-model-len` — vLLM states the exact tradeoff in
-its own error if you get it wrong (`"the estimated maximum model length is
-N"`). At `0.23` (~18.3GB budget), that leaves ~0.9GB for KV cache, enough for
-`--max-model-len 4096` (needs ~0.75GB) but not the full `8192` (needs 1.5GB).
-Raising `--max-model-len` back up requires raising `--gpu-memory-utilization`
-with it, within whatever's actually free.
+**`--max-model-len` and `--gpu-memory-utilization` move together, not
+independently, and getting this wrong fails silently, not loudly (Blocker
+14).** Weights (~15.4GB) plus ~2GB fixed overhead leaves only what's left of
+the utilization budget for KV cache. The danger isn't a startup error like
+the ones above — it's that `repair_experiment.py`'s multi-turn loop appends
+every reply to the message history, so context grows across
+`--max-iterations`, and a cap that's too low doesn't reject the request
+upfront: it lets several turns succeed, then fails mid-conversation and
+records the run as a genuine repair failure. `4096` truncated all nine pilot
+conditions; `8192` fixed eight of nine (only `raw-structured` — the
+documented longest condition — still truncated); `12288` (paired with
+`--gpu-memory-utilization 0.25`) was confirmed clean on all nine. These exact
+numbers depend on free memory that fluctuated 19.5–23GB over the course of an
+hour on this box — if a future restart's admission check fails, dial back
+toward `8192`/`0.24` (confirmed reliable at the lower end of that range)
+rather than re-deriving from scratch.
 
 Detach with `Ctrl-b d`.
 

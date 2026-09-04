@@ -997,6 +997,73 @@ accumulated multi-turn context before `--max-iterations` (4) turns complete.
 Not yet observed either way — the pilot (Blocker-11-era instructions, this
 model, these parameters) hasn't been run.
 
+### Blocker 14: `--max-model-len 4096` silently truncated every pilot condition (2026-09-04) → FIXED
+
+The prediction at the end of Blocker 13 was right, but understated: the
+nine-run pilot didn't just risk truncating `raw-structured` — **it truncated
+all nine conditions**, at between 1 and 3 of the 4 designed turns. None of
+them errored loudly. Each one wrote a normal-looking run record with
+`fixed: false`, because `repair_experiment.py`'s loop catches the model-call
+exception, records it to `run.notes["llm_error"]`, and breaks — and every
+iteration *before* the break had already succeeded and been recorded. A
+partial run looks identical to a genuine repair failure unless something
+goes and reads `notes.llm_error`.
+
+**Root cause, confirmed by grepping every pilot record's `llm_error`:**
+identically-shaped `400`s — `"prompt contains at least 4097 input tokens"` —
+at `--max-model-len 4096`. Not a per-condition prompt-size problem:
+`repair_experiment.py`'s multi-turn loop appends the model's *entire reply*
+(the complete rewritten hunk, per `FORMAT_REQUIREMENT`'s "no diffs" rule) to
+the message history every turn, so context grows every iteration regardless
+of condition, and 4096 didn't survive more than a few turns for anyone.
+`SLM_SELECTION.md` §8's "a few thousand tokens" estimate was for one
+condition's single-turn feedback text, not the accumulated 4-turn
+conversation — the two are not the same number.
+
+This also explains an apparent anomaly from the first pilot attempt:
+`iraware-structured` (the most-reduced condition) truncated *fastest*, after
+only one successful turn — backwards from what the mechanism should do. At
+the time this looked like it might be a real confound in the structured
+render format. It wasn't — it was noise from a context window too small to
+show the real ordering. Once the window was large enough, the condition that
+needed the most room turned out to be `raw-structured`, exactly as
+`SLM_SELECTION.md` already predicted (the "longest condition" language in
+§8). Worth remembering: an undersized resource limit doesn't fail in a way
+that points at itself — it can look like a finding about the conditions
+being compared.
+
+**Fix, in two confirmed steps, both empirical:**
+
+1. `--max-model-len 8192` / `--gpu-memory-utilization 0.24` (using the real
+   per-run numbers Blocker 13 established: ~17.3GB fixed weights+overhead) —
+   **8 of 9 conditions ran clean, all 4 turns, no `llm_error`.** Only
+   `raw-structured` still truncated, on its 3rd turn.
+2. `--max-model-len 12288` / `--gpu-memory-utilization 0.25` — re-tested
+   `raw-structured` alone (`--condition raw-structured`, to avoid re-running
+   the other eight): **4 iterations, no `llm_error`.** All nine conditions
+   now confirmed clean at these parameters.
+
+`VLLM_USE_FLASHINFER_SAMPLER=0` also added at this point (unrelated failure,
+same session): vLLM's default sampler backend tries to JIT-compile a CUDA
+kernel via `nvcc` on first use, which this container doesn't have installed
+(CUDA runtime only, not the toolkit) — `RuntimeError: Could not find nvcc`.
+The env var forces vLLM's built-in PyTorch sampler, sidestepping the need for
+a compiler entirely.
+
+**These numbers are tuned against memory that moved during diagnosis** — free
+memory ranged ~19.5GB to ~23GB across the roughly one hour this took to
+resolve, and `12288`/`0.25` (~19.9GB requested) was confirmed working at the
+higher end of that range. If a future `vllm serve` restart fails its
+admission check, that means the shared tenant's usage has grown past what it
+was during this session — the fix is dialing back toward `8192`/`0.24`
+(confirmed reliable at the lower, ~19.5GB end), not re-deriving the formula.
+
+**Not yet re-verified:** whether `8192` (not `12288`) survives the full
+24-bug sample — `raw-structured`'s context growth could plausibly vary by
+bug. If a future sweep run truncates on `raw-structured` again even at
+`12288`, that is new information (this bug's hunk size, not a generic
+config problem) and worth its own note, not a silent re-run.
+
 ---
 
 ## 12. Nice-to-Haves

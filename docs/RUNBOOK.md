@@ -157,11 +157,13 @@ pip install vllm          # first run downloads ~28GB of weights
 
 nvidia-smi --query-gpu=memory.free --format=csv    # check the real number first
 
+export VLLM_USE_FLASHINFER_SAMPLER=0
+
 vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
     --served-model-name qwen2.5-coder-14b \
     --quantization fp8 \
-    --max-model-len 4096 \
-    --gpu-memory-utilization 0.23 \
+    --max-model-len 12288 \
+    --gpu-memory-utilization 0.25 \
     --enforce-eager \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
@@ -172,28 +174,43 @@ Detach with `Ctrl-b d`. Leave it running.
 **Use tmux (or screen).** This has to outlive your SSH session by days. If the
 connection drops and takes vLLM with it, the sweep goes down too.
 
-**These parameters assume the card is shared, not yours alone** — see
-Blockers 12 and 13 in [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
-`Qwen2.5-Coder-14B-Instruct` needs ~15.4GB for weights (a bit over the ~14GB
-estimate) plus ~2GB fixed overhead even under `--enforce-eager`, which only
-leaves KV-cache room for a context length proportional to what's left of the
-`--gpu-memory-utilization` budget: `0.23 × ~80GB ≈ 18.3GB`, so `~0.9GB` for
-KV cache, enough for `--max-model-len 4096` with a small margin
-(`1.5GB × 4096/8192 = 0.75GB` required) but not for the full 8192. Raise
-`--max-model-len` only alongside `--gpu-memory-utilization` — one without the
-other reproduces the exact `Available KV cache memory` shortfall Blocker 13
-hit. `--enforce-eager` itself is not optional at this margin: without it,
-default CUDA graph capture consumed the entire remaining budget before KV
-cache saw any of it, failing with `Available KV cache memory: -0.49 GiB`.
-Skipping graph capture trades some inference throughput for that memory back
-— irrelevant here since inference is under 1% of this sweep's wall time.
+**These parameters were arrived at empirically, in this order — see Blocker 14
+in [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the full trail, worth reading
+if any of these numbers ever need re-deriving on a different machine:**
+
+- `VLLM_USE_FLASHINFER_SAMPLER=0` — without it, vLLM's default sampler tries
+  to JIT-compile a CUDA kernel via `nvcc`, which this container doesn't have.
+  Forces the built-in PyTorch sampler instead; no throughput cost worth
+  mentioning at this sweep's request rate.
+- `--enforce-eager` — without it, default CUDA graph capture consumes the
+  entire memory budget before KV cache sees any of it
+  (`Available KV cache memory: -0.49 GiB`). Costs some inference throughput;
+  irrelevant here since inference is under 1% of this sweep's wall time.
+- `--max-model-len 12288` and `--gpu-memory-utilization 0.25` **move
+  together, not independently** — weights (~15.4GB) plus ~2GB fixed overhead
+  leaves only what's left of the utilization budget for KV cache, and KV
+  cache requirement scales with `--max-model-len`. `4096` and `8192` were
+  both tried and both **silently truncated real conversations**: every
+  multi-turn repair attempt appends the full previous reply to the message
+  history, so context keeps growing across `--max-iterations`, and a context
+  cap that's too low doesn't error gracefully — it fails an in-progress run
+  partway through and gets recorded as a genuine repair failure. Confirmed
+  first at `4096` (all nine pilot conditions truncated), then at `8192`
+  (eight of nine conditions ran clean; only `raw-structured` — already
+  documented as the longest condition — still truncated). `12288` was
+  confirmed clean on all nine pilot conditions with `results/pilot/`.
 
 **If you actually have the card to yourself**, `nvidia-smi --query-gpu=memory.free`
 will show close to the full ~80GB and you can both raise `--gpu-memory-utilization`
 (toward 0.9) and go back to the originally-chosen `Qwen/Qwen3-Coder-30B-A3B-Instruct`
 from [`SLM_SELECTION.md`](SLM_SELECTION.md) §8 — check free memory before every
 `vllm serve`, since what fits depends on who else is on the card *right now*,
-not on what fit last time.
+not on what fit last time. **These specific numbers (`12288`/`0.25`) were tuned
+against ~19.5-23GB of free memory that fluctuated over the course of an hour**
+— if a future restart's admission check fails, that's the shared tenant's usage
+having grown; the fix is the same formula in Blocker 14, dialed back toward
+`8192`/`0.24` (confirmed reliable at the lower end of that range) rather than
+re-deriving from scratch.
 
 `--served-model-name` and `--api-key` must match `LAB_LLM_MODEL` and
 `LAB_LLM_TOKEN` in your `.env`.
