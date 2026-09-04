@@ -40,6 +40,7 @@ comparison needed to find out whether that helps.
 | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | what the results do and do not support |
 | [`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md) | preregistered *k* and statistical test, fixed before the sweep |
 | [`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md) | which open model drives the sweep, and what the papers say |
+| [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | step-by-step: bare H100 server to results table |
 | [`llvm-apr-benchmark/`](llvm-apr-benchmark/) | upstream benchmark, unmodified |
 
 ### The `ce` package

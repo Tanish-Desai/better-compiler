@@ -105,6 +105,24 @@ SYSTEM_PROMPT = (
 # LLM client
 # --------------------------------------------------------------------------
 
+#: Attempts per LLM call, and the waits between them.
+#:
+#: The OpenAI client already retries connection errors and 5xx twice by
+#: itself, but with a sub-second backoff sized for a hiccup -- not for a
+#: server that is *gone*. A self-hosted vLLM that OOMs or gets restarted is
+#: unavailable for minutes while it reloads 30B of weights, and the sweep runs
+#: for days, so this is a when and not an if.
+#:
+#: What makes it worth guarding is not the lost run, it is the *silently
+#: wrong* one. ``repair()`` below breaks out of its loop on an LLM error; a
+#: break on turn 1 leaves no iterations and the cell is correctly dropped, but
+#: a break on turn 2 of 4 writes a record with ``fixed: false`` that nothing
+#: downstream distinguishes from the model genuinely failing to fix the bug.
+#: One restart would quietly cost that condition a repair it might have made.
+_LLM_ATTEMPTS = 3
+_LLM_BACKOFF = (30.0, 120.0)
+
+
 class Model:
     """Thin OpenAI-compatible wrapper that also reports token usage.
 
@@ -133,12 +151,33 @@ class Model:
         )
 
     def chat(self, messages: List[dict]) -> Tuple[str, dict]:
-        response = self.client.chat.completions.create(
-            model=self.name,
-            messages=messages,
-            timeout=300,
-            temperature=self.temperature,
-        )
+        for attempt in range(_LLM_ATTEMPTS):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.name,
+                    messages=messages,
+                    timeout=300,
+                    temperature=self.temperature,
+                )
+                break
+            except Exception as e:  # noqa: BLE001 - see _LLM_ATTEMPTS
+                status = getattr(e, "status_code", None)
+                permanent = (
+                    status is not None
+                    and 400 <= status < 500
+                    and status not in (408, 409, 429)
+                )
+                # A prompt over the context limit, or a model name that is not
+                # served, fails identically on every retry. Waiting 150s to
+                # confirm that only slows the sweep down.
+                if permanent or attempt == _LLM_ATTEMPTS - 1:
+                    raise
+                delay = _LLM_BACKOFF[min(attempt, len(_LLM_BACKOFF) - 1)]
+                print(f"  LLM call failed ({type(e).__name__}: {e}); retrying "
+                      f"in {delay:.0f}s [attempt {attempt + 2}/{_LLM_ATTEMPTS}]",
+                      file=sys.stderr)
+                time.sleep(delay)
+
         usage = getattr(response, "usage", None)
         stats = {
             "prompt_tokens": getattr(usage, "prompt_tokens", 0) or 0,

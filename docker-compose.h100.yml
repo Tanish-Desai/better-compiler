@@ -1,0 +1,46 @@
+# H100 server overlay. Layered ON TOP of docker-compose.yml, never instead of
+# it -- everything not mentioned here (the volumes, the bind mounts, the image)
+# comes from the base file unchanged.
+#
+# Do not run this by hand with -f flags. `.env.h100` sets COMPOSE_FILE so that
+# a plain `docker compose ...` picks both files up automatically; the runbook
+# (docs/RUNBOOK.md step 3) is one `cp` and then every command in the repo works
+# as written. That is the entire point of splitting it this way: the commands
+# in the docs stay identical on both machines.
+#
+# Why an overlay instead of editing docker-compose.yml: the base file's numbers
+# are sized for a 47GB laptop and must keep working there. These are sized for
+# a 96-core / 1TB server. Neither is "the" correct value.
+services:
+  better-compiler:
+    # 10g on the laptop was chosen to protect the host from LLVM's build
+    # (docs/IMPLEMENTATION.md Blocker 9). With 1TB installed, 256g is enormous
+    # headroom for the same workload -- Blocker 9 measured ~0.9GB per parallel
+    # compile job, so even --build-jobs 96 peaks near 86GB -- while still
+    # leaving the box usable for anything else running on it.
+    #
+    # If you are sharing this server with other people, lower it. This is the
+    # one line here most likely to need a local edit.
+    mem_limit: 256g
+    memswap_limit: 256g
+
+    # vLLM runs on the HOST (it needs the GPU); the experiment runs in HERE
+    # (it needs the CPUs). This is the line that lets the container reach it.
+    # Without it, `host.docker.internal` does not resolve on Linux and every
+    # LLM call fails with a connection error.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Baked in so that `docker compose exec better-compiler python3 ...` just
+    # works, instead of every command in the docs needing a six-variable `env`
+    # prefix. Values come from .env.h100; the defaults after :- are what you
+    # get if that file is missing a line.
+    #
+    # LAB_LLM_TEMP MUST stay above 0. docs/ANALYSIS_PLAN.md fixes k = 3, and
+    # three trials at temperature 0 are three identical answers -- triple the
+    # compute for one sample's worth of information.
+    environment:
+      LAB_LLM_URL: ${LAB_LLM_URL:-http://host.docker.internal:8000/v1}
+      LAB_LLM_TOKEN: ${LAB_LLM_TOKEN:-local-sweep}
+      LAB_LLM_MODEL: ${LAB_LLM_MODEL:-qwen3-coder-30b}
+      LAB_LLM_TEMP: ${LAB_LLM_TEMP:-0.8}
