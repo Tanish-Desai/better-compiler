@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
@@ -48,11 +49,37 @@ from ce.oracle import establish  # noqa: E402
 from ce.reduce_iraware import reduce_iraware  # noqa: E402
 
 
+#: Opcodes that accept `nsw`, so all four are usable perturbation sites.
+_NSW_OPCODES = ("add", "sub", "mul", "shl")
+
+
 def perturb(body: str, fn) -> str | None:
-    """Attach an unjustified `nsw` to the first add that lacks one."""
+    """Attach an unjustified `nsw` to the first integer op that lacks one.
+
+    Two things here are deliberate, both found while measuring why this script
+    reports so few cases (docs/IMPLEMENTATION.md Blocker 15):
+
+    **All four `nsw`-capable opcodes, not just `add`.** Restricting to `add`
+    passed up most of the dataset: of 453 single-function miscompilation tests
+    in the 4-80 instruction range, 71 have a plain `add` but 130 have one of
+    add/sub/mul/shl.
+
+    **The flag is inserted with a regex anchored on the `= <opcode>` that
+    starts the instruction**, not by replacing the first occurrence of the
+    opcode's text. LLVM names results after their operation constantly
+    (`%add = add i64 %phi, 1`), and a plain `.replace(opcode + " ", ...)` hits
+    the *name* first, emitting `%add nsw = add i64 %phi, 1` -- invalid IR that
+    alive-tv rejects, so the case was silently dropped by the `tool_error`
+    check in `main` rather than reported. 190 instructions in the dataset are
+    shaped that way.
+    """
     for inst in fn.instructions():
-        if inst.opcode == "add" and inst.result and "nsw" not in inst.raw:
-            return body.replace(inst.raw, inst.raw.replace("add ", "add nsw ", 1), 1)
+        if inst.opcode not in _NSW_OPCODES or not inst.result or "nsw" in inst.raw:
+            continue
+        patched = re.sub(rf"(=\s*){inst.opcode}(\s)",
+                         rf"\g<1>{inst.opcode} nsw\g<2>", inst.raw, count=1)
+        if patched != inst.raw:
+            return body.replace(inst.raw, patched, 1)
     return None
 
 

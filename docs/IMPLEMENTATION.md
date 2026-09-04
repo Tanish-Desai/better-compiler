@@ -1064,6 +1064,97 @@ bug. If a future sweep run truncates on `raw-structured` again even at
 `12288`, that is new information (this bug's hunk size, not a generic
 config problem) and worth its own note, not a silent re-run.
 
+### Blocker 15: `iraware` reduces nothing on some counterexamples (2026-09-04) → OPEN
+
+**Not resolved. Frequency unknown. Read this before trusting any `iraware`
+row in a completed sweep.**
+
+The first clean pilot (Blocker 14's parameters, bug `115575`) produced this,
+from the run records' per-iteration `feedback` dicts:
+
+| condition | result | oracle calls | passes applied |
+|---|---|--:|---|
+| `iraware` | 6 → 6 instructions, **0% removed** | **0** | **(none)** |
+| `generic` | 16 → 12 lines (25%) | 136 | `ddmin-lines` |
+| `llvmreduce` | 6 → **3** instructions (50%) | 212 | `llvm-reduce-src`, `-tgt` |
+
+No error, no parse failure — `reduce_iraware` found the function, ran its
+pass list, and every pass returned `None` on its internal "nothing removable"
+guard before ever reaching `ctx.accept()`, hence zero oracle calls and a
+0.001s runtime. **This is not "the counterexample was already minimal":**
+`llvm-reduce` halved the instruction count on the same input and the oracle
+accepted the result, so a smaller violating version demonstrably exists.
+`iraware`'s dependency closure is more conservative than reality here —
+likely because [`reduce_iraware.py`](../ce/reduce_iraware.py) seeds the
+backward slice with `violation_seeds(result) | _returned_values(src_fn)`,
+unconditionally pinning everything the function returns, which on a small
+function can be most of the body. `llvm-reduce` has no such constraint.
+
+**It is not a blanket small-input failure.** `scripts/smoke_reduce_dataset.py`
+over the whole dataset found `93096` (8 instructions) reducing by 50% while
+`112078` (also 8 instructions) no-ops exactly like `115575`. Size doesn't
+predict it; the shape of the violation's dependency closure does.
+
+**Why it matters, precisely.** When `iraware` no-ops, its prompt is
+byte-identical to `raw`'s for that bug, so the `iraware`-vs-`raw` comparison
+draws both arms from the same distribution — discordant pairs still occur at
+temperature 0.8 but symmetrically, so the row contributes noise instead of
+signal and McNemar's test effectively loses it. At n = 24 with power already
+0.33–0.57 for a large effect ([`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) §4),
+losing rows is expensive. Separately, on those bugs the
+`iraware`-vs-`llvmreduce` comparison silently becomes `raw`-vs-`llvmreduce`
+— still a real measurement, but not the one the row is labelled as. That
+needs stating in the writeup whether or not the rate is fixed.
+
+**Known rate: 2 cases out of 7 observed, which settles nothing** (95% CI
+roughly 4%–71%). The smoke test is also the wrong instrument for the real
+answer — it injects synthetic `nsw` flags into dataset test bodies rather
+than using genuine Alive2 counterexamples from actually-buggy passes, and
+its own docstring says so.
+
+**Plan:** the sweep is bug-major and resumable, and the run records already
+log `passes_applied` and `oracle_calls` per iteration, so the real rate on
+real counterexamples accumulates for free as the sweep runs. Check after the
+first ~10 bugs:
+
+```bash
+python3 -c "
+import json, glob, collections
+noop = collections.Counter(); total = collections.Counter()
+for f in glob.glob('results/*.json'):
+    d = json.load(open(f))
+    if not d['condition'].startswith('iraware'): continue
+    for it in d['iterations']:
+        fb = it['feedback']
+        if not fb.get('counterexample'): continue
+        total[d['bug_id']] += 1
+        if not fb.get('passes_applied'): noop[d['bug_id']] += 1
+print(sorted(b for b in total if noop[b] == total[b]))
+"
+```
+
+Preregistered decision, set before the data arrived: **≤ 2 of the first ~10
+bugs no-op → run to completion** and record this as a limitation in
+`METHODOLOGY.md`. **≥ 4 of the first ~10 → stop and fix**, because ~10 of 24
+rows compromised biases the sweep toward a null result structurally.
+
+**Tooling fixed while investigating this** (`scripts/smoke_reduce_dataset.py`,
+both verified against the whole dataset):
+
+- `perturb` only injected `nsw` into `add`. It now covers add/sub/mul/shl,
+  taking usable candidates from 71 to 130 out of 453 single-function
+  miscompilation tests in the 4–80 instruction range.
+- `perturb` inserted the flag with `raw.replace(opcode + " ", ...)`, which
+  matches the *result name* first whenever a value is named after its
+  operation — emitting `%add nsw = add i64 %phi, 1`, invalid IR that alive-tv
+  rejects, so those cases were silently dropped by the `tool_error` check
+  instead of reported. **190 instructions in the dataset are shaped that
+  way.** Now anchored on the `= <opcode>` that starts the instruction.
+
+Note also that the script's `--min` default of 10 instructions excludes the
+size class where both observed no-ops live (6 and 8 instructions). Pass
+`--min 4` when using it to probe this.
+
 ---
 
 ## 12. Nice-to-Haves
