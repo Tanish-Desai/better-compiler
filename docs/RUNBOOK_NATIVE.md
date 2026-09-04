@@ -93,7 +93,8 @@ actually has the GPU (see §6 if that isn't this one):
 
 ```bash
 tmux new -s vllm
-pip install vllm
+python3 -m venv ~/vllm-venv && source ~/vllm-venv/bin/activate
+pip install vllm          # first run downloads ~60GB of weights
 vllm serve Qwen/Qwen3-Coder-30B-A3B-Instruct \
     --served-model-name qwen3-coder-30b \
     --quantization fp8 \
@@ -102,6 +103,11 @@ vllm serve Qwen/Qwen3-Coder-30B-A3B-Instruct \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
 ```
+
+A dedicated venv, not the one `setup_native.sh` made — same PEP 668 restriction
+that hit the repo's own deps applies here too, and vLLM's dependency tree
+(torch, transformers, ...) is large and unrelated to the repair loop's; keeping
+them apart avoids one's resolver fighting the other's pins.
 
 Detach with `Ctrl-b d`.
 

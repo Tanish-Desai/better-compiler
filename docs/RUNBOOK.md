@@ -152,7 +152,8 @@ vLLM needs the GPU directly, so it runs on the **host**, not in the container.
 ```bash
 tmux new -s vllm
 
-pip install vllm          # in a venv. First run downloads ~60GB of weights.
+python3 -m venv ~/vllm-venv && source ~/vllm-venv/bin/activate
+pip install vllm          # first run downloads ~60GB of weights
 
 vllm serve Qwen/Qwen3-Coder-30B-A3B-Instruct \
     --served-model-name qwen3-coder-30b \
