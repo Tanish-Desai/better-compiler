@@ -145,6 +145,40 @@ def run_record_path(
     return os.path.join(directory, f"{bug_id}.{condition}{suffix}.json")
 
 
+def record_is_complete(path: str) -> bool:
+    """True when ``path`` holds a finished run that a resume may skip.
+
+    A plain ``os.path.exists`` is not enough, because two kinds of file can
+    sit at a record's path without the run behind them having finished:
+
+    **A run that ended in an endpoint error.** ``repair()`` breaks out of its
+    loop when the model call fails, and already refuses to write anything at
+    all when that happens before the first turn -- filing an infrastructure
+    outage as a failed repair would drag the condition's rate down. But when
+    it happens on turn 2 of 4, some iterations were already recorded, so a
+    record *is* written, carrying ``notes.llm_error`` and a ``fixed: false``
+    that means "the endpoint died", not "the model could not fix this bug".
+    Without this check a resume skips that cell forever and the contamination
+    is permanent. This is not hypothetical: a whole nine-condition pilot was
+    lost to it once (docs/IMPLEMENTATION.md Blocker 14).
+
+    **A truncated file**, from a sweep killed mid-write. ``RunLog.write``
+    renames into place atomically now, so this should not happen going
+    forward, but records written before that change can still be short.
+
+    Either way the answer is the same -- redo the cell -- so both collapse
+    into one predicate. Anything unreadable is treated as incomplete.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            record = json.load(f)
+    except (OSError, ValueError):
+        return False
+    if not isinstance(record, dict):
+        return False
+    return not record.get("notes", {}).get("llm_error")
+
+
 @dataclass
 class Iteration:
     """One turn of the repair loop, as a row of experiment data."""
@@ -228,15 +262,24 @@ class RunLog:
         }
 
     def write(self, directory: str) -> str:
-        """Write the run record and return the path. See ``run_record_path``."""
+        """Write the run record and return the path. See ``run_record_path``.
+
+        Written to a temporary file and then renamed, because a sweep runs for
+        days and can be killed at any instant. ``os.replace`` is atomic, so a
+        reader either sees the previous record or the new one -- never a
+        half-written file that ``json.load`` chokes on and that
+        :func:`record_is_complete` would then have to throw away.
+        """
         os.makedirs(directory, exist_ok=True)
         path = run_record_path(
             directory, self.bug_id, self.condition,
             allow_promotion=self.notes.get("allow_promotion", True),
             trial=self.trial,
         )
-        with open(path, "w", encoding="utf-8") as f:
+        tmp = f"{path}.tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(self.as_dict(), f, indent=2)
+        os.replace(tmp, path)
         return path
 
 

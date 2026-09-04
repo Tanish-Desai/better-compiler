@@ -42,6 +42,7 @@ comparison needed to find out whether that helps.
 | [`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md) | which open model drives the sweep, and what the papers say |
 | [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | step-by-step: bare H100 server to results table |
 | [`docs/RUNBOOK_NATIVE.md`](docs/RUNBOOK_NATIVE.md) | same, for a server where you can't start Docker |
+| [`docs/OPERATING.md`](docs/OPERATING.md) | **day-to-day: start it, watch it, fix it when it breaks** |
 | [`llvm-apr-benchmark/`](llvm-apr-benchmark/) | upstream benchmark, unmodified |
 
 ### The `ce` package

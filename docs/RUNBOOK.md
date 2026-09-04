@@ -9,6 +9,10 @@ the experiment *is*. [`SLM_SELECTION.md`](SLM_SELECTION.md) explains why this
 model. [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) fixes *k* and the statistical
 test. This file is only about operating the thing.
 
+**Already set up and just need to run it?** [`OPERATING.md`](OPERATING.md)
+is the short, plain-language page for day-to-day operation — starting the
+sweep, checking on it, and what to do when something breaks.
+
 **No Docker access on your server?** Some hosting setups grant container
 permissions but not the ability to start a Docker daemon inside them (no
 `--privileged`, no `docker.sock`). If `docker compose up` isn't an option for

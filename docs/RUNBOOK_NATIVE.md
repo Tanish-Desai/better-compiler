@@ -1,5 +1,8 @@
 # Runbook: running the sweep without Docker
 
+**Already set up and just need to run it?** [`OPERATING.md`](OPERATING.md)
+is the short, plain-language page for day-to-day operation.
+
 **When to use this instead of [`RUNBOOK.md`](RUNBOOK.md):** you have root (or
 passwordless sudo) inside a container someone else provisioned — a shared
 cluster, a JupyterHub pod, a rented GPU box sold as "a container, not a VM" —
@@ -55,21 +58,25 @@ installs the Python deps (step 5), and writes an env file.
 build if they're already done, so if it dies partway through (a flaky
 connection during the LLVM clone, say), just run it again.
 
-When it finishes, it prints:
+It finishes by writing `$ROOT/env.sh` — every variable anything in this repo
+reads, in one file — and adding a block to `~/.bashrc` that sources it. **So
+every new shell already has the environment**, and no command in these docs
+needs an `export` line or an `env VAR=... ` prefix. That matters because the
+code (correctly) has no built-in defaults for these paths; it just does
+`os.environ["LAB_LLVM_DIR"]` and fails loudly if it isn't set.
 
-```
-Environment written to $ROOT/env.sh -- source it before running anything:
-    source $ROOT/env.sh
-```
-
-**Do that in every new shell** — the vLLM shell, the pilot shell, the sweep
-shell, all of them. Nothing below works without it, since the code (correctly)
-has no built-in defaults for these paths and just does `os.environ["LAB_LLVM_DIR"]`.
+The `~/.bashrc` edit is idempotent — it greps for its own marker first, so
+re-running the script never stacks up duplicate lines.
 
 ## 2. Confirm it worked
 
+The shell you ran the script in started *before* `~/.bashrc` was updated, so
+load the environment once by hand here. Every shell after this one gets it
+automatically:
+
 ```bash
 source ~/better-compiler-runtime/env.sh   # or your install root + /env.sh
+echo $LAB_LLM_URL                          # expect http://127.0.0.1:8000/v1
 python3 -m pytest tests -q
 ```
 
@@ -160,18 +167,24 @@ Detach with `Ctrl-b d`.
 
 ## 5. Point the runner at it
 
-The Docker path baked `LAB_LLM_*` into `docker-compose.h100.yml` via `.env`.
-There's no compose layer here, so export them directly — once per shell, or
-append to `~/.bashrc`:
+**Nothing to do here — `setup_native.sh` already did it.** The `LAB_LLM_*`
+variables (and `VLLM_USE_FLASHINFER_SAMPLER`) are written into
+`$ROOT/env.sh` alongside the `LAB_LLVM_*` paths, and the script adds a block
+to `~/.bashrc` that sources that file, so every new shell has them. No
+command in these docs needs an `export` line or an `env VAR=... ` prefix.
+
+Confirm in a fresh shell:
 
 ```bash
-export LAB_LLM_URL=http://127.0.0.1:8000/v1     # localhost if vLLM is right here;
-                                                  # otherwise that container's
-                                                  # reachable address — see §6
-export LAB_LLM_TOKEN=local-sweep                 # must match --api-key above
-export LAB_LLM_MODEL=qwen2.5-coder-14b           # must match --served-model-name
-export LAB_LLM_TEMP=0.8                          # MUST be > 0 -- see RUNBOOK.md
+echo $LAB_LLM_URL        # expect http://127.0.0.1:8000/v1
 ```
+
+Empty output means this shell predates the setup script — `source
+$ROOT/env.sh` once, or open a new shell.
+
+Edit `$ROOT/env.sh` directly if any of it needs changing (a different port, a
+GPU on another host — see §7). Re-running `setup_native.sh` regenerates the
+file, so keep changes you care about somewhere else too.
 
 ## 6. Everything from here is identical to `RUNBOOK.md`
 

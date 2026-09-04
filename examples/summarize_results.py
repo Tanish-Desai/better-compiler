@@ -104,6 +104,25 @@ def main(argv=None) -> int:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2
 
+    # Records left behind by a run the model endpoint killed part-way are not
+    # results: `fixed: false` there means "vLLM died", not "the model could not
+    # fix this bug", and averaging them into a condition's rate drags it down
+    # (docs/IMPLEMENTATION.md Blocker 14). They are counted, not dropped --
+    # silently discarding records would hide the outage instead of the
+    # opposite -- but they are called out loudly, because this script is meant
+    # to be run mid-sweep, which is exactly when they exist.
+    broken = [r for r in all_runs if r.get("notes", {}).get("llm_error")]
+    if broken:
+        cells = ", ".join(sorted(f"{r['bug_id']}/{r['condition']}" for r in broken))
+        print(
+            f"WARNING: {len(broken)} of {len(all_runs)} records ended in a model "
+            f"endpoint error and are counted below as unfixed.\n"
+            f"         Affected: {cells}\n"
+            f"         Re-run the sweep to redo them (they are not treated as "
+            f"done on resume), then summarize again.",
+            file=sys.stderr,
+        )
+
     # Keep the promotion ablation out of the main tables (see module
     # docstring) -- it's a separate axis, not another condition.
     runs = [r for r in all_runs if _allow_promotion(r)]

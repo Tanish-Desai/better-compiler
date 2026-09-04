@@ -69,7 +69,9 @@ from typing import List, Optional, Tuple
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, os.pardir))
 
-from ce.benchmark import Iteration, RunLog, normalize_feedback, run_record_path  # noqa: E402
+from ce.benchmark import (  # noqa: E402
+    Iteration, RunLog, normalize_feedback, record_is_complete, run_record_path,
+)
 from ce.feedback import CONDITIONS, resolve_condition  # noqa: E402
 
 # The benchmark's helpers read LAB_* at import time, so import them only after
@@ -446,9 +448,15 @@ def main(argv=None) -> int:
                                          allow_promotion=not args.no_promotion,
                                          trial=trial)
                 if os.path.exists(record) and not args.overwrite:
-                    print(f"[{done}/{total}] [{bug_id}] already done under "
-                          f"{condition} t{trial}")
-                    continue
+                    if record_is_complete(record):
+                        print(f"[{done}/{total}] [{bug_id}] already done under "
+                              f"{condition} t{trial}")
+                        continue
+                    # An endpoint error or a truncated write left a record
+                    # behind for a run that never finished. Redo it rather
+                    # than inherit it -- see ce.benchmark.record_is_complete.
+                    print(f"[{done}/{total}] [{bug_id}/{condition}/t{trial}] "
+                          f"previous attempt did not finish; redoing")
                 print(f"[{done}/{total}] [{bug_id}/{condition}/t{trial}] starting")
                 try:
                     run = repair(bug_id, condition, args, model, trial=trial)
