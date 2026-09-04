@@ -523,6 +523,73 @@ Instead, our more precise research question is:
 
 ---
 
+## 11.4 DRReduce
+
+**Added 2026-09-04** (literature check run alongside a novelty-confirmation
+pass; searched for anything post-dating this file's prior related-work
+edits).
+
+The paper *DRReduce: Enhancing Syntax-Guided Program Reduction with
+Dependency Reconstruction* (arXiv 2605.19412, ~May 2026) introduces a
+generic program reducer that builds a semantic dependency graph from the
+input program, performs dependency-coherent deletions (rather than deleting
+a node/subtree in isolation and backtracking when the checker rejects it,
+as syntax-guided reducers like Perses do), and delegates remaining
+minimization to a syntax-guided reducer. It reports average size
+reductions of 51.9%/14.9%/19.8% over Perses/WDD/CDD respectively, with
+80.2% fewer oracle queries than the baseline it ablates against.
+
+It is explicitly IR-capable: the paper notes that IRs need fewer
+dependency-reconstruction rules than source languages because they use a
+smaller, more regular set of constructs — LLVM IR is a natural fit.
+
+**What it means for our research:**
+
+This is a stronger generic baseline than plain delta-debugging/ddmin and
+should replace or supplement whatever Condition C ("Generic Reduction," §15)
+currently uses. It is dependency-aware but has no notion of Alive2's
+src/tgt pairing or the counterexample/refinement-violation itself — the
+same distinction already drawn against `llvm-reduce` in the comparison
+matrix (§27): dependency- or IR-structure-aware is not the same as
+counterexample-aware. Citing DRReduce (instead of only ddmin-style methods)
+makes Condition C a fair, current fight rather than a strawman.
+
+---
+
+## 11.5 LLM-VeriOpt
+
+**Added 2026-09-04**, same literature check as 11.4.
+
+The paper *LLM-VeriOpt: Verification-Guided Reinforcement Learning for
+LLM-Based Compiler Optimization* (CGO 2026, published 2026-01-31) uses
+Alive2 semantic-equivalence checks as a **reward signal** in GRPO
+reinforcement-learning training of a small model (Qwen-3B) that generates
+LLVM-IR peephole optimizations, reporting a 5.4x improvement in code
+successfully (and correctly) transformed versus the un-tuned base model.
+
+**What it means for our research:**
+
+Same tool (Alive2) and same substrate (LLVM IR) as our work, so it is
+worth citing to show this is an active area — but the mechanism and task
+are both different from ours:
+
+```text
+LLM-VeriOpt:  Alive2 feedback -> RL reward -> trained generation policy
+              (training-time, optimization generation)
+
+Ours:         Alive2 counterexample -> IR-aware reduction/structuring
+              -> in-context repair feedback
+              (inference-time, bug repair)
+```
+
+It does not reduce or restructure the counterexample itself, and it targets
+optimization generation rather than repairing a bug in an existing patch.
+It does not close the gap this project targets, but it is the closest
+"Alive2 + LLM + LLVM-IR" published work found so far and belongs in the
+literature review regardless.
+
+---
+
 # 12. The Research Gap
 
 The research gap should be formulated around the **intersection** of these areas:
