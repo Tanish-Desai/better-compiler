@@ -42,5 +42,5 @@ services:
     environment:
       LAB_LLM_URL: ${LAB_LLM_URL:-http://host.docker.internal:8000/v1}
       LAB_LLM_TOKEN: ${LAB_LLM_TOKEN:-local-sweep}
-      LAB_LLM_MODEL: ${LAB_LLM_MODEL:-qwen3-coder-30b}
+      LAB_LLM_MODEL: ${LAB_LLM_MODEL:-qwen2.5-coder-14b}
       LAB_LLM_TEMP: ${LAB_LLM_TEMP:-0.8}

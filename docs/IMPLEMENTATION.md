@@ -896,6 +896,60 @@ conditions equally, leaving the between-condition differences — the entire
 result — intact. It threatens only the absolute rate, which Blocker 4 already
 forbids claiming.
 
+### Blocker 12: the "shared card" in Blocker 11 has ~20GB free, not ~50GB (2026-09-04) → DECIDED
+
+Blocker 11's FP8 sizing ("leaves half the card free") assumed the kind of
+sharing `SLM_SELECTION.md` §4 anticipated in the abstract — other jobs coming
+and going, tens of GB free at any moment. The actual H100 turned out to have
+a standing tenant: `nvidia-smi` showed 60531 MiB in use at 23% utilization
+with **zero processes listed**, which is PID-namespace isolation hiding
+another container's job, not a stale allocation anything on this side could
+kill. Free memory: ~19.6–20.5GB, fluctuating, not ours to control.
+
+`Qwen/Qwen3-Coder-30B-A3B-Instruct` needs ~31GB in FP8 for weights alone
+(`SLM_SELECTION.md` §4) — a MoE model's full parameter set has to be resident
+regardless of how few experts activate per token. No `--gpu-memory-utilization`
+value closes a 31GB-vs-20GB gap; the first attempt to serve it failed exactly
+this way (`ValueError: Free memory on device cuda:0 (19.62/79.18 GiB) ... is
+less than desired GPU memory utilization (0.9, 71.26 GiB)`).
+
+**Decision:** `Qwen/Qwen2.5-Coder-14B-Instruct` (Apache 2.0), FP8, ~14GB of
+weights — already tabulated in `SLM_SELECTION.md` §4, just not the primary
+pick there because that table's ranking assumed near-exclusive card access.
+Same family as the rejected-fallback `Qwen2.5-Coder-32B-Instruct`, several
+size classes above the 1–4B tier §3 rejected for the floor-effect risk — this
+is a smaller pick forced by memory, not a retreat toward that floor.
+
+`docker-compose.h100.yml`, `.env.h100`, `RUNBOOK.md`, and `RUNBOOK_NATIVE.md`
+now default to it. Launch parameters were chosen from the live numbers above,
+not the original 0.9 (headroom kept deliberately wide since the other
+tenant's usage is outside anyone's control here and this has to run
+unattended for days):
+
+```bash
+vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
+    --served-model-name qwen2.5-coder-14b \
+    --quantization fp8 \
+    --max-model-len 8192 \
+    --gpu-memory-utilization 0.22 \
+    --host 0.0.0.0 --port 8000 \
+    --api-key local-sweep
+```
+
+`--max-model-len` dropped from 32768 to 8192: `SLM_SELECTION.md` §8 already
+noted the longest condition is only a few thousand tokens, and vLLM's startup
+check requires enough KV cache headroom for one full-length sequence — a
+lower cap needs less of that headroom to satisfy, which matters when the
+headroom itself is thin. `--gpu-memory-utilization 0.22` targets ~17.4GB
+(14GB weights + ~3.4GB KV/overhead), leaving a ~2-3GB buffer under the
+lowest free reading observed. Re-check `nvidia-smi` before every restart —
+this number is a snapshot, not a guarantee, and if free memory has dropped
+further the value needs to come down with it.
+
+**Not yet done:** re-running the nine-run pilot (Blocker-11-era instructions,
+now against this model) to confirm repair rates aren't at the floor.
+`SLM_SELECTION.md` §9's screening criteria apply unchanged.
+
 ---
 
 ## 12. Nice-to-Haves

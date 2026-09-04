@@ -12,6 +12,19 @@ sites are marked as claimed, because we have not reproduced them.
 test. `docs/METHODOLOGY.md` states what the results can support. This file is
 only about the model.
 
+**Operational note (2026-09-04):** the analysis below still ranks
+`Qwen3-Coder-30B-A3B-Instruct` first, and that ranking is unchanged — it
+assumes a card that's yours alone or close to it. The actual H100 turned out
+to have a standing tenant leaving only ~20GB free, below that model's ~31GB
+FP8 footprint, so the sweep is currently running `Qwen2.5-Coder-14B-Instruct`
+instead (§4's own fit table, just not the row this document originally
+picked). See Blocker 12 in [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the
+numbers and the serving command actually in use, and the runbooks
+([`RUNBOOK.md`](RUNBOOK.md), [`RUNBOOK_NATIVE.md`](RUNBOOK_NATIVE.md)) for how
+to tell whether that still applies to your machine. §8 below is the original
+command, correct for whoever actually gets the exclusive access this analysis
+assumed.
+
 ---
 
 ## 1. The decision, up front

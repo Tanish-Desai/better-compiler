@@ -153,13 +153,15 @@ vLLM needs the GPU directly, so it runs on the **host**, not in the container.
 tmux new -s vllm
 
 python3 -m venv ~/vllm-venv && source ~/vllm-venv/bin/activate
-pip install vllm          # first run downloads ~60GB of weights
+pip install vllm          # first run downloads ~28GB of weights
 
-vllm serve Qwen/Qwen3-Coder-30B-A3B-Instruct \
-    --served-model-name qwen3-coder-30b \
+nvidia-smi --query-gpu=memory.free --format=csv    # check the real number first
+
+vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
+    --served-model-name qwen2.5-coder-14b \
     --quantization fp8 \
-    --max-model-len 32768 \
-    --gpu-memory-utilization 0.9 \
+    --max-model-len 8192 \
+    --gpu-memory-utilization 0.22 \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
 ```
@@ -169,7 +171,17 @@ Detach with `Ctrl-b d`. Leave it running.
 **Use tmux (or screen).** This has to outlive your SSH session by days. If the
 connection drops and takes vLLM with it, the sweep goes down too.
 
-Lower `--gpu-memory-utilization` to `0.55` if you are sharing the card.
+**These parameters assume the card is shared, not yours alone** — see
+Blocker 12 in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). `Qwen2.5-Coder-14B-Instruct`
+at `--gpu-memory-utilization 0.22` targets ~17.4GB (≈14GB weights + headroom),
+which is what fit when a standing tenant on this H100 left only ~20GB free.
+**If you actually have the card to yourself**, `nvidia-smi --query-gpu=memory.free`
+will show close to the full ~80GB and you can both raise `--gpu-memory-utilization`
+(toward 0.9) and go back to the originally-chosen `Qwen/Qwen3-Coder-30B-A3B-Instruct`
+from [`SLM_SELECTION.md`](SLM_SELECTION.md) §8 — check free memory before every
+`vllm serve`, since what fits depends on who else is on the card *right now*,
+not on what fit last time.
+
 `--served-model-name` and `--api-key` must match `LAB_LLM_MODEL` and
 `LAB_LLM_TOKEN` in your `.env`.
 

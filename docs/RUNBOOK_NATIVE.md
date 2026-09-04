@@ -94,12 +94,15 @@ actually has the GPU (see §6 if that isn't this one):
 ```bash
 tmux new -s vllm
 python3 -m venv ~/vllm-venv && source ~/vllm-venv/bin/activate
-pip install vllm          # first run downloads ~60GB of weights
-vllm serve Qwen/Qwen3-Coder-30B-A3B-Instruct \
-    --served-model-name qwen3-coder-30b \
+pip install vllm          # first run downloads ~28GB of weights
+
+nvidia-smi --query-gpu=memory.free --format=csv    # check the real number first
+
+vllm serve Qwen/Qwen2.5-Coder-14B-Instruct \
+    --served-model-name qwen2.5-coder-14b \
     --quantization fp8 \
-    --max-model-len 32768 \
-    --gpu-memory-utilization 0.9 \
+    --max-model-len 8192 \
+    --gpu-memory-utilization 0.22 \
     --host 0.0.0.0 --port 8000 \
     --api-key local-sweep
 ```
@@ -108,6 +111,16 @@ A dedicated venv, not the one `setup_native.sh` made — same PEP 668 restrictio
 that hit the repo's own deps applies here too, and vLLM's dependency tree
 (torch, transformers, ...) is large and unrelated to the repair loop's; keeping
 them apart avoids one's resolver fighting the other's pins.
+
+**14B, not the 30B `SLM_SELECTION.md` originally chose** — see Blocker 12 in
+[`IMPLEMENTATION.md`](IMPLEMENTATION.md). A standing tenant on this H100 left
+only ~20GB free, below the 30B model's ~31GB FP8 footprint; no
+`--gpu-memory-utilization` value fixes a gap that shape. If your `nvidia-smi`
+check above shows most of the card free, use the original model and command
+from [`SLM_SELECTION.md`](SLM_SELECTION.md) §8 instead — this substitution is
+a response to a specific memory shortage, not a standing preference for the
+smaller model. Re-check free memory before every restart; what fits depends
+on who else is on the card *right now*.
 
 Detach with `Ctrl-b d`.
 
@@ -122,7 +135,7 @@ export LAB_LLM_URL=http://127.0.0.1:8000/v1     # localhost if vLLM is right her
                                                   # otherwise that container's
                                                   # reachable address — see §6
 export LAB_LLM_TOKEN=local-sweep                 # must match --api-key above
-export LAB_LLM_MODEL=qwen3-coder-30b             # must match --served-model-name
+export LAB_LLM_MODEL=qwen2.5-coder-14b           # must match --served-model-name
 export LAB_LLM_TEMP=0.8                          # MUST be > 0 -- see RUNBOOK.md
 ```
 
