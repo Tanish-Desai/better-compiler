@@ -186,6 +186,12 @@ class Iteration:
     index: int
     condition: str
     fixed: bool
+    #: What became of the model's reply: ``applied`` (patched and tested),
+    #: ``unchanged`` (the window handed straight back, so nothing was built)
+    #: or ``mismatch`` (the reply did not contain the region to replace).
+    #: Recorded rather than inferred: the first sweep's no-op turns were
+    #: indistinguishable from genuine repair failures after the fact.
+    patch: str = "applied"
     feedback: Dict[str, object] = field(default_factory=dict)
     llm: Dict[str, object] = field(default_factory=dict)
     seconds: float = 0.0
@@ -195,6 +201,7 @@ class Iteration:
             "index": self.index,
             "condition": self.condition,
             "fixed": self.fixed,
+            "patch": self.patch,
             "seconds": round(self.seconds, 3),
             "feedback": self.feedback,
             "llm": self.llm,

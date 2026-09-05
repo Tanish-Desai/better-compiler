@@ -2,7 +2,7 @@
 
 **Audience:** our team. Assumes no compiler background. Read top to bottom.
 
-**Last updated:** 2026-09-04 (model chosen, *k* and the statistical test preregistered — see Blockers 10 and 11)
+**Last updated:** 2026-09-05 (first real sweep ran, fixed nothing, and was discarded — the model returned the code unchanged on 64.5% of turns. See Blocker 16)
 
 ---
 
@@ -41,8 +41,10 @@
 
 ### What doesn't work yet
 
-- ❌ **No repair-rate numbers exist.** The AI experiment has never run. It needs a model endpoint (`LAB_LLM_URL` + `LAB_LLM_TOKEN`).
-- ❌ **`results/` holds no run records.** Only `results/build_logs/`, which are `opt` build transcripts.
+- ❌ **No usable repair-rate numbers exist.** The first sweep ran the complete easy tier (216 runs) and fixed nothing, because the model returned the source window unchanged on 64.5% of turns (Blocker 16). Those runs are discarded for repair rates and kept only as reducer data.
+- ❌ **The Blocker 16 fixes are unvalidated.** The no-op guard, brace-balanced windows and rebalanced prompt pass unit tests; nobody has yet re-run the nine-condition pilot on `115575` to confirm the no-op rate actually dropped. **Do that before spending another sweep.**
+- ⚠️ **Blocker 15 is open**: `iraware` reduced nothing on 3 of the 8 bugs measured — between the preregistered ≤2 continue / ≥4 stop thresholds. Since the sweep is restarting anyway, fix it in the same window rather than spending the judgement call.
+- ⚠️ **Model is `Qwen2.5-Coder-14B-Instruct`, not the preregistered primary** — forced by a standing tenant leaving ~20GB on the H100 (Blocker 12). Re-check `nvidia-smi` before the next sweep.
 - ✅ **Repeat count decided: *k* = 3** (Blocker 10, [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md)).
 - ✅ **Statistical test decided: McNemar's exact**, one-sided, Benjamini-Hochberg over four preregistered comparisons (Blocker 10).
 - ✅ **Model chosen:** `Qwen3-Coder-30B-A3B-Instruct` on the H100, served by vLLM (Blocker 11, [`SLM_SELECTION.md`](SLM_SELECTION.md)).
@@ -1154,6 +1156,110 @@ both verified against the whole dataset):
 Note also that the script's `--min` default of 10 instructions excludes the
 size class where both observed no-ops live (6 and 8 instructions). Pass
 `--min 4` when using it to probe this.
+
+### Blocker 16: the model returned the code unchanged on 64.5% of turns (2026-09-05) → FIXED, sweep discarded
+
+The first real sweep reached 216 runs — the complete **easy tier**, all eight
+bugs, nine conditions, three trials — and fixed **nothing**. The harness was
+not at fault in any way `scripts/triage_sweep.py` could see: 861 of 861 turns
+reached the compiler, no empty replies, no patch-application failures, 82% of
+turns compiled. Only 3 runs (1.4%) hit Blocker 14's error shape.
+
+`scripts/inspect_patches.py`, reading the conversations stored in
+`certificate.log.messages`, found the actual cause: **64.5% of replies handed
+the source window straight back, unmodified.** Median lines changed: zero.
+68.2% were identical to the previous turn's reply.
+
+**Why this was invisible.** A reply identical to the window *applies cleanly* —
+`apply_patch` finds the hunk and replaces it with the same text — so the turn
+went on to reset the tree, rebuild LLVM and run the full lit directory, several
+minutes each, to establish that unmodified source does not fix the bug. It then
+recorded `fixed: false`, indistinguishable from a genuine failed repair. Around
+555 of the sweep's 861 turns were spent this way. The same shape as Blocker 14
+and worth stating as a general lesson: **this harness's failure modes all
+present as `fixed: false`, so a repair rate of zero has to be diagnosed, never
+interpreted.**
+
+**Two causes, both upstream of anything this project varies.**
+
+*The window is not a syntactic unit.* `bug_hunk` took the hint's line range
+±30 lines with no regard for structure. On bug `89390` that produced an excerpt
+opening mid-statement on a comment and ending on an unterminated brace, and
+spanning more than one function. The single genuine edit across all nine
+conditions on that bug is the tell — `generic-structured` did not attempt a
+repair, it **closed the dangling function**:
+
+```
+   if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {
++    NewInst->copyIRFlags(B0);
++  }
++  replaceValue(I, NewBO);
++  return true;
++}
+```
+
+*The prompt is weighted toward reproduction.* `FORMAT_REQUIREMENT` plus
+`context_requirement` give three directives about reproducing the window
+faithfully (complete snippet, no diff, keep the prefix and suffix) against one
+about fixing it. Echoing satisfies every explicit, checkable instruction.
+
+**This is upstream's prompt, and that is the point.** `baseline.py` was written
+and validated against `deepseek-reasoner`, a reasoning model. It does not
+transfer down to a 14B instruct model. Blocker 12 chose the 14B under memory
+pressure; the cost of that choice landed here, not where it was expected.
+
+**Fix** (all three uniform across conditions — see `METHODOLOGY.md` §1, whose
+"nothing else changed" claim is retired):
+
+1. `is_no_op()` rejects a verbatim reply before building and tells the model it
+   returned the code unchanged. `Iteration.patch` now records
+   `applied`/`unchanged`/`mismatch` explicitly rather than leaving it to be
+   inferred later from build counts.
+2. `_balance_braces()` grows the window until its running brace depth never
+   dips below zero and finishes at zero — so it opens everything it closes and
+   closes everything it opens. Net depth alone is not sufficient: a window can
+   sum to zero while both starting and ending mid-function, which is exactly
+   what the fixed margin produced.
+3. `FORMAT_REQUIREMENT` gains an explicit "your answer must differ from the
+   code you were given".
+
+**The one encouraging result**, and it should be read carefully. Per-condition
+no-op rates were ordered as the hypothesis predicts — monotone down the
+reduction axis, and `structured` below `plain` at every level:
+
+| | plain | structured |
+|---|--:|--:|
+| `baseline` | 74.0% | — |
+| `raw` | 70.8% | 66.7% |
+| `generic` | 66.7% | 58.3% |
+| `llvmreduce` | 63.8% | 58.3% |
+| `iraware` | 62.5% | 58.9% |
+
+Richer feedback made the model *more willing to touch the code*. Among replies
+that did edit, though, the conditions were indistinguishable (similarity 0.946
+across conditions vs 0.948 across trials of an identical prompt) — consistent
+with those edits being reactions to the broken window rather than to the
+counterexample.
+
+**Do not report this as a result.** It is a secondary outcome, not
+preregistered, measured on a degenerate run, and the counts are turn-level and
+clustered four-to-a-run (68% of turns repeat the previous turn), so the
+effective n is far below 96. `baseline` vs `iraware-structured` is p≈0.03
+unclustered and comfortably non-significant once clustering is accounted for.
+Its only legitimate use is what it is used for here: evidence that the design
+is not dead and the no-op rate was the blocker.
+
+**Status of the 216 runs:** discarded for repair rates — they measure a loop
+that mostly declined to attempt the task. Kept as a measurement of the
+*reducers* on genuine Alive2 counterexamples from actually-buggy passes, which
+is data `scripts/smoke_reduce_dataset.py` cannot produce (its own docstring
+says it injects synthetic flags instead). Blocker 15's no-op count of 3 of 8
+bugs comes from this data and stands.
+
+**Not yet done:** re-running the nine-condition pilot on `115575` under the
+fixed harness, to confirm the no-op rate has actually dropped before spending
+another sweep. Until that number exists, nothing here is validated beyond unit
+tests.
 
 ---
 

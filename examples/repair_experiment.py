@@ -95,7 +95,16 @@ def _import_benchmark() -> None:
 FORMAT_REQUIREMENT = """
 Please answer with the code directly. Do not include any additional information in the output.
 Please answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.
+Your answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.
 """
+
+#: Sent back when the model returns the window verbatim. Passed through
+#: ``normalize_feedback`` unchanged, like any other non-alive2 failure.
+NO_OP_FEEDBACK = (
+    "You returned the code exactly as it was given to you, so no patch was "
+    "produced and nothing was tested. The bug is still present. Identify the "
+    "specific line whose behaviour is wrong and change it."
+)
 
 SYSTEM_PROMPT = (
     "You are an LLVM maintainer.\n"
@@ -202,6 +211,23 @@ def extract_code(reply: str) -> str:
     return reply
 
 
+def normalise_code(text: str) -> str:
+    """Whitespace-insensitive form, so reformatting is not read as an edit."""
+    return "\n".join(line.strip() for line in text.strip().splitlines() if line.strip())
+
+
+def is_no_op(reply: str, original_hunk: str) -> bool:
+    """True when the model handed the window straight back.
+
+    Worth its own check rather than letting ``apply_patch`` succeed on it.
+    Replacing the hunk with an identical string *does* apply cleanly, so the
+    turn goes on to reset the tree, rebuild LLVM and run lit -- several
+    minutes spent confirming that unmodified source does not fix the bug.
+    That is what 555 of the first sweep's 861 turns did (Blocker 16).
+    """
+    return normalise_code(extract_code(reply)) == normalise_code(original_hunk)
+
+
 def apply_patch(file: str, original_hunk: str, reply: str) -> bool:
     """Replace ``original_hunk`` with the model's code. False if it did not match."""
     path = os.path.join(llvm_helper.llvm_dir, file)
@@ -214,8 +240,63 @@ def apply_patch(file: str, original_hunk: str, reply: str) -> bool:
     return True
 
 
+_LINE_COMMENT = re.compile(r"//.*")
+_STRING = re.compile(r'"(?:\\.|[^"\\])*"')
+_CHAR = re.compile(r"'(?:\\.|[^'\\])*'")
+
+
+def _brace_delta(line: str) -> int:
+    """Net brace depth a line contributes, ignoring comments and literals.
+
+    Crude on purpose -- this is a windowing heuristic, not a C++ parser. Its
+    only job is to avoid cutting a function in half, and it is bounded, so
+    when it is wrong the result is the old fixed-margin window.
+    """
+    line = _LINE_COMMENT.sub("", line)
+    line = _STRING.sub('""', line)
+    line = _CHAR.sub("''", line)
+    return line.count("{") - line.count("}")
+
+
+def _balance_braces(source: List[str], lo: int, hi: int,
+                    limit: int = 200) -> Tuple[int, int]:
+    """Grow ``[lo, hi]`` (1-based, inclusive) until its braces balance.
+
+    A fixed +/-30 margin cuts wherever it lands, which routinely produces a
+    window that opens mid-function and ends on an unterminated brace. Handed
+    that, `Qwen2.5-Coder-14B` spent 64.5% of its turns returning the excerpt
+    verbatim, and the one edit it did make on bug 89390 was to close the
+    dangling function rather than to fix anything (Blocker 16). Extending to
+    a brace-balanced window costs a few dozen lines of context and gives the
+    model something it can actually parse.
+
+    Balanced means two things, not one. A net depth of zero is not enough: a
+    window can close a brace opened above it and open another it never closes
+    and still sum to zero, which is how the +/-30 margin produced excerpts that
+    both start and end mid-function. So the running depth must never dip below
+    zero (nothing closed that was not opened here) *and* must finish at zero.
+    """
+    for _ in range(limit):
+        depth = lowest = 0
+        for line in source[lo - 1:hi]:
+            depth += _brace_delta(line)
+            lowest = min(lowest, depth)
+        if lowest < 0 and lo > 1:
+            lo -= 1          # reach up for the opening brace we are closing
+        elif depth > 0 and hi < len(source):
+            hi += 1          # reach down for the closing brace we are missing
+        else:
+            break
+    return lo, hi
+
+
 def bug_hunk(env, margin: int = 30) -> Tuple[str, str]:
-    """The source window the model is asked to rewrite."""
+    """The source window the model is asked to rewrite.
+
+    Brace-balanced, so the model receives complete functions rather than an
+    excerpt starting mid-statement. Applied identically under every condition,
+    so it changes the task's difficulty without touching what is being varied.
+    """
     lineno = env.get_hint_line_level_bug_locations()
     bug_file = next(iter(lineno.keys()))
     ranges = next(iter(lineno.values()))
@@ -226,6 +307,7 @@ def bug_hunk(env, margin: int = 30) -> Tuple[str, str]:
     ).splitlines()
     lo = max(lo - margin, 1)
     hi = min(hi + margin, len(source))
+    lo, hi = _balance_braces(source, lo, hi)
     return bug_file, "\n".join(source[lo - 1:hi])
 
 
@@ -313,22 +395,29 @@ def repair(bug_id: str, condition: str, args, model: Model,
             break
         messages.append({"role": "assistant", "content": reply})
 
-        if not apply_patch(file, hunk, reply):
+        if is_no_op(reply, hunk):
+            patch = "unchanged"
+            log = NO_OP_FEEDBACK
+            fixed = False
+        elif not apply_patch(file, hunk, reply):
+            patch = "mismatch"
             log = "The provided code does not match the region to replace; reply with the full hunk."
             fixed = False
         else:
+            patch = "applied"
             fixed, log = env.check_full()
 
         run.record(Iteration(
             index=index,
             condition=cond.name,
             fixed=fixed,
+            patch=patch,
             feedback=feedback.summary(),
             llm=llm_stats,
             seconds=time.time() - started,
         ))
         print(f"[{bug_id}/{cond.name}/t{trial}] iteration {index + 1}: "
-              f"{'FIXED' if fixed else 'not fixed'}")
+              f"{'FIXED' if fixed else patch if patch != 'applied' else 'not fixed'}")
         if fixed:
             break
 

@@ -9,8 +9,35 @@ implementation's commitments.
 
 The repair loop is held fixed and exactly one thing is varied: the text handed
 to the model after a failed verification. `examples/repair_experiment.py` is
-`llvm-apr-benchmark/examples/baseline.py` with the feedback call swapped and
-nothing else changed.
+`llvm-apr-benchmark/examples/baseline.py` with the feedback call swapped, plus
+the three harness changes in the next paragraph.
+
+**The "nothing else changed" claim no longer holds, and saying so is part of
+the method.** Upstream's `baseline.py` was written for `deepseek-reasoner`. Run
+against `Qwen2.5-Coder-14B-Instruct`, its prompt produced no repair attempt at
+all on 64.5% of turns: the model handed the source window straight back
+(`docs/IMPLEMENTATION.md` Blocker 16). Three changes were required before the
+loop attempts the task, and all three are applied **identically under every
+condition**, so they change the task's difficulty without touching the factor
+being varied:
+
+1. **A no-op guard.** A reply identical to the window is rejected before
+   building, and the model is told it returned the code unchanged. Previously
+   such a reply applied cleanly and the turn spent several minutes confirming
+   that unmodified source does not fix the bug.
+2. **Brace-balanced windows.** `bug_hunk`'s fixed ±30-line margin cut wherever
+   it landed, routinely handing the model an excerpt that began mid-statement
+   and ended on an unterminated brace. The window now grows until it opens
+   everything it closes and closes everything it opens.
+3. **A rebalanced format instruction.** Upstream's wording gives three
+   directives about reproducing the window faithfully against one about fixing
+   it; an explicit "your answer must differ from the code you were given" was
+   added.
+
+None of these can favour one condition over another — they are upstream of the
+feedback text entirely. But they do mean results are not comparable with the
+pre-Blocker-16 sweep, and that sweep's records are kept only as a measurement
+of the reducers, never of repair rates.
 
 Two orthogonal factors:
 

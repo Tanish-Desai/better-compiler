@@ -76,10 +76,25 @@ NOOP_RUN_TO_COMPLETION = 2
 NOOP_STOP_AND_FIX = 4
 
 
+def patch_statuses(run: dict) -> List[Optional[str]]:
+    """Per-turn ``applied`` / ``unchanged`` / ``mismatch``, where recorded.
+
+    Runs from before the no-op guard existed have no ``patch`` field, and
+    cannot be back-filled: a reply identical to the window applied cleanly
+    then, so those records genuinely cannot tell a no-op from a real patch.
+    They yield ``None`` and fall back to the build-count inference below.
+    """
+    return [i.get("patch") for i in run.get("iterations", [])]
+
+
 def classify(run: dict) -> str:
     """Which bucket this run's failure falls in. See the module docstring."""
     if run.get("totals", {}).get("fixed"):
         return "fixed"
+
+    statuses = [s for s in patch_statuses(run) if s]
+    if statuses and all(s == "unchanged" for s in statuses):
+        return "returned the code unchanged"
 
     notes = run.get("notes", {})
     if notes.get("llm_error"):
@@ -124,7 +139,14 @@ def turn_level(runs: List[dict]) -> Dict[str, int]:
         # and calling this "turns that built" once made a 17% compile-failure
         # rate read as a 100% compile-success rate.
         out["turns that reached a build"] += min(builds, len(iterations))
-        out["turns the patch did not apply"] += max(0, len(iterations) - builds)
+        statuses = [s for s in patch_statuses(run) if s]
+        if statuses:
+            out["turns that returned the code unchanged"] += sum(
+                1 for s in statuses if s == "unchanged")
+            out["turns the patch did not apply"] += sum(
+                1 for s in statuses if s == "mismatch")
+        else:
+            out["turns the patch did not apply"] += max(0, len(iterations) - builds)
         out["turns with an empty reply"] += sum(
             1 for i in iterations
             if not int(i.get("llm", {}).get("completion_tokens", 0) or 0)
@@ -200,6 +222,7 @@ def main(argv=None) -> int:
     print("\nWhere the turns went")
     width = max(len(k) for k in turns) + 2
     for name in ("turns", "turns that reached a build",
+                 "turns that returned the code unchanged",
                  "turns the patch did not apply", "build failures",
                  "turns with an empty reply"):
         print(f"  {name.ljust(width)}  {turns[name]:>4}")
