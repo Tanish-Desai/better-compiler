@@ -125,6 +125,10 @@ def main(argv=None) -> int:
 
     unchanged = same_as_previous = no_fence = turns = missing = 0
     edit_sizes: List[int] = []
+    #: normalised original hunk per bug, so a reply can be tested for "no edit"
+    bases: Dict[str, str] = {}
+    #: per condition: (turns, turns that returned the hunk unchanged)
+    by_condition: Dict[str, List[int]] = collections.defaultdict(lambda: [0, 0])
 
     for run in runs:
         bug = str(run.get("bug_id"))
@@ -136,15 +140,18 @@ def main(argv=None) -> int:
             continue
         hunks.setdefault(bug, hunk)
         base = normalise(hunk)
+        bases.setdefault(bug, base)
 
         previous = None
         for index, reply in enumerate(replies):
             turns += 1
+            by_condition[cond][0] += 1
             if "```" not in reply:
                 no_fence += 1
             code = normalise(extract_code(reply))
             if code == base:
                 unchanged += 1
+                by_condition[cond][1] += 1
             if previous is not None and code == previous:
                 same_as_previous += 1
             previous = code
@@ -158,10 +165,19 @@ def main(argv=None) -> int:
                 raw_first[(bug, trial, cond)] = extract_code(reply)
 
     # --- the measurement that decides the study ---------------------------
+    #
+    # Restricted to replies that actually edited something. A reply that echoes
+    # the hunk back verbatim carries no information about whether the feedback
+    # landed, and once those dominate, both similarities collapse to "how alike
+    # are two copies of one text" -- about 1.0, by construction, whatever the
+    # feedback did. Including them does not measure feedback-sensitivity
+    # weakly; it measures the no-op rate and mislabels it.
     across_conditions: List[float] = []
     by_bug_trial: Dict[Tuple[str, int], Dict[str, str]] = collections.defaultdict(dict)
     by_bug_cond: Dict[Tuple[str, str], Dict[int, str]] = collections.defaultdict(dict)
     for (bug, trial, cond), code in first.items():
+        if code == bases.get(bug):
+            continue
         by_bug_trial[(bug, trial)][cond] = code
         by_bug_cond[(bug, cond)][trial] = code
 
@@ -215,7 +231,27 @@ def main(argv=None) -> int:
     print(f"  {'median lines changed vs the hunk'.ljust(width)}  "
           f"{report['median_lines_changed']:>4}")
 
+    # Whether the model edits at all is itself a per-condition outcome. If the
+    # richer feedback provokes an edit more often, the feedback is landing --
+    # expressed as willingness to touch the code rather than as which edit is
+    # chosen. That signal survives even when the similarity metric below has
+    # gone degenerate.
+    if by_condition:
+        print("\nHow often each condition provoked no edit at all")
+        width = max(len(c) for c in by_condition)
+        rates = {}
+        for cond in sorted(by_condition):
+            total, noop = by_condition[cond]
+            rate = noop / total if total else 0.0
+            rates[cond] = rate
+            bar = "#" * round(rate * 30)
+            print(f"  {cond.ljust(width)}  {noop:>3}/{total:<3} {rate:5.1%}  {bar}")
+        spread = max(rates.values()) - min(rates.values())
+        print(f"  spread across conditions: {spread:.1%}")
+
     print("\nDoes the feedback change what the model writes?")
+    print("  (only replies that actually edited something -- verbatim echoes "
+          "carry no signal)")
     print(f"  same bug+trial, ACROSS the 9 conditions   "
           f"{report['similarity_across_conditions']:.3f}   "
           f"({len(across_conditions)} pairs, feedback differs)")
@@ -224,18 +260,31 @@ def main(argv=None) -> int:
           f"({len(across_trials)} pairs, identical prompt)")
 
     gap = report["similarity_across_trials"] - report["similarity_across_conditions"]
-    if across_conditions and across_trials:
-        if gap <= 0.02:
-            print("\n  -> Changing the feedback moves the model no more than "
-                  "resampling the same prompt does. The nine conditions are "
-                  "drawing from one distribution, so the design is measuring "
-                  "nothing -- and a bigger model does not fix that. The prompt "
-                  "or the loop is what has to change.")
-        else:
-            print(f"\n  -> The feedback lands: conditions differ by {gap:.3f} "
-                  "more than sampling noise alone. The design is sound and the "
-                  "zero repair rate is a capability problem, so the model is "
-                  "the lever worth pulling.")
+    noop_rate = unchanged / turns if turns else 0.0
+    if noop_rate >= 0.25:
+        print(f"\n  -> {noop_rate:.0%} of replies returned the hunk unchanged. "
+              "That is the finding, and it comes before the similarity numbers: "
+              "the loop is mostly not attempting a repair at all. Every one of "
+              "those turns still reset the tree, rebuilt LLVM and ran lit to "
+              "confirm that unmodified source does not fix the bug.")
+        print("     Feedback-sensitivity is UNTESTED here, not disproven -- "
+              "there are too few real edits to measure it. Fix the no-op rate "
+              "first, then re-run this to find out whether the conditions "
+              "differ.")
+    elif len(across_conditions) < 30 or len(across_trials) < 10:
+        print("\n  -> Too few genuine edits to compare; treat the similarity "
+              "numbers above as unmeasured rather than as a result.")
+    elif gap <= 0.02:
+        print("\n  -> Changing the feedback moves the model no more than "
+              "resampling the same prompt does. The nine conditions are "
+              "drawing from one distribution, so the design is measuring "
+              "nothing -- and a bigger model does not fix that. The prompt "
+              "or the loop is what has to change.")
+    else:
+        print(f"\n  -> The feedback lands: conditions differ by {gap:.3f} "
+              "more than sampling noise alone. The design is sound and the "
+              "zero repair rate is a capability problem, so the model is "
+              "the lever worth pulling.")
 
     if args.show:
         bug = args.show
