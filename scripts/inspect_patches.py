@@ -255,8 +255,10 @@ def main(argv=None) -> int:
     print(f"  same bug+trial, ACROSS the 9 conditions   "
           f"{report['similarity_across_conditions']:.3f}   "
           f"({len(across_conditions)} pairs, feedback differs)")
+    trials_cell = (f"{report['similarity_across_trials']:.3f}"
+                   if across_trials else "  --- ")
     print(f"  same bug+condition, ACROSS trials         "
-          f"{report['similarity_across_trials']:.3f}   "
+          f"{trials_cell}   "
           f"({len(across_trials)} pairs, identical prompt)")
 
     gap = report["similarity_across_trials"] - report["similarity_across_conditions"]
@@ -271,6 +273,12 @@ def main(argv=None) -> int:
               "there are too few real edits to measure it. Fix the no-op rate "
               "first, then re-run this to find out whether the conditions "
               "differ.")
+    elif not across_trials:
+        print("\n  -> No sampling-noise floor to compare against: every "
+              "condition here was run once, so there is no pair of trials of "
+              "an identical prompt. The across-conditions number alone means "
+              "nothing -- two samples of the same prompt differ too. Re-run "
+              "with --repeat 3 before reading it.")
     elif len(across_conditions) < 30 or len(across_trials) < 10:
         print("\n  -> Too few genuine edits to compare; treat the similarity "
               "numbers above as unmeasured rather than as a result.")
