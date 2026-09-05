@@ -120,7 +120,10 @@ def turn_level(runs: List[dict]) -> Dict[str, int]:
         cert = run.get("certificate") or {}
         builds = max(0, int(cert.get("build_count", 0) or 0) - 1)
         out["turns"] += len(iterations)
-        out["turns that built"] += min(builds, len(iterations))
+        # "reached a build", not "built successfully" -- the distinction matters,
+        # and calling this "turns that built" once made a 17% compile-failure
+        # rate read as a 100% compile-success rate.
+        out["turns that reached a build"] += min(builds, len(iterations))
         out["turns the patch did not apply"] += max(0, len(iterations) - builds)
         out["turns with an empty reply"] += sum(
             1 for i in iterations
@@ -193,11 +196,22 @@ def main(argv=None) -> int:
         share = 100.0 * count / len(runs)
         print(f"  {name.ljust(width)}  {count:>4}  {share:5.1f}%")
 
+    compiled = turns["turns that reached a build"] - turns["build failures"]
     print("\nWhere the turns went")
-    width = max(len(k) for k in turns)
-    for name in ("turns", "turns that built", "turns the patch did not apply",
-                 "build failures", "turns with an empty reply"):
+    width = max(len(k) for k in turns) + 2
+    for name in ("turns", "turns that reached a build",
+                 "turns the patch did not apply", "build failures",
+                 "turns with an empty reply"):
         print(f"  {name.ljust(width)}  {turns[name]:>4}")
+    print(f"  {'turns that compiled'.ljust(width)}  {compiled:>4}")
+
+    # The number the buckets bury: of every patch that did compile, how many
+    # got as far as making the bug's own reproducer pass -- before lit is even
+    # consulted. Zero here means the model is not near a fix, which is a
+    # different and much worse position than failing on regressions.
+    reached = sum(1 for r in runs if (r.get("certificate") or {}).get("fast_check_pass"))
+    print(f"  {'runs where the reproducer passed'.ljust(width)}  {reached:>4}"
+          f"  (of {len(runs)})")
 
     print(f"\nBlocker 15: iraware reduced nothing on "
           f"{len(noop_bugs)} of {len(noop['total'])} bugs seen"
@@ -216,12 +230,36 @@ def main(argv=None) -> int:
         print("  -> fewer than ~8 bugs seen; the decision point is ~10.")
 
     # The verdict this whole script exists to support.
+    #
+    # Thresholds, not any-nonzero. A handful of failed cells in a long sweep is
+    # housekeeping -- re-run them. Blocker 14 was every condition failing, and
+    # only that shape means the sweep is not measuring anything. Reporting 3
+    # bad cells out of 216 in the same words as 9 out of 9 buries the finding
+    # under the footnote.
     print("\nRead")
-    if buckets.get("llm_error"):
-        print("  The model call failed on "
-              f"{buckets['llm_error']} runs. Those are NOT data -- this is "
-              "Blocker 14's failure mode. Check notes.llm_error before "
-              "anything else and re-run those cells with --overwrite.")
+    broken = buckets.get("llm_error", 0) + buckets.get("no reply", 0)
+    if broken > len(runs) * 0.1:
+        print(f"  {broken} of {len(runs)} runs never got a usable reply. That "
+              "is Blocker 14's shape -- those runs are not data. Check "
+              "notes.llm_error before reading anything else, and re-run those "
+              "cells with --overwrite.")
+    elif not fixed_runs and len(bugs) >= 5:
+        print(f"  Nothing fixed across {len(bugs)} bugs and {len(runs)} runs, "
+              "with no harness fault visible: patches apply, builds run, "
+              "replies arrive.")
+        if not reached:
+            print("  Not one patch made the bug's own reproducer pass, before "
+                  "lit is even consulted. The model is not near a fix; it is "
+                  "not losing fixes to regressions.")
+        print("  This is the floor SLM_SELECTION.md section 3 preregistered as "
+              "a failed experiment, not a null result: identical all-zero "
+              "columns give McNemar no discordant pairs, so the primary "
+              "comparisons are undefined rather than negative. Finishing the "
+              "sweep cannot change that. Change the model or the task setup "
+              "and restart.")
+    elif broken:
+        print(f"  {broken} runs failed to get a reply -- housekeeping, not "
+              "Blocker 14's shape. Re-run those cells with --overwrite.")
     elif buckets.get("no reply"):
         print(f"  {buckets['no reply']} runs got empty replies. The endpoint "
               "is answering but the client is not reading the output.")
