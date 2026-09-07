@@ -37,6 +37,7 @@ assumed.
 | **Rejected** | 1–4B tier (Phi-4-mini, Qwen2.5-Coder-3B, Gemma-3-4B) | — | Floor effect. See §3 — this is the single most important thing in this document. |
 | **Rejected** | `facebook/llm-compiler-{7b,13b}` | bespoke, not OSI | Section 5. |
 | **Rejected** | Codestral | non-commercial | Not free/open by the criterion you set. |
+| **Investigate** | `Qwen/Qwen3-27B` (or "Qwen 3.8 27B" — naming unclear) | Apache 2.0? | Team flagged: check if a Qwen3 27B *Coder* variant exists (or is coming). A dense 27B would fit in FP8 (~27GB) on a shared H100, but must be the *Coder* specialisation — base/instruct without the code-training mix is not a substitute for Qwen3-Coder-30B-A3B. Verify model card and licence before considering. |
 
 **Run the sweep with one model.** 648 runs is already ~two weeks of rebuilds
 (`docs/ANALYSIS_PLAN.md` §5). A second model doubles that and answers a
