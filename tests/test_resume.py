@@ -93,3 +93,11 @@ def test_rewriting_a_record_replaces_it_cleanly(tmp_path):
     _write(tmp_path, "777", iterations=1)
     path = _write(tmp_path, "777", iterations=3)
     assert json.loads(open(path, encoding="utf-8").read())["totals"]["iterations"] == 3
+
+
+def test_short_run_without_a_fix_is_incomplete(tmp_path):
+    run = RunLog("888", "baseline", max_iterations=4)
+    run.record(Iteration(0, "baseline", False))
+    assert not record_is_complete(run.write(str(tmp_path)))
+    run.record(Iteration(1, "baseline", True))
+    assert record_is_complete(run.write(str(tmp_path)))

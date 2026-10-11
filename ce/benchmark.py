@@ -168,6 +168,7 @@ def record_is_complete(path: str) -> bool:
 
     Either way the answer is the same -- redo the cell -- so both collapse
     into one predicate. Anything unreadable is treated as incomplete.
+    A non-fixed record with fewer iterations than its budget is incomplete too.
     """
     try:
         with open(path, encoding="utf-8") as f:
@@ -176,7 +177,11 @@ def record_is_complete(path: str) -> bool:
         return False
     if not isinstance(record, dict):
         return False
-    return not record.get("notes", {}).get("llm_error")
+    if record.get("notes", {}).get("llm_error") or not record.get("iterations"):
+        return False
+    budget = record.get("max_iterations", 0) or 0
+    fixed = record.get("totals", {}).get("fixed", record.get("fixed", False))
+    return bool(fixed or len(record["iterations"]) >= budget)
 
 
 @dataclass
@@ -195,6 +200,8 @@ class Iteration:
     feedback: Dict[str, object] = field(default_factory=dict)
     llm: Dict[str, object] = field(default_factory=dict)
     seconds: float = 0.0
+    #: Per-turn validation, unlike the certificate's sticky "ever passed" flags.
+    validation: Dict[str, object] = field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return {
@@ -205,6 +212,7 @@ class Iteration:
             "seconds": round(self.seconds, 3),
             "feedback": self.feedback,
             "llm": self.llm,
+            "validation": self.validation,
         }
 
 
@@ -296,11 +304,13 @@ def load_runs(directory: str) -> List[dict]:
     if not os.path.isdir(directory):
         return out
     for name in sorted(os.listdir(directory)):
-        if not name.endswith(".json"):
+        if not name.endswith(".json") or name.startswith("."):
             continue
         try:
             with open(os.path.join(directory, name), "r", encoding="utf-8") as f:
-                out.append(json.load(f))
+                record = json.load(f)
+                if isinstance(record, dict) and "bug_id" in record and "condition" in record:
+                    out.append(record)
         except (OSError, json.JSONDecodeError):
             continue
     return out

@@ -1,5 +1,9 @@
 # Running the sweep, day to day
 
+**Recovering the uploaded mixed-model H100 run?** Follow
+[`H100_RECOVERY.md`](H100_RECOVERY.md) first. Changing the model requires a
+matching `LAB_LLM_MODEL` and a separate experiment directory.
+
 This is the short, plain page. Setup lives in
 [`RUNBOOK_NATIVE.md`](RUNBOOK_NATIVE.md) (or [`RUNBOOK.md`](RUNBOOK.md) if you
 can use Docker). Once setup is done, this is all you need.

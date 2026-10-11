@@ -67,6 +67,7 @@ class Environment:
         self.full_check_count = 0
         self.fast_check_pass = False
         self.full_check_pass = False
+        self.last_validation = {}
         if max_build_jobs is None:
             self.max_build_jobs = os.cpu_count()
         else:
@@ -124,6 +125,7 @@ class Environment:
             "full_check_count": self.full_check_count,
             "fast_check_pass": self.fast_check_pass,
             "full_check_pass": self.full_check_pass,
+            "last_validation": self.last_validation,
             "patch": patch,
             "log": log,
         }
@@ -133,13 +135,16 @@ class Environment:
             self.fast_check_count += 1
             res, reason = self.build()
             if not res:
+                self._record_validation("build", False, reason)
                 return (False, reason)
             res, log = llvm_helper.verify_test_group(
                 repro=False, input=self.data["tests"], type=self.bug_type
             )
             if not res:
+                self._record_validation("reproducer", False, log)
                 return (False, log)
             self.fast_check_pass = True
+            self._record_validation("reproducer", True, log)
             return (True, log)
 
     def check_full(self):
@@ -147,11 +152,13 @@ class Environment:
             self.full_check_count += 1
             res, reason = self.build()
             if not res:
+                self._record_validation("build", False, reason)
                 return (False, reason)
             res, log = llvm_helper.verify_test_group(
                 repro=False, input=self.data["tests"], type=self.bug_type
             )
             if not res:
+                self._record_validation("reproducer", False, log)
                 return (False, log)
             self.fast_check_pass = True
             res, log = llvm_helper.verify_lit(
@@ -160,9 +167,30 @@ class Environment:
                 max_test_jobs=self.max_build_jobs,
             )
             if not res:
+                self._record_validation("regression", False, log)
                 return (False, log)
             self.full_check_pass = True
+            self._record_validation("regression", True, log)
             return (True, log)
+
+    def _record_validation(self, stage, passed, log):
+        text = str(log)
+        kind = None
+        if not passed:
+            if "timed out" in text.lower():
+                kind = "timeout"
+            elif stage == "regression" and "UNRESOLVED:" in text:
+                kind = "infrastructure"
+            elif stage == "regression" and "FAIL:" in text:
+                kind = "test_failure"
+            else:
+                kind = "error"
+        self.last_validation = {
+            "stage": stage,
+            "passed": passed,
+            "reproducer_pass": stage == "regression" or (stage == "reproducer" and passed),
+            "failure_kind": kind,
+        }
 
     def get_bug_type(self):
         return self.bug_type

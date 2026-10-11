@@ -61,7 +61,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
-from ce.benchmark import load_runs, summarize  # noqa: E402
+from ce.benchmark import summarize  # noqa: E402
+from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
 
 COLUMNS = (
     ("condition", 24),
@@ -97,9 +98,13 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--model", help="select one model from historical mixed results")
     args = parser.parse_args(argv)
 
-    all_runs = load_runs(args.directory)
+    try:
+        all_runs = load_experiment_runs(args.directory, args.model)
+    except ExperimentMismatch as e:
+        parser.error(str(e))
     if not all_runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2

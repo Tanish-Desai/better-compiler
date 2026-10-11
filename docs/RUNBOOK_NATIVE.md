@@ -1,5 +1,9 @@
 # Runbook: running the sweep without Docker
 
+**For the mixed Qwen2.5/Qwen3 run uploaded on 2026-10-11**, use
+[`H100_RECOVERY.md`](H100_RECOVERY.md) for the required validation checks and
+the new nine-condition pilot before another full sweep.
+
 **Already set up and just need to run it?** [`OPERATING.md`](OPERATING.md)
 is the short, plain-language page for day-to-day operation.
 

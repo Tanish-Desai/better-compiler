@@ -5,6 +5,10 @@ __pycache__/
 # Experiment output: run records are data, regenerate them rather than commit
 results/
 
+# Fresh experiment and diagnostic output. Uploaded historical results remain tracked.
+results-qwen3-v2*/
+validation-checks/
+
 # Reading material, not source. ~28MB of third-party PDFs, kept locally so
 # they don't sit in git history. docs/SLM_SELECTION.md cites every one of them
 # by filename and arXiv id, so its reasoning is followable without them here.

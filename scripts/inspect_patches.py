@@ -30,11 +30,10 @@ here is a comparison of two similarities:
     across conditions   same bug, same trial, nine different feedback texts
     across trials       same bug, same condition, identical feedback text
 
-The second is a pure sampling-noise floor: at temperature 0.8, two runs of the
-identical prompt still differ. If the first is no lower than the second, the
-nine conditions are drawing from one distribution and the design is measuring
-nothing -- **which no change of model can fix.** If the first is clearly
-lower, the feedback is landing and the repair rate is the model's problem.
+The second gives a descriptive reference for resampling the same prompt.
+Character similarity is dominated by the shared source window, and pairs from
+one bug are correlated. These numbers guide inspection of actual semantic edits;
+they cannot establish a model floor or prove that feedback has no effect.
 
 Everything is derived from ``certificate.log.messages``, which
 ``repair_experiment.py`` already stores for every run.
@@ -56,7 +55,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, os.pardir))
 sys.path.insert(0, os.path.join(_HERE, os.pardir, "examples"))
 
-from ce.benchmark import load_runs  # noqa: E402
+from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
 
 try:  # keep one definition of "which part of the reply is code"
     from repair_experiment import extract_code  # noqa: E402
@@ -110,9 +109,13 @@ def main(argv=None) -> int:
     parser.add_argument("--context", type=int, default=3,
                         help="diff context lines with --show")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--model", help="select one model from historical mixed results")
     args = parser.parse_args(argv)
 
-    runs = load_runs(args.directory)
+    try:
+        runs = load_experiment_runs(args.directory, args.model)
+    except ExperimentMismatch as e:
+        parser.error(str(e))
     if not runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2
@@ -209,6 +212,8 @@ def main(argv=None) -> int:
         "similarity_across_trials": mean(across_trials),
         "pairs_across_conditions": len(across_conditions),
         "pairs_across_trials": len(across_trials),
+        "bugs_with_condition_pairs": len({b for (b, t), cells in by_bug_trial.items() if len(cells) > 1}),
+        "bugs_with_trial_pairs": len({b for (b, c), cells in by_bug_cond.items() if len(cells) > 1}),
     }
 
     if args.json and not args.show:
@@ -266,9 +271,9 @@ def main(argv=None) -> int:
     if noop_rate >= 0.25:
         print(f"\n  -> {noop_rate:.0%} of replies returned the hunk unchanged. "
               "That is the finding, and it comes before the similarity numbers: "
-              "the loop is mostly not attempting a repair at all. Every one of "
-              "those turns still reset the tree, rebuilt LLVM and ran lit to "
-              "confirm that unmodified source does not fix the bug.")
+              "many turns are not attempting a repair. The current runner "
+              "skips validation of unchanged replies; historical runners may "
+              "have rebuilt them. Check the iteration patch status.")
         print("     Feedback-sensitivity is UNTESTED here, not disproven -- "
               "there are too few real edits to measure it. Fix the no-op rate "
               "first, then re-run this to find out whether the conditions "
@@ -279,20 +284,22 @@ def main(argv=None) -> int:
               "an identical prompt. The across-conditions number alone means "
               "nothing -- two samples of the same prompt differ too. Re-run "
               "with --repeat 3 before reading it.")
-    elif len(across_conditions) < 30 or len(across_trials) < 10:
+    elif (len(across_conditions) < 30 or len(across_trials) < 10
+          or report["bugs_with_condition_pairs"] < 5 or report["bugs_with_trial_pairs"] < 5):
         print("\n  -> Too few genuine edits to compare; treat the similarity "
-              "numbers above as unmeasured rather than as a result.")
+              "numbers as descriptive. Pairs from a single bug are not "
+              "independent evidence about the model or feedback design.")
     elif gap <= 0.02:
         print("\n  -> Changing the feedback moves the model no more than "
               "resampling the same prompt does. The nine conditions are "
-              "drawing from one distribution, so the design is measuring "
-              "nothing -- and a bigger model does not fix that. The prompt "
-              "or the loop is what has to change.")
+              "similar under this descriptive text metric. Shared source "
+              "dominates character similarity, so this does not establish "
+              "that feedback has no effect or that another model cannot help.")
     else:
         print(f"\n  -> The feedback lands: conditions differ by {gap:.3f} "
-              "more than sampling noise alone. The design is sound and the "
-              "zero repair rate is a capability problem, so the model is "
-              "the lever worth pulling.")
+              "more than resampling under this descriptive text metric. "
+              "Inspect the semantic edits; this metric alone cannot separate "
+              "model capability from task framing.")
 
     if args.show:
         bug = args.show

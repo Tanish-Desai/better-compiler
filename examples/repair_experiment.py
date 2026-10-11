@@ -59,6 +59,7 @@ per-iteration rebuild. See the comment in ``main`` for the arithmetic.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -73,6 +74,7 @@ from ce.benchmark import (  # noqa: E402
     Iteration, RunLog, normalize_feedback, record_is_complete, run_record_path,
 )
 from ce.feedback import CONDITIONS, resolve_condition  # noqa: E402
+from ce.experiment import ExperimentMismatch, prepare_output  # noqa: E402
 
 # The benchmark's helpers read LAB_* at import time, so import them only after
 # argument parsing has had a chance to fail fast on a missing environment.
@@ -98,6 +100,14 @@ Please answer with the complete code snippet (including the unmodified part) tha
 Your answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.
 """
 
+# Increment when windowing, patch handling or validation semantics change.
+# Prompt wording is hashed as well, so editing it cannot reuse old cells.
+HARNESS_VERSION = "repair-v2"
+
+
+class BaselineBuildError(RuntimeError):
+    """Infrastructure failure: stop the sweep rather than query the model."""
+
 #: Sent back when the model returns the window verbatim. Passed through
 #: ``normalize_feedback`` unchanged, like any other non-alive2 failure.
 NO_OP_FEEDBACK = (
@@ -108,8 +118,27 @@ NO_OP_FEEDBACK = (
 
 SYSTEM_PROMPT = (
     "You are an LLVM maintainer.\n"
-    "You are fixing a middle-end bug in the LLVM project." + FORMAT_REQUIREMENT
+    "You are fixing a middle-end bug in the LLVM project.\n"
+    "Make the smallest targeted change that addresses the reported failure. "
+    "Preserve unrelated optimizations and IR invariants. A valid repair must "
+    "pass both the reproducer and the existing regression tests. When tests "
+    "fail, use their specific diagnostics to revise your previous patch; "
+    "do not disable the optimization wholesale or weaken the tests."
+    + FORMAT_REQUIREMENT
 )
+
+
+def experiment_config(args) -> dict:
+    return {
+        "model": os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner"),
+        "base_model_cutoff": os.environ.get("LAB_LLM_BASEMODEL_CUTOFF", "2023-12-31Z"),
+        "temperature": float(os.environ.get("LAB_LLM_TEMP", "0.8")),
+        "max_iterations": args.max_iterations,
+        "oracle_budget": args.oracle_budget,
+        "oracle_strictness": args.strictness,
+        "harness_version": HARNESS_VERSION,
+        "prompt_hash": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
+    }
 
 
 # --------------------------------------------------------------------------
@@ -160,6 +189,12 @@ class Model:
             api_key=os.environ["LAB_LLM_TOKEN"],
             base_url=os.environ.get("LAB_LLM_URL", "https://api.deepseek.com"),
         )
+
+    def check_endpoint(self) -> None:
+        served = {entry.id for entry in self.client.models.list(timeout=30).data}
+        if self.name not in served:
+            raise RuntimeError(f"LAB_LLM_MODEL={self.name!r} is not served by the endpoint "
+                               f"(available: {', '.join(sorted(served))}).")
 
     def chat(self, messages: List[dict]) -> Tuple[str, dict]:
         for attempt in range(_LLM_ATTEMPTS):
@@ -344,12 +379,17 @@ def repair(bug_id: str, condition: str, args, model: Model,
             "allow_promotion": not args.no_promotion,
             "temperature": model.temperature,
             "trial": trial,
+            "experiment_config": experiment_config(args),
+            "build_jobs": args.build_jobs,
         },
     )
     env.use_knowledge("alive2", env.knowledge_cutoff)
 
     env.reset()
     ok, log = env.check_fast()
+    if env.build_failure_count:
+        raise BaselineBuildError("The unpatched LLVM build failed; this is not a repair "
+                                 f"outcome. Fix the build first.\n{str(log)[-4000:]}")
     if ok:
         print(f"[{bug_id}] skipped: the bug does not reproduce at base_commit")
         return None
@@ -399,13 +439,16 @@ def repair(bug_id: str, condition: str, args, model: Model,
             patch = "unchanged"
             log = NO_OP_FEEDBACK
             fixed = False
+            validation = {"stage": "no_patch", "passed": False}
         elif not apply_patch(file, hunk, reply):
             patch = "mismatch"
             log = "The provided code does not match the region to replace; reply with the full hunk."
             fixed = False
+            validation = {"stage": "no_patch", "passed": False}
         else:
             patch = "applied"
             fixed, log = env.check_full()
+            validation = dict(env.last_validation)
 
         run.record(Iteration(
             index=index,
@@ -415,9 +458,11 @@ def repair(bug_id: str, condition: str, args, model: Model,
             feedback=feedback.summary(),
             llm=llm_stats,
             seconds=time.time() - started,
+            validation=validation,
         ))
-        print(f"[{bug_id}/{cond.name}/t{trial}] iteration {index + 1}: "
-              f"{'FIXED' if fixed else patch if patch != 'applied' else 'not fixed'}")
+        outcome = "FIXED" if fixed else patch if patch != "applied" else "not fixed"
+        detail = "" if fixed or patch != "applied" else f" ({validation.get('stage')}: {validation.get('failure_kind')})"
+        print(f"[{bug_id}/{cond.name}/t{trial}] iteration {index + 1}: {outcome}{detail}")
         if fixed:
             break
 
@@ -489,25 +534,46 @@ def main(argv=None) -> int:
     parser.add_argument("--build-jobs", type=int, default=os.cpu_count())
     parser.add_argument("--overwrite", action="store_true",
                         help="redo cells that already have a record")
+    parser.add_argument("--plan", action="store_true",
+                        help="check experiment compatibility and list remaining cells; "
+                             "no endpoint, LLVM imports, builds or writes")
     args = parser.parse_args(argv)
 
     conditions = [resolve_condition(c).name for c in args.condition]
     if args.repeat < 1:
         parser.error("--repeat must be at least 1")
+    if args.max_iterations < 1 or args.build_jobs < 1:
+        parser.error("--max-iterations and --build-jobs must be positive")
     args.oracle_budget = args.oracle_budget or None
-    _import_benchmark()
 
     if args.sample:
         bug_ids = sample_bug_ids(args.sample)
     elif args.all:
         bug_ids = sorted(
-            f.removesuffix(".json") for f in os.listdir(llvm_helper.dataset_dir)
+            f.removesuffix(".json") for f in os.listdir(os.environ["LAB_DATASET_DIR"])
             if f.endswith(".json")
         )
     elif args.bug_ids:
         bug_ids = args.bug_ids
     else:
         parser.error("pass bug ids, --sample, or --all")
+
+    try:
+        prepare_output(args.out, experiment_config(args), write=False)
+    except ExperimentMismatch as e:
+        parser.error(str(e))
+    if args.plan:
+        total = len(bug_ids) * args.repeat * len(conditions)
+        complete = sum(
+            record_is_complete(run_record_path(
+                args.out, bug, condition, allow_promotion=not args.no_promotion, trial=trial))
+            for bug in bug_ids for trial in range(1, args.repeat + 1) for condition in conditions
+        )
+        print(f"Model: {experiment_config(args)['model']}; harness: {HARNESS_VERSION}")
+        print(f"{total} cells: {0 if args.overwrite else complete} skipped, "
+              f"{total if args.overwrite else total - complete} to run")
+        print(f"Bugs in order: {', '.join(bug_ids)}")
+        return 0
 
     # BUG-MAJOR ORDER, DELIBERATELY.
     #
@@ -526,7 +592,15 @@ def main(argv=None) -> int:
     # Trials sit outside conditions so that an interrupted sweep leaves whole
     # (bug, trial) rows covering every condition, which is exactly what the
     # paired table and the significance test can still use.
+    if not os.environ.get("LAB_LLM_TOKEN"):
+        parser.error("LAB_LLM_TOKEN is not set")
     model = Model()
+    try:
+        model.check_endpoint()
+    except Exception as e:
+        parser.error(f"Endpoint preflight failed before any LLVM build: {e}")
+    _import_benchmark()
+    prepare_output(args.out, experiment_config(args))
     total = len(bug_ids) * args.repeat * len(conditions)
     done = 0
     for bug_id in bug_ids:
@@ -549,6 +623,9 @@ def main(argv=None) -> int:
                 print(f"[{done}/{total}] [{bug_id}/{condition}/t{trial}] starting")
                 try:
                     run = repair(bug_id, condition, args, model, trial=trial)
+                except BaselineBuildError as e:
+                    print(f"[{bug_id}] stopping sweep: {e}", file=sys.stderr)
+                    return 1
                 except Exception as e:  # noqa: BLE001 - one bad cell must not end the sweep
                     print(f"[{bug_id}/{condition}/t{trial}] error: "
                           f"{type(e).__name__}: {e}", file=sys.stderr)

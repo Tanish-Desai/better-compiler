@@ -86,7 +86,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
-from ce.benchmark import load_runs, per_bug_outcomes  # noqa: E402
+from ce.benchmark import per_bug_outcomes  # noqa: E402
+from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
 
 #: The preregistered primary family: ``(better, worse, what it asks)``.
 #: "better" is the direction the hypothesis predicts, which is what makes the
@@ -219,13 +220,17 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--model", help="select one model from historical mixed results")
     parser.add_argument("--all-pairs", action="store_true",
                         help="also print the 36 exploratory pairs, uncorrected")
     parser.add_argument("--ablation", action="store_true",
                         help="test promotion-on against promotion-off, per iraware condition")
     args = parser.parse_args(argv)
 
-    runs = load_runs(args.directory)
+    try:
+        runs = load_experiment_runs(args.directory, args.model)
+    except ExperimentMismatch as e:
+        parser.error(str(e))
     if not runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2

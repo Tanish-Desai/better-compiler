@@ -65,11 +65,12 @@ import collections
 import json
 import os
 import sys
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
-from ce.benchmark import load_runs  # noqa: E402
+from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
+from scripts.inspect_patches import conversation, normalise, extract_code  # noqa: E402
 
 #: Blocker 15's preregistered thresholds, over roughly the first ten bugs.
 NOOP_RUN_TO_COMPLETION = 2
@@ -79,12 +80,18 @@ NOOP_STOP_AND_FIX = 4
 def patch_statuses(run: dict) -> List[Optional[str]]:
     """Per-turn ``applied`` / ``unchanged`` / ``mismatch``, where recorded.
 
-    Runs from before the no-op guard existed have no ``patch`` field, and
-    cannot be back-filled: a reply identical to the window applied cleanly
-    then, so those records genuinely cannot tell a no-op from a real patch.
-    They yield ``None`` and fall back to the build-count inference below.
+    For records predating the guard, recover unchanged replies from stored
+    conversations. Other missing statuses remain unknown: build counts alone
+    cannot distinguish a formatting failure from a historical no-op rebuild.
     """
-    return [i.get("patch") for i in run.get("iterations", [])]
+    statuses = [i.get("patch") for i in run.get("iterations", [])]
+    if any(s is None for s in statuses):
+        hunk, replies = conversation(run)
+        if hunk is not None and len(replies) == len(statuses):
+            for index, reply in enumerate(replies):
+                if statuses[index] is None and normalise(extract_code(reply)) == normalise(hunk):
+                    statuses[index] = "unchanged"
+    return statuses
 
 
 def classify(run: dict) -> str:
@@ -92,13 +99,22 @@ def classify(run: dict) -> str:
     if run.get("totals", {}).get("fixed"):
         return "fixed"
 
-    statuses = [s for s in patch_statuses(run) if s]
-    if statuses and all(s == "unchanged" for s in statuses):
-        return "returned the code unchanged"
-
     notes = run.get("notes", {})
     if notes.get("llm_error"):
         return "llm_error"
+
+    statuses = patch_statuses(run)
+    if statuses and all(s == "unchanged" for s in statuses):
+        return "returned the code unchanged"
+
+    validations = [i.get("validation") for i in run.get("iterations", [])]
+    regressions = [v for v in validations if v and v.get("stage") == "regression"]
+    if any(v.get("failure_kind") == "test_failure" for v in regressions):
+        return "broke regression tests"
+    if any(v.get("failure_kind") == "timeout" for v in regressions):
+        return "regression validation timed out"
+    if regressions:
+        return "regression validation error"
 
     iterations = run.get("iterations", [])
     if iterations and all(
@@ -116,7 +132,17 @@ def classify(run: dict) -> str:
     if int(cert.get("build_failure_count", 0) or 0) >= max(1, builds - 1):
         return "build failed"
     if cert.get("fast_check_pass") and not cert.get("full_check_pass"):
-        return "broke regression tests"
+        # Historical sticky flags only prove that some turn reached lit. Look
+        # at the returned diagnostics before calling that a real regression.
+        messages = (cert.get("log") or {}).get("messages", [])
+        lit_logs = [m.get("content", "") for m in messages
+                    if m.get("role") == "user" and m.get("content", "").startswith("Feedback:")
+                    and "llvm-lit" in m.get("content", "")]
+        if any("FAIL:" in log for log in lit_logs):
+            return "broke regression tests"
+        if any("timed out" in log.lower() for log in lit_logs):
+            return "regression validation timed out"
+        return "regression validation error"
     if unapplied > 0:
         return "no fix found (some turns unapplied)"
     return "no fix found"
@@ -181,9 +207,13 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--model", help="select one model from historical mixed results")
     args = parser.parse_args(argv)
 
-    runs = load_runs(args.directory)
+    try:
+        runs = load_experiment_runs(args.directory, args.model)
+    except ExperimentMismatch as e:
+        parser.error(str(e))
     if not runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2
@@ -205,6 +235,7 @@ def main(argv=None) -> int:
             "fixed_runs": len(fixed_runs), "fixed_bugs": fixed_bugs,
             "iraware_noop_bugs": noop_bugs,
             "iraware_bugs_seen": sorted(noop["total"]),
+            "models": sorted({r.get("model", "unknown") for r in runs}),
         }, indent=2))
         return 0
 
@@ -266,26 +297,12 @@ def main(argv=None) -> int:
               "is Blocker 14's shape -- those runs are not data. Check "
               "notes.llm_error before reading anything else, and re-run those "
               "cells with --overwrite.")
-    elif not fixed_runs and len(bugs) >= 5:
-        print(f"  Nothing fixed across {len(bugs)} bugs and {len(runs)} runs, "
-              "with no harness fault visible: patches apply, builds run, "
-              "replies arrive.")
-        if not reached:
-            print("  Not one patch made the bug's own reproducer pass, before "
-                  "lit is even consulted. The model is not near a fix; it is "
-                  "not losing fixes to regressions.")
-        print("  This is the floor SLM_SELECTION.md section 3 preregistered as "
-              "a failed experiment, not a null result: identical all-zero "
-              "columns give McNemar no discordant pairs, so the primary "
-              "comparisons are undefined rather than negative. Finishing the "
-              "sweep cannot change that. Change the model or the task setup "
-              "and restart.")
     elif broken:
         print(f"  {broken} runs failed to get a reply -- housekeeping, not "
               "Blocker 14's shape. Re-run those cells with --overwrite.")
-    elif buckets.get("no reply"):
-        print(f"  {buckets['no reply']} runs got empty replies. The endpoint "
-              "is answering but the client is not reading the output.")
+    elif turns["turns that returned the code unchanged"] > turns["turns"] * 0.25:
+        print("  Over a quarter of turns returned unchanged code. Inspect the "
+              "stored replies and prompt before spending another full sweep.")
     elif turns["turns the patch did not apply"] > turns["turns"] * 0.5:
         print("  Over half of all turns never reached a build: the model is "
               "not echoing the code window back verbatim. Turns are being "
@@ -293,16 +310,22 @@ def main(argv=None) -> int:
               "spending more compute.")
     elif buckets.get("broke regression tests"):
         print(f"  {buckets['broke regression tests']} runs fixed the "
-              "reproducer and then failed lit. The model is solving the "
-              "stated problem and overreaching -- a real finding, and "
-              "invisible in the repair rate.")
+              "reproducer in at least one turn and then failed lit. Inspect "
+              "the exact test failures before changing the model. The final "
+              "saved patch may come from a later turn that did not pass.")
+    elif buckets.get("regression validation timed out") or buckets.get("regression validation error"):
+        print("  Some patches reached lit but validation timed out or failed "
+              "without a test assertion. Check the toolchain and validation logs.")
+    elif not fixed_runs:
+        print(f"  No full fixes in {len(runs)} runs over {len(bugs)} bugs. This "
+              "does not establish a model floor or predict unattempted bugs. "
+              "Verify a known human patch and screen the held-out pilot before "
+              "committing to the rest of the sweep. All-zero outcomes have no "
+              "discordant pairs to inform the condition comparison.")
     else:
-        print("  No harness failure visible: turns are reaching the model, "
-              "patches are applying, builds are running, and the patches "
-              "simply do not fix the bugs. That is the expected shape of a "
-              "hard task (SLM_SELECTION.md section 2.1) -- but a sweep that "
-              "ends at 0% still cannot answer the research question, since "
-              "identical all-zero columns give McNemar no discordant pairs.")
+        print(f"  {len(fixed_runs)} runs passed full validation. Compare only "
+              "matched bugs under this experiment configuration; partial "
+              "coverage is not evidence about unattempted bugs.")
     return 0
 
 
