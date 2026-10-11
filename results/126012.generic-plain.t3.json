@@ -1,0 +1,323 @@
+{
+  "bug_id": "126012",
+  "condition": "generic-plain",
+  "model": "qwen2.5-coder-14b",
+  "max_iterations": 4,
+  "trial": 3,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 3864.0,
+    "oracle_calls": 436.0,
+    "reduction_seconds": 12.475,
+    "llm_prompt_tokens": 28202,
+    "llm_completion_tokens": 3016,
+    "wall_seconds": 302.996
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "generic-plain",
+      "fixed": false,
+      "seconds": 64.066,
+      "feedback": {
+        "condition": "generic-plain",
+        "prompt_chars": 3861,
+        "prompt_tokens_est": 966,
+        "shown_lines": 43,
+        "shown_instructions": 27,
+        "shown_blocks": 10,
+        "shown_values": 17,
+        "shown_chars": 1827,
+        "original_lines": 43,
+        "original_instructions": 27,
+        "original_blocks": 10,
+        "original_values": 17,
+        "original_chars": 1827,
+        "counterexample": true,
+        "failed_test": "test",
+        "strategy": "generic",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "size_after": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "seconds": 3.111,
+        "oracle_calls": 109,
+        "oracle_accepted": 0,
+        "oracle_rejected": 109,
+        "oracle_tool_failures": 82,
+        "oracle_seconds": 3.108,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 2885,
+        "completion_tokens": 754
+      }
+    },
+    {
+      "index": 1,
+      "condition": "generic-plain",
+      "fixed": false,
+      "seconds": 63.82,
+      "feedback": {
+        "condition": "generic-plain",
+        "prompt_chars": 3861,
+        "prompt_tokens_est": 966,
+        "shown_lines": 43,
+        "shown_instructions": 27,
+        "shown_blocks": 10,
+        "shown_values": 17,
+        "shown_chars": 1827,
+        "original_lines": 43,
+        "original_instructions": 27,
+        "original_blocks": 10,
+        "original_values": 17,
+        "original_chars": 1827,
+        "counterexample": true,
+        "failed_test": "test",
+        "strategy": "generic",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "size_after": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "seconds": 3.273,
+        "oracle_calls": 109,
+        "oracle_accepted": 0,
+        "oracle_rejected": 109,
+        "oracle_tool_failures": 82,
+        "oracle_seconds": 3.269,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 5662,
+        "completion_tokens": 754
+      }
+    },
+    {
+      "index": 2,
+      "condition": "generic-plain",
+      "fixed": false,
+      "seconds": 62.549,
+      "feedback": {
+        "condition": "generic-plain",
+        "prompt_chars": 3861,
+        "prompt_tokens_est": 966,
+        "shown_lines": 43,
+        "shown_instructions": 27,
+        "shown_blocks": 10,
+        "shown_values": 17,
+        "shown_chars": 1827,
+        "original_lines": 43,
+        "original_instructions": 27,
+        "original_blocks": 10,
+        "original_values": 17,
+        "original_chars": 1827,
+        "counterexample": true,
+        "failed_test": "test",
+        "strategy": "generic",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "size_after": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "seconds": 2.977,
+        "oracle_calls": 109,
+        "oracle_accepted": 0,
+        "oracle_rejected": 109,
+        "oracle_tool_failures": 82,
+        "oracle_seconds": 2.974,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 8439,
+        "completion_tokens": 754
+      }
+    },
+    {
+      "index": 3,
+      "condition": "generic-plain",
+      "fixed": false,
+      "seconds": 61.655,
+      "feedback": {
+        "condition": "generic-plain",
+        "prompt_chars": 3861,
+        "prompt_tokens_est": 966,
+        "shown_lines": 43,
+        "shown_instructions": 27,
+        "shown_blocks": 10,
+        "shown_values": 17,
+        "shown_chars": 1827,
+        "original_lines": 43,
+        "original_instructions": 27,
+        "original_blocks": 10,
+        "original_values": 17,
+        "original_chars": 1827,
+        "counterexample": true,
+        "failed_test": "test",
+        "strategy": "generic",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "size_after": {
+          "lines": 43,
+          "instructions": 27,
+          "blocks": 10,
+          "values": 17,
+          "chars": 1827
+        },
+        "seconds": 3.114,
+        "oracle_calls": 109,
+        "oracle_accepted": 0,
+        "oracle_rejected": 109,
+        "oracle_tool_failures": 82,
+        "oracle_seconds": 3.111,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 11216,
+        "completion_tokens": 754
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 128.26484036445618,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-02-06+0000"
+      ],
+      [
+        "hint:components",
+        "2025-02-06+0000"
+      ],
+      [
+        "alive2",
+        "2025-02-06+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-02-06+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-02-06+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "patch": "diff --git a/llvm/lib/Analysis/ScalarEvolution.cpp b/llvm/lib/Analysis/ScalarEvolution.cpp\nindex f89887118d8d..dff73685a0d8 100644\n--- a/llvm/lib/Analysis/ScalarEvolution.cpp\n+++ b/llvm/lib/Analysis/ScalarEvolution.cpp\n@@ -12367,6 +12367,7 @@ bool ScalarEvolution::isImpliedViaMerge(CmpPredicate Pred, const SCEV *LHS,\n       if (!ProvedEasily(L, R))\n         return false;\n     }\n+\n   } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n     // Case two: RHS is also a Phi from the same basic block, and it is an\n     // AddRec. It means that there is a loop which has both AddRec and Unknown\n@@ -12433,6 +12434,7 @@ bool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n             m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n     auto *ShifteeS = getSCEV(Shiftee);\n     // Prove one of the following:\n+\n     // LHS <u (shiftee >> shiftvalue) && shiftee <=u RHS ---> LHS <u RHS\n     // LHS <=u (shiftee >> shiftvalue) && shiftee <=u RHS ---> LHS <=u RHS\n     // LHS <s (shiftee >> shiftvalue) && shiftee <=s RHS && shiftee >=s 0\n",
+    "log": {
+      "model": "qwen2.5-coder-14b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in ScalarEvolution.\nIssue title: [IndVarSimplify] Miscompilation at O2\nDetailed information:\nSource:\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar2 = phi i32 [ 1, %entry ], [ %indvar3, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %cmp = icmp sgt i32 %indvar2, 0\n  %ext = zext i1 %cmp to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  ret i32 %indvar1\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %ext = zext i1 true to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add nuw nsw i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  %indvar1.lcssa = phi i32 [ %indvar1, %for.inc ]\n  ret i32 %indvar1.lcssa\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar2 = #x00000001 (1)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar2#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni1 %cmp#2 = #x0 (0)\ni32 %ext#2 = #x00000000 (0)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000000 (0)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000000 (0)\ni32 %indvar2#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni1 %cmp#3 = #x1 (1)\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1#phi#0 = #x00000000 (0)\n\nTarget:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni32 %ext#2 = #x00000001 (1)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000001 (1)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1.lcssa = #x00000001 (1)\nSource value: #x00000000 (0)\nTarget value: #x00000001 (1)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease modify the following code in llvm/lib/Analysis/ScalarEvolution.cpp to fix the bug:\n```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n    // TODO: Generalize to handle loops with many inputs in a header.\n    if (LPhi->getNumIncomingValues() != 2) return false;\n\n    auto *RLoop = RAR->getLoop();\n    auto *Predecessor = RLoop->getLoopPredecessor();\n    assert(Predecessor && \"Loop with AddRec with no predecessor?\");\n    const SCEV *L1 = getSCEV(LPhi->getIncomingValueForBlock(Predecessor));\n    if (!ProvedEasily(L1, RAR->getStart()))\n      return false;\n    auto *Latch = RLoop->getLoopLatch();\n    assert(Latch && \"Loop with AddRec with no latch?\");\n    const SCEV *L2 = getSCEV(LPhi->getIncomingValueForBlock(Latch));\n    if (!ProvedEasily(L2, RAR->getPostIncExpr(*this)))\n      return false;\n  } else {\n    // In all other cases go over inputs of LHS and compare each of them to RHS,\n    // the predicate is true for (LHS, RHS) if it is true for all such pairs.\n    // At this point RHS is either a non-Phi, or it is a Phi from some block\n    // different from LBB.\n    for (const BasicBlock *IncBB : predecessors(LBB)) {\n      // Check that RHS is available in this block.\n      if (!dominates(RHS, IncBB))\n        return false;\n      const SCEV *L = getSCEV(LPhi->getIncomingValueForBlock(IncBB));\n      // Make sure L does not refer to a value from a potentially previous\n      // iteration of a loop.\n      if (!properlyDominates(L, LBB))\n        return false;\n      if (!ProvedEasily(L, RHS))\n        return false;\n    }\n  }\n  return true;\n}\n\nbool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n                                                    const SCEV *LHS,\n                                                    const SCEV *RHS,\n                                                    const SCEV *FoundLHS,\n                                                    const SCEV *FoundRHS) {\n  // We want to imply LHS < RHS from LHS < (RHS >> shiftvalue).  First, make\n  // sure that we are dealing with same LHS.\n  if (RHS == FoundRHS) {\n    std::swap(LHS, RHS);\n    std::swap(FoundLHS, FoundRHS);\n    Pred = ICmpInst::getSwappedCmpPredicate(Pred);\n  }\n  if (LHS != FoundLHS)\n    return false;\n\n  auto *SUFoundRHS = dyn_cast<SCEVUnknown>(FoundRHS);\n  if (!SUFoundRHS)\n    return false;\n\n  Value *Shiftee, *ShiftValue;\n\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n```\nand the suffix:\n```cpp\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n    // TODO: Generalize to handle loops with many inputs in a header.\n    if (LPhi->getNumIncomingValues() != 2) return false;\n\n    auto *RLoop = RAR->getLoop();\n    auto *Predecessor = RLoop->getLoopPredecessor();\n    assert(Predecessor && \"Loop with AddRec with no predecessor?\");\n    const SCEV *L1 = getSCEV(LPhi->getIncomingValueForBlock(Predecessor));\n    if (!ProvedEasily(L1, RAR->getStart()))\n      return false;\n    auto *Latch = RLoop->getLoopLatch();\n    assert(Latch && \"Loop with AddRec with no latch?\");\n    const SCEV *L2 = getSCEV(LPhi->getIncomingValueForBlock(Latch));\n    if (!ProvedEasily(L2, RAR->getPostIncExpr(*this)))\n      return false;\n  } else {\n    // In all other cases go over inputs of LHS and compare each of them to RHS,\n    // the predicate is true for (LHS, RHS) if it is true for all such pairs.\n    // At this point RHS is either a non-Phi, or it is a Phi from some block\n    // different from LBB.\n    for (const BasicBlock *IncBB : predecessors(LBB)) {\n      // Check that RHS is available in this block.\n      if (!dominates(RHS, IncBB))\n        return false;\n      const SCEV *L = getSCEV(LPhi->getIncomingValueForBlock(IncBB));\n      // Make sure L does not refer to a value from a potentially previous\n      // iteration of a loop.\n      if (!properlyDominates(L, LBB))\n        return false;\n      if (!ProvedEasily(L, RHS))\n        return false;\n    }\n  }\n  return true;\n}\n\nbool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n                                                    const SCEV *LHS,\n                                                    const SCEV *RHS,\n                                                    const SCEV *FoundLHS,\n                                                    const SCEV *FoundRHS) {\n  // We want to imply LHS < RHS from LHS < (RHS >> shiftvalue).  First, make\n  // sure that we are dealing with same LHS.\n  if (RHS == FoundRHS) {\n    std::swap(LHS, RHS);\n    std::swap(FoundLHS, FoundRHS);\n    Pred = ICmpInst::getSwappedCmpPredicate(Pred);\n  }\n  if (LHS != FoundLHS)\n    return false;\n\n  auto *SUFoundRHS = dyn_cast<SCEVUnknown>(FoundRHS);\n  if (!SUFoundRHS)\n    return false;\n\n  Value *Shiftee, *ShiftValue;\n\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nSource:\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar2 = phi i32 [ 1, %entry ], [ %indvar3, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %cmp = icmp sgt i32 %indvar2, 0\n  %ext = zext i1 %cmp to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  ret i32 %indvar1\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %ext = zext i1 true to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add nuw nsw i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  %indvar1.lcssa = phi i32 [ %indvar1, %for.inc ]\n  ret i32 %indvar1.lcssa\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar2 = #x00000001 (1)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar2#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni1 %cmp#2 = #x0 (0)\ni32 %ext#2 = #x00000000 (0)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000000 (0)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000000 (0)\ni32 %indvar2#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni1 %cmp#3 = #x1 (1)\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1#phi#0 = #x00000000 (0)\n\nTarget:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni32 %ext#2 = #x00000001 (1)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000001 (1)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1.lcssa = #x00000001 (1)\nSource value: #x00000000 (0)\nTarget value: #x00000001 (1)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n```\nand the suffix:\n```cpp\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n    // TODO: Generalize to handle loops with many inputs in a header.\n    if (LPhi->getNumIncomingValues() != 2) return false;\n\n    auto *RLoop = RAR->getLoop();\n    auto *Predecessor = RLoop->getLoopPredecessor();\n    assert(Predecessor && \"Loop with AddRec with no predecessor?\");\n    const SCEV *L1 = getSCEV(LPhi->getIncomingValueForBlock(Predecessor));\n    if (!ProvedEasily(L1, RAR->getStart()))\n      return false;\n    auto *Latch = RLoop->getLoopLatch();\n    assert(Latch && \"Loop with AddRec with no latch?\");\n    const SCEV *L2 = getSCEV(LPhi->getIncomingValueForBlock(Latch));\n    if (!ProvedEasily(L2, RAR->getPostIncExpr(*this)))\n      return false;\n  } else {\n    // In all other cases go over inputs of LHS and compare each of them to RHS,\n    // the predicate is true for (LHS, RHS) if it is true for all such pairs.\n    // At this point RHS is either a non-Phi, or it is a Phi from some block\n    // different from LBB.\n    for (const BasicBlock *IncBB : predecessors(LBB)) {\n      // Check that RHS is available in this block.\n      if (!dominates(RHS, IncBB))\n        return false;\n      const SCEV *L = getSCEV(LPhi->getIncomingValueForBlock(IncBB));\n      // Make sure L does not refer to a value from a potentially previous\n      // iteration of a loop.\n      if (!properlyDominates(L, LBB))\n        return false;\n      if (!ProvedEasily(L, RHS))\n        return false;\n    }\n  }\n  return true;\n}\n\nbool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n                                                    const SCEV *LHS,\n                                                    const SCEV *RHS,\n                                                    const SCEV *FoundLHS,\n                                                    const SCEV *FoundRHS) {\n  // We want to imply LHS < RHS from LHS < (RHS >> shiftvalue).  First, make\n  // sure that we are dealing with same LHS.\n  if (RHS == FoundRHS) {\n    std::swap(LHS, RHS);\n    std::swap(FoundLHS, FoundRHS);\n    Pred = ICmpInst::getSwappedCmpPredicate(Pred);\n  }\n  if (LHS != FoundLHS)\n    return false;\n\n  auto *SUFoundRHS = dyn_cast<SCEVUnknown>(FoundRHS);\n  if (!SUFoundRHS)\n    return false;\n\n  Value *Shiftee, *ShiftValue;\n\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nSource:\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar2 = phi i32 [ 1, %entry ], [ %indvar3, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %cmp = icmp sgt i32 %indvar2, 0\n  %ext = zext i1 %cmp to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  ret i32 %indvar1\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %ext = zext i1 true to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add nuw nsw i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  %indvar1.lcssa = phi i32 [ %indvar1, %for.inc ]\n  ret i32 %indvar1.lcssa\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar2 = #x00000001 (1)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar2#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni1 %cmp#2 = #x0 (0)\ni32 %ext#2 = #x00000000 (0)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000000 (0)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000000 (0)\ni32 %indvar2#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni1 %cmp#3 = #x1 (1)\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1#phi#0 = #x00000000 (0)\n\nTarget:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni32 %ext#2 = #x00000001 (1)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000001 (1)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1.lcssa = #x00000001 (1)\nSource value: #x00000000 (0)\nTarget value: #x00000001 (1)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n```\nand the suffix:\n```cpp\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n    // TODO: Generalize to handle loops with many inputs in a header.\n    if (LPhi->getNumIncomingValues() != 2) return false;\n\n    auto *RLoop = RAR->getLoop();\n    auto *Predecessor = RLoop->getLoopPredecessor();\n    assert(Predecessor && \"Loop with AddRec with no predecessor?\");\n    const SCEV *L1 = getSCEV(LPhi->getIncomingValueForBlock(Predecessor));\n    if (!ProvedEasily(L1, RAR->getStart()))\n      return false;\n    auto *Latch = RLoop->getLoopLatch();\n    assert(Latch && \"Loop with AddRec with no latch?\");\n    const SCEV *L2 = getSCEV(LPhi->getIncomingValueForBlock(Latch));\n    if (!ProvedEasily(L2, RAR->getPostIncExpr(*this)))\n      return false;\n  } else {\n    // In all other cases go over inputs of LHS and compare each of them to RHS,\n    // the predicate is true for (LHS, RHS) if it is true for all such pairs.\n    // At this point RHS is either a non-Phi, or it is a Phi from some block\n    // different from LBB.\n    for (const BasicBlock *IncBB : predecessors(LBB)) {\n      // Check that RHS is available in this block.\n      if (!dominates(RHS, IncBB))\n        return false;\n      const SCEV *L = getSCEV(LPhi->getIncomingValueForBlock(IncBB));\n      // Make sure L does not refer to a value from a potentially previous\n      // iteration of a loop.\n      if (!properlyDominates(L, LBB))\n        return false;\n      if (!ProvedEasily(L, RHS))\n        return false;\n    }\n  }\n  return true;\n}\n\nbool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n                                                    const SCEV *LHS,\n                                                    const SCEV *RHS,\n                                                    const SCEV *FoundLHS,\n                                                    const SCEV *FoundRHS) {\n  // We want to imply LHS < RHS from LHS < (RHS >> shiftvalue).  First, make\n  // sure that we are dealing with same LHS.\n  if (RHS == FoundRHS) {\n    std::swap(LHS, RHS);\n    std::swap(FoundLHS, FoundRHS);\n    Pred = ICmpInst::getSwappedCmpPredicate(Pred);\n  }\n  if (LHS != FoundLHS)\n    return false;\n\n  auto *SUFoundRHS = dyn_cast<SCEVUnknown>(FoundRHS);\n  if (!SUFoundRHS)\n    return false;\n\n  Value *Shiftee, *ShiftValue;\n\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nSource:\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar2 = phi i32 [ 1, %entry ], [ %indvar3, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %cmp = icmp sgt i32 %indvar2, 0\n  %ext = zext i1 %cmp to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  ret i32 %indvar1\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %ext = zext i1 true to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add nuw nsw i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  %indvar1.lcssa = phi i32 [ %indvar1, %for.inc ]\n  ret i32 %indvar1.lcssa\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar2 = #x00000001 (1)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar2#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni1 %cmp#2 = #x0 (0)\ni32 %ext#2 = #x00000000 (0)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000000 (0)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000000 (0)\ni32 %indvar2#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni1 %cmp#3 = #x1 (1)\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1#phi#0 = #x00000000 (0)\n\nTarget:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni32 %ext#2 = #x00000001 (1)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000001 (1)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1.lcssa = #x00000001 (1)\nSource value: #x00000000 (0)\nTarget value: #x00000001 (1)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n```\nand the suffix:\n```cpp\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n    // TODO: Generalize to handle loops with many inputs in a header.\n    if (LPhi->getNumIncomingValues() != 2) return false;\n\n    auto *RLoop = RAR->getLoop();\n    auto *Predecessor = RLoop->getLoopPredecessor();\n    assert(Predecessor && \"Loop with AddRec with no predecessor?\");\n    const SCEV *L1 = getSCEV(LPhi->getIncomingValueForBlock(Predecessor));\n    if (!ProvedEasily(L1, RAR->getStart()))\n      return false;\n    auto *Latch = RLoop->getLoopLatch();\n    assert(Latch && \"Loop with AddRec with no latch?\");\n    const SCEV *L2 = getSCEV(LPhi->getIncomingValueForBlock(Latch));\n    if (!ProvedEasily(L2, RAR->getPostIncExpr(*this)))\n      return false;\n  } else {\n    // In all other cases go over inputs of LHS and compare each of them to RHS,\n    // the predicate is true for (LHS, RHS) if it is true for all such pairs.\n    // At this point RHS is either a non-Phi, or it is a Phi from some block\n    // different from LBB.\n    for (const BasicBlock *IncBB : predecessors(LBB)) {\n      // Check that RHS is available in this block.\n      if (!dominates(RHS, IncBB))\n        return false;\n      const SCEV *L = getSCEV(LPhi->getIncomingValueForBlock(IncBB));\n      // Make sure L does not refer to a value from a potentially previous\n      // iteration of a loop.\n      if (!properlyDominates(L, LBB))\n        return false;\n      if (!ProvedEasily(L, RHS))\n        return false;\n    }\n  }\n  return true;\n}\n\nbool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n                                                    const SCEV *LHS,\n                                                    const SCEV *RHS,\n                                                    const SCEV *FoundLHS,\n                                                    const SCEV *FoundRHS) {\n  // We want to imply LHS < RHS from LHS < (RHS >> shiftvalue).  First, make\n  // sure that we are dealing with same LHS.\n  if (RHS == FoundRHS) {\n    std::swap(LHS, RHS);\n    std::swap(FoundLHS, FoundRHS);\n    Pred = ICmpInst::getSwappedCmpPredicate(Pred);\n  }\n  if (LHS != FoundLHS)\n    return false;\n\n  auto *SUFoundRHS = dyn_cast<SCEVUnknown>(FoundRHS);\n  if (!SUFoundRHS)\n    return false;\n\n  Value *Shiftee, *ShiftValue;\n\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nSource:\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar2 = phi i32 [ 1, %entry ], [ %indvar3, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %cmp = icmp sgt i32 %indvar2, 0\n  %ext = zext i1 %cmp to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  ret i32 %indvar1\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i32 @test() {\nentry:\n  br label %for.preheader\n\nfor.preheader:                                    ; preds = %for.inc, %entry\n  %indvar1 = phi i32 [ 0, %entry ], [ %phi, %for.inc ]\n  %indvar3 = phi i32 [ 0, %entry ], [ %inc, %for.inc ]\n  %cond1 = icmp eq i32 %indvar3, 0\n  br i1 %cond1, label %for.inc, label %for.end\n\nfor.end:                                          ; preds = %for.preheader\n  %ext = zext i1 true to i32\n  br label %for.inc\n\nfor.inc:                                          ; preds = %for.end, %for.preheader\n  %phi = phi i32 [ %ext, %for.end ], [ 0, %for.preheader ]\n  %inc = add nuw nsw i32 %indvar3, 1\n  %exitcond = icmp eq i32 %indvar3, 2\n  br i1 %exitcond, label %for.exit, label %for.preheader\n\nfor.exit:                                         ; preds = %for.inc\n  %indvar1.lcssa = phi i32 [ %indvar1, %for.inc ]\n  ret i32 %indvar1.lcssa\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar2 = #x00000001 (1)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar2#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni1 %cmp#2 = #x0 (0)\ni32 %ext#2 = #x00000000 (0)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000000 (0)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000000 (0)\ni32 %indvar2#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni1 %cmp#3 = #x1 (1)\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1#phi#0 = #x00000000 (0)\n\nTarget:\n  >> Jump to %for.preheader\ni32 %indvar1 = #x00000000 (0)\ni32 %indvar3 = #x00000000 (0)\ni1 %cond1 = #x1 (1)\n  >> Jump to %for.inc\ni32 %phi = #x00000000 (0)\ni32 %inc = #x00000001 (1)\ni1 %exitcond = #x0 (0)\n  >> Jump to %for.preheader#2\ni32 %indvar1#2 = #x00000000 (0)\ni32 %indvar3#2 = #x00000001 (1)\ni1 %cond1#2 = #x0 (0)\n  >> Jump to %for.end#2\ni32 %ext#2 = #x00000001 (1)\n  >> Jump to %for.inc#2\ni32 %phi#2 = #x00000001 (1)\ni32 %inc#2 = #x00000002 (2)\ni1 %exitcond#2 = #x0 (0)\n  >> Jump to %for.preheader#3\ni32 %indvar1#3 = #x00000001 (1)\ni32 %indvar3#3 = #x00000002 (2)\ni1 %cond1#3 = #x0 (0)\n  >> Jump to %for.end#3\ni32 %ext#3 = #x00000001 (1)\n  >> Jump to %for.inc#3\ni32 %phi#3 = #x00000001 (1)\ni32 %inc#3 = #x00000003 (3)\ni1 %exitcond#3 = #x1 (1)\n  >> Jump to %for.exit\ni32 %indvar1.lcssa = #x00000001 (1)\nSource value: #x00000000 (0)\nTarget value: #x00000001 (1)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  } else if (RAR && RAR->getLoop()->getHeader() == LBB) {\n    // Case two: RHS is also a Phi from the same basic block, and it is an\n    // AddRec. It means that there is a loop which has both AddRec and Unknown\n    // PHIs, for it we can compare incoming values of AddRec from above the loop\n    // and latch with their respective incoming values of LPhi.\n```\nand the suffix:\n```cpp\n  using namespace PatternMatch;\n  if (match(SUFoundRHS->getValue(),\n            m_LShr(m_Value(Shiftee), m_Value(ShiftValue)))) {\n    auto *ShifteeS = getSCEV(Shiftee);\n    // Prove one of the following:\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "ScalarEvolution"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 3
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "bug_id": "126974",
+  "condition": "baseline",
+  "model": "qwen2.5-coder-14b",
+  "max_iterations": 4,
+  "trial": 1,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 128.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "llm_prompt_tokens": 9232,
+    "llm_completion_tokens": 2780,
+    "wall_seconds": 1429.003
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 81.945,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 991,
+        "completion_tokens": 695
+      }
+    },
+    {
+      "index": 1,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 57.589,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 1869,
+        "completion_tokens": 695
+      }
+    },
+    {
+      "index": 2,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 59.172,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 2747,
+        "completion_tokens": 695
+      }
+    },
+    {
+      "index": 3,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 59.874,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 3625,
+        "completion_tokens": 695
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 108.55863428115845,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-02-12+0000"
+      ],
+      [
+        "hint:components",
+        "2025-02-12+0000"
+      ],
+      [
+        "alive2",
+        "2025-02-12+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-02-12+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-02-12+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "patch": "diff --git a/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp b/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp\nindex 96d6db2ba5bf..04d6f67d7aa6 100644\n--- a/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp\n+++ b/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp\n@@ -5604,6 +5604,7 @@ Instruction *InstCombinerImpl::foldICmpBinOp(ICmpInst &I,\n     return replaceInstUsesWith(I, V);\n \n   if (Value *V = foldShiftIntoShiftInAnotherHandOfAndInICmp(I, SQ, Builder))\n+\n     return replaceInstUsesWith(I, V);\n \n   return nullptr;\n@@ -5670,6 +5671,7 @@ Instruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n     }\n     // Otherwise (X != Z):\n     ICmpInst::Predicate NewPred = MinMax->getPredicate();\n+\n     auto MinMaxCmpXZ = IsCondKnownTrue(simplifyICmpInst(NewPred, X, Z, Q));\n     if (!MinMaxCmpXZ.has_value()) {\n       std::swap(X, Y);\n",
+    "log": {
+      "model": "qwen2.5-coder-14b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in InstCombine.\nIssue title: [RISC-V] Miscompile using rv64gcv\nDetailed information:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease modify the following code in llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp to fix the bug:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "InstCombine"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 1
+  }
+}

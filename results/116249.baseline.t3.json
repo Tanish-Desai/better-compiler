@@ -1,0 +1,199 @@
+{
+  "bug_id": "116249",
+  "condition": "baseline",
+  "model": "qwen2.5-coder-14b",
+  "max_iterations": 4,
+  "trial": 3,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 128.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "llm_prompt_tokens": 10250,
+    "llm_completion_tokens": 2990,
+    "wall_seconds": 298.024
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 77.804,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 41,
+        "shown_instructions": 21,
+        "shown_blocks": 10,
+        "shown_values": 15,
+        "shown_chars": 1918,
+        "counterexample": true,
+        "failed_test": "test_drop_icmp_samesign"
+      },
+      "llm": {
+        "prompt_tokens": 1082,
+        "completion_tokens": 779
+      }
+    },
+    {
+      "index": 1,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 63.372,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 41,
+        "shown_instructions": 21,
+        "shown_blocks": 10,
+        "shown_values": 15,
+        "shown_chars": 1918,
+        "counterexample": true,
+        "failed_test": "test_drop_icmp_samesign"
+      },
+      "llm": {
+        "prompt_tokens": 2090,
+        "completion_tokens": 737
+      }
+    },
+    {
+      "index": 2,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 63.643,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 41,
+        "shown_instructions": 21,
+        "shown_blocks": 10,
+        "shown_values": 15,
+        "shown_chars": 1918,
+        "counterexample": true,
+        "failed_test": "test_drop_icmp_samesign"
+      },
+      "llm": {
+        "prompt_tokens": 3056,
+        "completion_tokens": 737
+      }
+    },
+    {
+      "index": 3,
+      "condition": "baseline",
+      "fixed": false,
+      "seconds": 61.639,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 41,
+        "shown_instructions": 21,
+        "shown_blocks": 10,
+        "shown_values": 15,
+        "shown_chars": 1918,
+        "counterexample": true,
+        "failed_test": "test_drop_icmp_samesign"
+      },
+      "llm": {
+        "prompt_tokens": 4022,
+        "completion_tokens": 737
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 126.28620767593384,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2024-11-14+0000"
+      ],
+      [
+        "hint:components",
+        "2024-11-14+0000"
+      ],
+      [
+        "alive2",
+        "2024-11-14+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2024-11-14+0000"
+      ],
+      [
+        "hint:issue",
+        "2024-11-14+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "patch": "diff --git a/llvm/lib/Transforms/Scalar/IndVarSimplify.cpp b/llvm/lib/Transforms/Scalar/IndVarSimplify.cpp\nindex 2b2d516a7079..8fe0f7f1b4ed 100644\n--- a/llvm/lib/Transforms/Scalar/IndVarSimplify.cpp\n+++ b/llvm/lib/Transforms/Scalar/IndVarSimplify.cpp\n@@ -1497,6 +1497,7 @@ bool IndVarSimplify::canonicalizeExitCondition(Loop *L) {\n       continue;\n     if (L->isLoopInvariant(LHS)) {\n       // Same logic applies for the inverse case until we actually pick\n+\n       // which operand of the compare to update.\n       Swapped = true;\n       std::swap(LHS, RHS);\n@@ -1534,7 +1535,6 @@ bool IndVarSimplify::canonicalizeExitCondition(Loop *L) {\n         DeadInsts.push_back(LHS);\n     };\n \n-\n     const DataLayout &DL = ExitingBB->getDataLayout();\n     const unsigned InnerBitWidth = DL.getTypeSizeInBits(LHSOp->getType());\n     const unsigned OuterBitWidth = DL.getTypeSizeInBits(RHS->getType());\n@@ -1563,6 +1563,7 @@ bool IndVarSimplify::optimizeLoopExits(Loop *L, SCEVExpander &Rewriter) {\n   llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n     // If our exitting block exits multiple loops, we can only rewrite the\n     // innermost one.  Otherwise, we're changing how many times the innermost\n+\n     // loop runs before it exits.\n     if (LI->getLoopFor(ExitingBB) != L)\n       return true;\n",
+    "log": {
+      "model": "qwen2.5-coder-14b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in IndVarSimplify.\nIssue title: [IndVarSimplify] samesign flag should be dropped after narrowing\nDetailed information:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease modify the following code in llvm/lib/Transforms/Scalar/IndVarSimplify.cpp to fix the bug:\n```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n\n    // Match (icmp unsigned-cond zext, RHS)\n    // TODO: Extend to handle corresponding sext/signed-cmp case\n    // TODO: Extend to other invertible functions\n    Value *LHSOp = nullptr;\n    if (!match(LHS, m_ZExt(m_Value(LHSOp))))\n      continue;\n\n    // In general, we only rotate if we can do so without increasing the number\n    // of instructions.  The exception is when we have an zext(add-rec).  The\n    // reason for allowing this exception is that we know we need to get rid\n    // of the zext for SCEV to be able to compute a trip count for said loops;\n    // we consider the new trip count valuable enough to increase instruction\n    // count by one.\n    if (!LHS->hasOneUse() && !isa<SCEVAddRecExpr>(SE->getSCEV(LHSOp)))\n      continue;\n\n    // Given a icmp unsigned-cond zext(Op) where zext(trunc(RHS)) == RHS\n    // replace with an icmp of the form icmp unsigned-cond Op, trunc(RHS)\n    // when zext is loop varying and RHS is loop invariant.  This converts\n    // loop varying work to loop-invariant work.\n    auto doRotateTransform = [&]() {\n      assert(ICmp->isUnsigned() && \"must have proven unsigned already\");\n      auto *NewRHS = CastInst::Create(\n          Instruction::Trunc, RHS, LHSOp->getType(), \"\",\n          L->getLoopPreheader()->getTerminator()->getIterator());\n      ICmp->setOperand(Swapped ? 1 : 0, LHSOp);\n      ICmp->setOperand(Swapped ? 0 : 1, NewRHS);\n      if (LHS->use_empty())\n        DeadInsts.push_back(LHS);\n    };\n\n\n    const DataLayout &DL = ExitingBB->getDataLayout();\n    const unsigned InnerBitWidth = DL.getTypeSizeInBits(LHSOp->getType());\n    const unsigned OuterBitWidth = DL.getTypeSizeInBits(RHS->getType());\n    auto FullCR = ConstantRange::getFull(InnerBitWidth);\n    FullCR = FullCR.zeroExtend(OuterBitWidth);\n    auto RHSCR = SE->getUnsignedRange(SE->applyLoopGuards(SE->getSCEV(RHS), L));\n    if (FullCR.contains(RHSCR)) {\n      doRotateTransform();\n      Changed = true;\n      // Note, we are leaving SCEV in an unfortunately imprecise case here\n      // as rotation tends to reveal information about trip counts not\n      // previously visible.\n      continue;\n    }\n  }\n\n  return Changed;\n}\n\nbool IndVarSimplify::optimizeLoopExits(Loop *L, SCEVExpander &Rewriter) {\n  SmallVector<BasicBlock*, 16> ExitingBlocks;\n  L->getExitingBlocks(ExitingBlocks);\n\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n```\nand the suffix:\n```cpp\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n\n    // Match (icmp unsigned-cond zext, RHS)\n    // TODO: Extend to handle corresponding sext/signed-cmp case\n    // TODO: Extend to other invertible functions\n    Value *LHSOp = nullptr;\n    if (!match(LHS, m_ZExt(m_Value(LHSOp))))\n      continue;\n\n    // In general, we only rotate if we can do so without increasing the number\n    // of instructions.  The exception is when we have an zext(add-rec).  The\n    // reason for allowing this exception is that we know we need to get rid\n    // of the zext for SCEV to be able to compute a trip count for said loops;\n    // we consider the new trip count valuable enough to increase instruction\n    // count by one.\n    if (!LHS->hasOneUse() && !isa<SCEVAddRecExpr>(SE->getSCEV(LHSOp)))\n      continue;\n\n    // Given a icmp unsigned-cond zext(Op) where zext(trunc(RHS)) == RHS\n    // replace with an icmp of the form icmp unsigned-cond Op, trunc(RHS)\n    // when zext is loop varying and RHS is loop invariant.  This converts\n    // loop varying work to loop-invariant work.\n    auto doRotateTransform = [&]() {\n      assert(ICmp->isUnsigned() && \"must have proven unsigned already\");\n      auto *NewRHS = CastInst::Create(\n          Instruction::Trunc, RHS, LHSOp->getType(), \"\",\n          L->getLoopPreheader()->getTerminator()->getIterator());\n      ICmp->setOperand(Swapped ? 1 : 0, LHSOp);\n      ICmp->setOperand(Swapped ? 0 : 1, NewRHS);\n      if (LHS->use_empty())\n        DeadInsts.push_back(LHS);\n    };\n\n    // Drop the samesign flag after narrowing\n    if (ICmp->isSigned()) {\n      ICmp->setPredicate(cast<CmpInst>(ICmp)->getUnsignedPredicate());\n    }\n\n    const DataLayout &DL = ExitingBB->getDataLayout();\n    const unsigned InnerBitWidth = DL.getTypeSizeInBits(LHSOp->getType());\n    const unsigned OuterBitWidth = DL.getTypeSizeInBits(RHS->getType());\n    auto FullCR = ConstantRange::getFull(InnerBitWidth);\n    FullCR = FullCR.zeroExtend(OuterBitWidth);\n    auto RHSCR = SE->getUnsignedRange(SE->applyLoopGuards(SE->getSCEV(RHS), L));\n    if (FullCR.contains(RHSCR)) {\n      doRotateTransform();\n      Changed = true;\n      // Note, we are leaving SCEV in an unfortunately imprecise case here\n      // as rotation tends to reveal information about trip counts not\n      // previously visible.\n      continue;\n    }\n  }\n\n  return Changed;\n}\n\nbool IndVarSimplify::optimizeLoopExits(Loop *L, SCEVExpander &Rewriter) {\n  SmallVector<BasicBlock*, 16> ExitingBlocks;\n  L->getExitingBlocks(ExitingBlocks);\n\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n```\nand the suffix:\n```cpp\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n\n    // Match (icmp unsigned-cond zext, RHS)\n    // TODO: Extend to handle corresponding sext/signed-cmp case\n    // TODO: Extend to other invertible functions\n    Value *LHSOp = nullptr;\n    if (!match(LHS, m_ZExt(m_Value(LHSOp))))\n      continue;\n\n    // In general, we only rotate if we can do so without increasing the number\n    // of instructions.  The exception is when we have an zext(add-rec).  The\n    // reason for allowing this exception is that we know we need to get rid\n    // of the zext for SCEV to be able to compute a trip count for said loops;\n    // we consider the new trip count valuable enough to increase instruction\n    // count by one.\n    if (!LHS->hasOneUse() && !isa<SCEVAddRecExpr>(SE->getSCEV(LHSOp)))\n      continue;\n\n    // Given a icmp unsigned-cond zext(Op) where zext(trunc(RHS)) == RHS\n    // replace with an icmp of the form icmp unsigned-cond Op, trunc(RHS)\n    // when zext is loop varying and RHS is loop invariant.  This converts\n    // loop varying work to loop-invariant work.\n    auto doRotateTransform = [&]() {\n      assert(ICmp->isUnsigned() && \"must have proven unsigned already\");\n      auto *NewRHS = CastInst::Create(\n          Instruction::Trunc, RHS, LHSOp->getType(), \"\",\n          L->getLoopPreheader()->getTerminator()->getIterator());\n      ICmp->setOperand(Swapped ? 1 : 0, LHSOp);\n      ICmp->setOperand(Swapped ? 0 : 1, NewRHS);\n      if (LHS->use_empty())\n        DeadInsts.push_back(LHS);\n    };\n\n    const DataLayout &DL = ExitingBB->getDataLayout();\n    const unsigned InnerBitWidth = DL.getTypeSizeInBits(LHSOp->getType());\n    const unsigned OuterBitWidth = DL.getTypeSizeInBits(RHS->getType());\n    auto FullCR = ConstantRange::getFull(InnerBitWidth);\n    FullCR = FullCR.zeroExtend(OuterBitWidth);\n    auto RHSCR = SE->getUnsignedRange(SE->applyLoopGuards(SE->getSCEV(RHS), L));\n    if (FullCR.contains(RHSCR)) {\n      doRotateTransform();\n      Changed = true;\n      // Note, we are leaving SCEV in an unfortunately imprecise case here\n      // as rotation tends to reveal information about trip counts not\n      // previously visible.\n      continue;\n    }\n  }\n\n  return Changed;\n}\n\nbool IndVarSimplify::optimizeLoopExits(Loop *L, SCEVExpander &Rewriter) {\n  SmallVector<BasicBlock*, 16> ExitingBlocks;\n  L->getExitingBlocks(ExitingBlocks);\n\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n```\nand the suffix:\n```cpp\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n\n    // Match (icmp unsigned-cond zext, RHS)\n    // TODO: Extend to handle corresponding sext/signed-cmp case\n    // TODO: Extend to other invertible functions\n    Value *LHSOp = nullptr;\n    if (!match(LHS, m_ZExt(m_Value(LHSOp))))\n      continue;\n\n    // In general, we only rotate if we can do so without increasing the number\n    // of instructions.  The exception is when we have an zext(add-rec).  The\n    // reason for allowing this exception is that we know we need to get rid\n    // of the zext for SCEV to be able to compute a trip count for said loops;\n    // we consider the new trip count valuable enough to increase instruction\n    // count by one.\n    if (!LHS->hasOneUse() && !isa<SCEVAddRecExpr>(SE->getSCEV(LHSOp)))\n      continue;\n\n    // Given a icmp unsigned-cond zext(Op) where zext(trunc(RHS)) == RHS\n    // replace with an icmp of the form icmp unsigned-cond Op, trunc(RHS)\n    // when zext is loop varying and RHS is loop invariant.  This converts\n    // loop varying work to loop-invariant work.\n    auto doRotateTransform = [&]() {\n      assert(ICmp->isUnsigned() && \"must have proven unsigned already\");\n      auto *NewRHS = CastInst::Create(\n          Instruction::Trunc, RHS, LHSOp->getType(), \"\",\n          L->getLoopPreheader()->getTerminator()->getIterator());\n      ICmp->setOperand(Swapped ? 1 : 0, LHSOp);\n      ICmp->setOperand(Swapped ? 0 : 1, NewRHS);\n      if (LHS->use_empty())\n        DeadInsts.push_back(LHS);\n    };\n\n    const DataLayout &DL = ExitingBB->getDataLayout();\n    const unsigned InnerBitWidth = DL.getTypeSizeInBits(LHSOp->getType());\n    const unsigned OuterBitWidth = DL.getTypeSizeInBits(RHS->getType());\n    auto FullCR = ConstantRange::getFull(InnerBitWidth);\n    FullCR = FullCR.zeroExtend(OuterBitWidth);\n    auto RHSCR = SE->getUnsignedRange(SE->applyLoopGuards(SE->getSCEV(RHS), L));\n    if (FullCR.contains(RHSCR)) {\n      doRotateTransform();\n      Changed = true;\n      // Note, we are leaving SCEV in an unfortunately imprecise case here\n      // as rotation tends to reveal information about trip counts not\n      // previously visible.\n      continue;\n    }\n  }\n\n  return Changed;\n}\n\nbool IndVarSimplify::optimizeLoopExits(Loop *L, SCEVExpander &Rewriter) {\n  SmallVector<BasicBlock*, 16> ExitingBlocks;\n  L->getExitingBlocks(ExitingBlocks);\n\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n```\nand the suffix:\n```cpp\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n\n    // Match (icmp unsigned-cond zext, RHS)\n    // TODO: Extend to handle corresponding sext/signed-cmp case\n    // TODO: Extend to other invertible functions\n    Value *LHSOp = nullptr;\n    if (!match(LHS, m_ZExt(m_Value(LHSOp))))\n      continue;\n\n    // In general, we only rotate if we can do so without increasing the number\n    // of instructions.  The exception is when we have an zext(add-rec).  The\n    // reason for allowing this exception is that we know we need to get rid\n    // of the zext for SCEV to be able to compute a trip count for said loops;\n    // we consider the new trip count valuable enough to increase instruction\n    // count by one.\n    if (!LHS->hasOneUse() && !isa<SCEVAddRecExpr>(SE->getSCEV(LHSOp)))\n      continue;\n\n    // Given a icmp unsigned-cond zext(Op) where zext(trunc(RHS)) == RHS\n    // replace with an icmp of the form icmp unsigned-cond Op, trunc(RHS)\n    // when zext is loop varying and RHS is loop invariant.  This converts\n    // loop varying work to loop-invariant work.\n    auto doRotateTransform = [&]() {\n      assert(ICmp->isUnsigned() && \"must have proven unsigned already\");\n      auto *NewRHS = CastInst::Create(\n          Instruction::Trunc, RHS, LHSOp->getType(), \"\",\n          L->getLoopPreheader()->getTerminator()->getIterator());\n      ICmp->setOperand(Swapped ? 1 : 0, LHSOp);\n      ICmp->setOperand(Swapped ? 0 : 1, NewRHS);\n      if (LHS->use_empty())\n        DeadInsts.push_back(LHS);\n    };\n\n    const DataLayout &DL = ExitingBB->getDataLayout();\n    const unsigned InnerBitWidth = DL.getTypeSizeInBits(LHSOp->getType());\n    const unsigned OuterBitWidth = DL.getTypeSizeInBits(RHS->getType());\n    auto FullCR = ConstantRange::getFull(InnerBitWidth);\n    FullCR = FullCR.zeroExtend(OuterBitWidth);\n    auto RHSCR = SE->getUnsignedRange(SE->applyLoopGuards(SE->getSCEV(RHS), L));\n    if (FullCR.contains(RHSCR)) {\n      doRotateTransform();\n      Changed = true;\n      // Note, we are leaving SCEV in an unfortunately imprecise case here\n      // as rotation tends to reveal information about trip counts not\n      // previously visible.\n      continue;\n    }\n  }\n\n  return Changed;\n}\n\nbool IndVarSimplify::optimizeLoopExits(Loop *L, SCEVExpander &Rewriter) {\n  SmallVector<BasicBlock*, 16> ExitingBlocks;\n  L->getExitingBlocks(ExitingBlocks);\n\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n      // which operand of the compare to update.\n      Swapped = true;\n      std::swap(LHS, RHS);\n    }\n    assert(!L->isLoopInvariant(LHS) && L->isLoopInvariant(RHS));\n```\nand the suffix:\n```cpp\n  // Remove all exits which aren't both rewriteable and execute on every\n  // iteration.\n  llvm::erase_if(ExitingBlocks, [&](BasicBlock *ExitingBB) {\n    // If our exitting block exits multiple loops, we can only rewrite the\n    // innermost one.  Otherwise, we're changing how many times the innermost\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "IndVarSimplify"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 3
+  }
+}

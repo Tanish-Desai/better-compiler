@@ -1,0 +1,335 @@
+{
+  "bug_id": "115575",
+  "condition": "llvmreduce-structured",
+  "model": "qwen2.5-coder-14b",
+  "max_iterations": 4,
+  "trial": 1,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 1280.0,
+    "oracle_calls": 848.0,
+    "reduction_seconds": 120.883,
+    "llm_prompt_tokens": 15648,
+    "llm_completion_tokens": 3564,
+    "wall_seconds": 397.349
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "llvmreduce-structured",
+      "fixed": false,
+      "seconds": 67.34,
+      "feedback": {
+        "condition": "llvmreduce-structured",
+        "prompt_chars": 1280,
+        "prompt_tokens_est": 320,
+        "shown_lines": 11,
+        "shown_instructions": 3,
+        "shown_blocks": 2,
+        "shown_values": 3,
+        "shown_chars": 452,
+        "original_lines": 16,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 638,
+        "counterexample": true,
+        "failed_test": "PR115575",
+        "strategy": "llvmreduce",
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "size_before": {
+          "lines": 16,
+          "instructions": 6,
+          "blocks": 2,
+          "values": 6,
+          "chars": 638
+        },
+        "size_after": {
+          "lines": 11,
+          "instructions": 3,
+          "blocks": 2,
+          "values": 3,
+          "chars": 452
+        },
+        "seconds": 29.556,
+        "oracle_calls": 212,
+        "oracle_accepted": 176,
+        "oracle_rejected": 36,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 12.744,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.5,
+        "reduction_ratio_lines": 0.3125,
+        "reduction_ratio_chars": 0.2915
+      },
+      "llm": {
+        "prompt_tokens": 1581,
+        "completion_tokens": 891
+      }
+    },
+    {
+      "index": 1,
+      "condition": "llvmreduce-structured",
+      "fixed": false,
+      "seconds": 49.645,
+      "feedback": {
+        "condition": "llvmreduce-structured",
+        "prompt_chars": 1280,
+        "prompt_tokens_est": 320,
+        "shown_lines": 11,
+        "shown_instructions": 3,
+        "shown_blocks": 2,
+        "shown_values": 3,
+        "shown_chars": 452,
+        "original_lines": 16,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 638,
+        "counterexample": true,
+        "failed_test": "PR115575",
+        "strategy": "llvmreduce",
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "size_before": {
+          "lines": 16,
+          "instructions": 6,
+          "blocks": 2,
+          "values": 6,
+          "chars": 638
+        },
+        "size_after": {
+          "lines": 11,
+          "instructions": 3,
+          "blocks": 2,
+          "values": 3,
+          "chars": 452
+        },
+        "seconds": 30.059,
+        "oracle_calls": 212,
+        "oracle_accepted": 176,
+        "oracle_rejected": 36,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 12.74,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.5,
+        "reduction_ratio_lines": 0.3125,
+        "reduction_ratio_chars": 0.2915
+      },
+      "llm": {
+        "prompt_tokens": 3135,
+        "completion_tokens": 891
+      }
+    },
+    {
+      "index": 2,
+      "condition": "llvmreduce-structured",
+      "fixed": false,
+      "seconds": 50.132,
+      "feedback": {
+        "condition": "llvmreduce-structured",
+        "prompt_chars": 1280,
+        "prompt_tokens_est": 320,
+        "shown_lines": 11,
+        "shown_instructions": 3,
+        "shown_blocks": 2,
+        "shown_values": 3,
+        "shown_chars": 452,
+        "original_lines": 16,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 638,
+        "counterexample": true,
+        "failed_test": "PR115575",
+        "strategy": "llvmreduce",
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "size_before": {
+          "lines": 16,
+          "instructions": 6,
+          "blocks": 2,
+          "values": 6,
+          "chars": 638
+        },
+        "size_after": {
+          "lines": 11,
+          "instructions": 3,
+          "blocks": 2,
+          "values": 3,
+          "chars": 452
+        },
+        "seconds": 30.745,
+        "oracle_calls": 212,
+        "oracle_accepted": 176,
+        "oracle_rejected": 36,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 13.576,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.5,
+        "reduction_ratio_lines": 0.3125,
+        "reduction_ratio_chars": 0.2915
+      },
+      "llm": {
+        "prompt_tokens": 4689,
+        "completion_tokens": 891
+      }
+    },
+    {
+      "index": 3,
+      "condition": "llvmreduce-structured",
+      "fixed": false,
+      "seconds": 53.12,
+      "feedback": {
+        "condition": "llvmreduce-structured",
+        "prompt_chars": 1280,
+        "prompt_tokens_est": 320,
+        "shown_lines": 11,
+        "shown_instructions": 3,
+        "shown_blocks": 2,
+        "shown_values": 3,
+        "shown_chars": 452,
+        "original_lines": 16,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 638,
+        "counterexample": true,
+        "failed_test": "PR115575",
+        "strategy": "llvmreduce",
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "size_before": {
+          "lines": 16,
+          "instructions": 6,
+          "blocks": 2,
+          "values": 6,
+          "chars": 638
+        },
+        "size_after": {
+          "lines": 11,
+          "instructions": 3,
+          "blocks": 2,
+          "values": 3,
+          "chars": 452
+        },
+        "seconds": 30.523,
+        "oracle_calls": 212,
+        "oracle_accepted": 176,
+        "oracle_rejected": 36,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 13.381,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.5,
+        "reduction_ratio_lines": 0.3125,
+        "reduction_ratio_chars": 0.2915
+      },
+      "llm": {
+        "prompt_tokens": 6243,
+        "completion_tokens": 891
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 261.24515414237976,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2024-11-09+0000"
+      ],
+      [
+        "hint:components",
+        "2024-11-09+0000"
+      ],
+      [
+        "alive2",
+        "2024-11-09+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2024-11-09+0000"
+      ],
+      [
+        "hint:issue",
+        "2024-11-09+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 04ea12ef0f12..2a44c4c80035 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -919,6 +919,7 @@ bool VectorCombine::scalarizeBinopOrCmp(Instruction &I) {\n \n   // Do not convert the vector condition of a vector select into a scalar\n   // condition. That may cause problems for codegen because of differences in\n+\n   // boolean formats and register-file transfers.\n   // TODO: Can we account for that in the cost model?\n   bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n@@ -982,9 +983,18 @@ bool VectorCombine::scalarizeBinopOrCmp(Instruction &I) {\n     VectorOpCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n   }\n \n+  // Check for division by zero in constant vectors\n+  if (IsConst0 && isa<ConstantInt>(V1) && cast<ConstantInt>(V1)->isZero()) {\n+    return false;\n+  }\n+  if (IsConst1 && isa<ConstantInt>(V0) && cast<ConstantInt>(V0)->isZero()) {\n+    return false;\n+  }\n+\n   // Get cost estimate for the insert element. This cost will factor into\n   // both sequences.\n   TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n+\n   InstructionCost InsertCost = TTI.getVectorInstrCost(\n       Instruction::InsertElement, VecTy, CostKind, Index);\n   InstructionCost OldCost =\n",
+    "log": {
+      "model": "qwen2.5-coder-14b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in VectorCombine.\nIssue title: [VectorCombine] UB triggered after optimization\nDetailed information:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @PR115575 -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  ret <2 x i8> zeroinitializer\n}\n\nTARGET (post-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  %bo.scalar = sdiv i8 0, 0\n  ret <2 x i8> zeroinitializer\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %bo.scalar: %bo.scalar = sdiv i8 0, 0\n\nCRITICAL VALUES:\n    %bo.scalar\n\nDEPENDENCY CHAIN (source):\n    (none)\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = poison\n\nDIVERGENCE (source vs target on that input):\n    %bo.scalar: source = (not computed)   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %bo.scalar.\n\nPlease modify the following code in llvm/lib/Transforms/Vectorize/VectorCombine.cpp to fix the bug:\n```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n      if (match(U, m_Select(m_Specific(&I), m_Value(), m_Value())))\n        return false;\n\n  // Match against one or both scalar values being inserted into constant\n  // vectors:\n  // vec_op VecC0, (inselt VecC1, V1, Index)\n  // vec_op (inselt VecC0, V0, Index), VecC1\n  // vec_op (inselt VecC0, V0, Index), (inselt VecC1, V1, Index)\n  // TODO: Deal with mismatched index constants and variable indexes?\n  Constant *VecC0 = nullptr, *VecC1 = nullptr;\n  Value *V0 = nullptr, *V1 = nullptr;\n  uint64_t Index0 = 0, Index1 = 0;\n  if (!match(Ins0, m_InsertElt(m_Constant(VecC0), m_Value(V0),\n                               m_ConstantInt(Index0))) &&\n      !match(Ins0, m_Constant(VecC0)))\n    return false;\n  if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),\n                               m_ConstantInt(Index1))) &&\n      !match(Ins1, m_Constant(VecC1)))\n    return false;\n\n  bool IsConst0 = !V0;\n  bool IsConst1 = !V1;\n  if (IsConst0 && IsConst1)\n    return false;\n  if (!IsConst0 && !IsConst1 && Index0 != Index1)\n    return false;\n\n  // Bail for single insertion if it is a load.\n  // TODO: Handle this once getVectorInstrCost can cost for load/stores.\n  auto *I0 = dyn_cast_or_null<Instruction>(V0);\n  auto *I1 = dyn_cast_or_null<Instruction>(V1);\n  if ((IsConst0 && I1 && I1->mayReadFromMemory()) ||\n      (IsConst1 && I0 && I0->mayReadFromMemory()))\n    return false;\n\n  uint64_t Index = IsConst0 ? Index1 : Index0;\n  Type *ScalarTy = IsConst0 ? V1->getType() : V0->getType();\n  Type *VecTy = I.getType();\n  assert(VecTy->isVectorTy() &&\n         (IsConst0 || IsConst1 || V0->getType() == V1->getType()) &&\n         (ScalarTy->isIntegerTy() || ScalarTy->isFloatingPointTy() ||\n          ScalarTy->isPointerTy()) &&\n         \"Unexpected types for insert element into binop or cmp\");\n\n  unsigned Opcode = I.getOpcode();\n  InstructionCost ScalarOpCost, VectorOpCost;\n  if (IsCmp) {\n    CmpInst::Predicate Pred = cast<CmpInst>(I).getPredicate();\n    ScalarOpCost = TTI.getCmpSelInstrCost(\n        Opcode, ScalarTy, CmpInst::makeCmpResultType(ScalarTy), Pred);\n    VectorOpCost = TTI.getCmpSelInstrCost(\n        Opcode, VecTy, CmpInst::makeCmpResultType(VecTy), Pred);\n  } else {\n    ScalarOpCost = TTI.getArithmeticInstrCost(Opcode, ScalarTy);\n    VectorOpCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n```\nand the suffix:\n```cpp\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n      if (match(U, m_Select(m_Specific(&I), m_Value(), m_Value())))\n        return false;\n\n  // Match against one or both scalar values being inserted into constant\n  // vectors:\n  // vec_op VecC0, (inselt VecC1, V1, Index)\n  // vec_op (inselt VecC0, V0, Index), VecC1\n  // vec_op (inselt VecC0, V0, Index), (inselt VecC1, V1, Index)\n  // TODO: Deal with mismatched index constants and variable indexes?\n  Constant *VecC0 = nullptr, *VecC1 = nullptr;\n  Value *V0 = nullptr, *V1 = nullptr;\n  uint64_t Index0 = 0, Index1 = 0;\n  if (!match(Ins0, m_InsertElt(m_Constant(VecC0), m_Value(V0),\n                               m_ConstantInt(Index0))) &&\n      !match(Ins0, m_Constant(VecC0)))\n    return false;\n  if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),\n                               m_ConstantInt(Index1))) &&\n      !match(Ins1, m_Constant(VecC1)))\n    return false;\n\n  bool IsConst0 = !V0;\n  bool IsConst1 = !V1;\n  if (IsConst0 && IsConst1)\n    return false;\n  if (!IsConst0 && !IsConst1 && Index0 != Index1)\n    return false;\n\n  // Bail for single insertion if it is a load.\n  // TODO: Handle this once getVectorInstrCost can cost for load/stores.\n  auto *I0 = dyn_cast_or_null<Instruction>(V0);\n  auto *I1 = dyn_cast_or_null<Instruction>(V1);\n  if ((IsConst0 && I1 && I1->mayReadFromMemory()) ||\n      (IsConst1 && I0 && I0->mayReadFromMemory()))\n    return false;\n\n  uint64_t Index = IsConst0 ? Index1 : Index0;\n  Type *ScalarTy = IsConst0 ? V1->getType() : V0->getType();\n  Type *VecTy = I.getType();\n  assert(VecTy->isVectorTy() &&\n         (IsConst0 || IsConst1 || V0->getType() == V1->getType()) &&\n         (ScalarTy->isIntegerTy() || ScalarTy->isFloatingPointTy() ||\n          ScalarTy->isPointerTy()) &&\n         \"Unexpected types for insert element into binop or cmp\");\n\n  unsigned Opcode = I.getOpcode();\n  InstructionCost ScalarOpCost, VectorOpCost;\n  if (IsCmp) {\n    CmpInst::Predicate Pred = cast<CmpInst>(I).getPredicate();\n    ScalarOpCost = TTI.getCmpSelInstrCost(\n        Opcode, ScalarTy, CmpInst::makeCmpResultType(ScalarTy), Pred);\n    VectorOpCost = TTI.getCmpSelInstrCost(\n        Opcode, VecTy, CmpInst::makeCmpResultType(VecTy), Pred);\n  } else {\n    ScalarOpCost = TTI.getArithmeticInstrCost(Opcode, ScalarTy);\n    VectorOpCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  }\n\n  // Check for division by zero in constant vectors\n  if (IsConst0 && isa<ConstantInt>(V1) && cast<ConstantInt>(V1)->isZero()) {\n    return false;\n  }\n  if (IsConst1 && isa<ConstantInt>(V0) && cast<ConstantInt>(V0)->isZero()) {\n    return false;\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @PR115575 -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  ret <2 x i8> zeroinitializer\n}\n\nTARGET (post-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  %bo.scalar = sdiv i8 0, 0\n  ret <2 x i8> zeroinitializer\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %bo.scalar: %bo.scalar = sdiv i8 0, 0\n\nCRITICAL VALUES:\n    %bo.scalar\n\nDEPENDENCY CHAIN (source):\n    (none)\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = poison\n\nDIVERGENCE (source vs target on that input):\n    %bo.scalar: source = (not computed)   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %bo.scalar.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n```\nand the suffix:\n```cpp\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n      if (match(U, m_Select(m_Specific(&I), m_Value(), m_Value())))\n        return false;\n\n  // Match against one or both scalar values being inserted into constant\n  // vectors:\n  // vec_op VecC0, (inselt VecC1, V1, Index)\n  // vec_op (inselt VecC0, V0, Index), VecC1\n  // vec_op (inselt VecC0, V0, Index), (inselt VecC1, V1, Index)\n  // TODO: Deal with mismatched index constants and variable indexes?\n  Constant *VecC0 = nullptr, *VecC1 = nullptr;\n  Value *V0 = nullptr, *V1 = nullptr;\n  uint64_t Index0 = 0, Index1 = 0;\n  if (!match(Ins0, m_InsertElt(m_Constant(VecC0), m_Value(V0),\n                               m_ConstantInt(Index0))) &&\n      !match(Ins0, m_Constant(VecC0)))\n    return false;\n  if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),\n                               m_ConstantInt(Index1))) &&\n      !match(Ins1, m_Constant(VecC1)))\n    return false;\n\n  bool IsConst0 = !V0;\n  bool IsConst1 = !V1;\n  if (IsConst0 && IsConst1)\n    return false;\n  if (!IsConst0 && !IsConst1 && Index0 != Index1)\n    return false;\n\n  // Bail for single insertion if it is a load.\n  // TODO: Handle this once getVectorInstrCost can cost for load/stores.\n  auto *I0 = dyn_cast_or_null<Instruction>(V0);\n  auto *I1 = dyn_cast_or_null<Instruction>(V1);\n  if ((IsConst0 && I1 && I1->mayReadFromMemory()) ||\n      (IsConst1 && I0 && I0->mayReadFromMemory()))\n    return false;\n\n  uint64_t Index = IsConst0 ? Index1 : Index0;\n  Type *ScalarTy = IsConst0 ? V1->getType() : V0->getType();\n  Type *VecTy = I.getType();\n  assert(VecTy->isVectorTy() &&\n         (IsConst0 || IsConst1 || V0->getType() == V1->getType()) &&\n         (ScalarTy->isIntegerTy() || ScalarTy->isFloatingPointTy() ||\n          ScalarTy->isPointerTy()) &&\n         \"Unexpected types for insert element into binop or cmp\");\n\n  unsigned Opcode = I.getOpcode();\n  InstructionCost ScalarOpCost, VectorOpCost;\n  if (IsCmp) {\n    CmpInst::Predicate Pred = cast<CmpInst>(I).getPredicate();\n    ScalarOpCost = TTI.getCmpSelInstrCost(\n        Opcode, ScalarTy, CmpInst::makeCmpResultType(ScalarTy), Pred);\n    VectorOpCost = TTI.getCmpSelInstrCost(\n        Opcode, VecTy, CmpInst::makeCmpResultType(VecTy), Pred);\n  } else {\n    ScalarOpCost = TTI.getArithmeticInstrCost(Opcode, ScalarTy);\n    VectorOpCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  }\n\n  // Check for division by zero in constant vectors\n  if (IsConst0 && isa<ConstantInt>(V1) && cast<ConstantInt>(V1)->isZero()) {\n    return false;\n  }\n  if (IsConst1 && isa<ConstantInt>(V0) && cast<ConstantInt>(V0)->isZero()) {\n    return false;\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @PR115575 -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  ret <2 x i8> zeroinitializer\n}\n\nTARGET (post-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  %bo.scalar = sdiv i8 0, 0\n  ret <2 x i8> zeroinitializer\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %bo.scalar: %bo.scalar = sdiv i8 0, 0\n\nCRITICAL VALUES:\n    %bo.scalar\n\nDEPENDENCY CHAIN (source):\n    (none)\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = poison\n\nDIVERGENCE (source vs target on that input):\n    %bo.scalar: source = (not computed)   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %bo.scalar.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n```\nand the suffix:\n```cpp\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n      if (match(U, m_Select(m_Specific(&I), m_Value(), m_Value())))\n        return false;\n\n  // Match against one or both scalar values being inserted into constant\n  // vectors:\n  // vec_op VecC0, (inselt VecC1, V1, Index)\n  // vec_op (inselt VecC0, V0, Index), VecC1\n  // vec_op (inselt VecC0, V0, Index), (inselt VecC1, V1, Index)\n  // TODO: Deal with mismatched index constants and variable indexes?\n  Constant *VecC0 = nullptr, *VecC1 = nullptr;\n  Value *V0 = nullptr, *V1 = nullptr;\n  uint64_t Index0 = 0, Index1 = 0;\n  if (!match(Ins0, m_InsertElt(m_Constant(VecC0), m_Value(V0),\n                               m_ConstantInt(Index0))) &&\n      !match(Ins0, m_Constant(VecC0)))\n    return false;\n  if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),\n                               m_ConstantInt(Index1))) &&\n      !match(Ins1, m_Constant(VecC1)))\n    return false;\n\n  bool IsConst0 = !V0;\n  bool IsConst1 = !V1;\n  if (IsConst0 && IsConst1)\n    return false;\n  if (!IsConst0 && !IsConst1 && Index0 != Index1)\n    return false;\n\n  // Bail for single insertion if it is a load.\n  // TODO: Handle this once getVectorInstrCost can cost for load/stores.\n  auto *I0 = dyn_cast_or_null<Instruction>(V0);\n  auto *I1 = dyn_cast_or_null<Instruction>(V1);\n  if ((IsConst0 && I1 && I1->mayReadFromMemory()) ||\n      (IsConst1 && I0 && I0->mayReadFromMemory()))\n    return false;\n\n  uint64_t Index = IsConst0 ? Index1 : Index0;\n  Type *ScalarTy = IsConst0 ? V1->getType() : V0->getType();\n  Type *VecTy = I.getType();\n  assert(VecTy->isVectorTy() &&\n         (IsConst0 || IsConst1 || V0->getType() == V1->getType()) &&\n         (ScalarTy->isIntegerTy() || ScalarTy->isFloatingPointTy() ||\n          ScalarTy->isPointerTy()) &&\n         \"Unexpected types for insert element into binop or cmp\");\n\n  unsigned Opcode = I.getOpcode();\n  InstructionCost ScalarOpCost, VectorOpCost;\n  if (IsCmp) {\n    CmpInst::Predicate Pred = cast<CmpInst>(I).getPredicate();\n    ScalarOpCost = TTI.getCmpSelInstrCost(\n        Opcode, ScalarTy, CmpInst::makeCmpResultType(ScalarTy), Pred);\n    VectorOpCost = TTI.getCmpSelInstrCost(\n        Opcode, VecTy, CmpInst::makeCmpResultType(VecTy), Pred);\n  } else {\n    ScalarOpCost = TTI.getArithmeticInstrCost(Opcode, ScalarTy);\n    VectorOpCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  }\n\n  // Check for division by zero in constant vectors\n  if (IsConst0 && isa<ConstantInt>(V1) && cast<ConstantInt>(V1)->isZero()) {\n    return false;\n  }\n  if (IsConst1 && isa<ConstantInt>(V0) && cast<ConstantInt>(V0)->isZero()) {\n    return false;\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @PR115575 -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  ret <2 x i8> zeroinitializer\n}\n\nTARGET (post-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  %bo.scalar = sdiv i8 0, 0\n  ret <2 x i8> zeroinitializer\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %bo.scalar: %bo.scalar = sdiv i8 0, 0\n\nCRITICAL VALUES:\n    %bo.scalar\n\nDEPENDENCY CHAIN (source):\n    (none)\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = poison\n\nDIVERGENCE (source vs target on that input):\n    %bo.scalar: source = (not computed)   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %bo.scalar.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n```\nand the suffix:\n```cpp\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n      if (match(U, m_Select(m_Specific(&I), m_Value(), m_Value())))\n        return false;\n\n  // Match against one or both scalar values being inserted into constant\n  // vectors:\n  // vec_op VecC0, (inselt VecC1, V1, Index)\n  // vec_op (inselt VecC0, V0, Index), VecC1\n  // vec_op (inselt VecC0, V0, Index), (inselt VecC1, V1, Index)\n  // TODO: Deal with mismatched index constants and variable indexes?\n  Constant *VecC0 = nullptr, *VecC1 = nullptr;\n  Value *V0 = nullptr, *V1 = nullptr;\n  uint64_t Index0 = 0, Index1 = 0;\n  if (!match(Ins0, m_InsertElt(m_Constant(VecC0), m_Value(V0),\n                               m_ConstantInt(Index0))) &&\n      !match(Ins0, m_Constant(VecC0)))\n    return false;\n  if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),\n                               m_ConstantInt(Index1))) &&\n      !match(Ins1, m_Constant(VecC1)))\n    return false;\n\n  bool IsConst0 = !V0;\n  bool IsConst1 = !V1;\n  if (IsConst0 && IsConst1)\n    return false;\n  if (!IsConst0 && !IsConst1 && Index0 != Index1)\n    return false;\n\n  // Bail for single insertion if it is a load.\n  // TODO: Handle this once getVectorInstrCost can cost for load/stores.\n  auto *I0 = dyn_cast_or_null<Instruction>(V0);\n  auto *I1 = dyn_cast_or_null<Instruction>(V1);\n  if ((IsConst0 && I1 && I1->mayReadFromMemory()) ||\n      (IsConst1 && I0 && I0->mayReadFromMemory()))\n    return false;\n\n  uint64_t Index = IsConst0 ? Index1 : Index0;\n  Type *ScalarTy = IsConst0 ? V1->getType() : V0->getType();\n  Type *VecTy = I.getType();\n  assert(VecTy->isVectorTy() &&\n         (IsConst0 || IsConst1 || V0->getType() == V1->getType()) &&\n         (ScalarTy->isIntegerTy() || ScalarTy->isFloatingPointTy() ||\n          ScalarTy->isPointerTy()) &&\n         \"Unexpected types for insert element into binop or cmp\");\n\n  unsigned Opcode = I.getOpcode();\n  InstructionCost ScalarOpCost, VectorOpCost;\n  if (IsCmp) {\n    CmpInst::Predicate Pred = cast<CmpInst>(I).getPredicate();\n    ScalarOpCost = TTI.getCmpSelInstrCost(\n        Opcode, ScalarTy, CmpInst::makeCmpResultType(ScalarTy), Pred);\n    VectorOpCost = TTI.getCmpSelInstrCost(\n        Opcode, VecTy, CmpInst::makeCmpResultType(VecTy), Pred);\n  } else {\n    ScalarOpCost = TTI.getArithmeticInstrCost(Opcode, ScalarTy);\n    VectorOpCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  }\n\n  // Check for division by zero in constant vectors\n  if (IsConst0 && isa<ConstantInt>(V1) && cast<ConstantInt>(V1)->isZero()) {\n    return false;\n  }\n  if (IsConst1 && isa<ConstantInt>(V0) && cast<ConstantInt>(V0)->isZero()) {\n    return false;\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @PR115575 -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  ret <2 x i8> zeroinitializer\n}\n\nTARGET (post-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <2 x i8> @PR115575(i8 %x) {\n  %bo.scalar = sdiv i8 0, 0\n  ret <2 x i8> zeroinitializer\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %bo.scalar: %bo.scalar = sdiv i8 0, 0\n\nCRITICAL VALUES:\n    %bo.scalar\n\nDEPENDENCY CHAIN (source):\n    (none)\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = poison\n\nDIVERGENCE (source vs target on that input):\n    %bo.scalar: source = (not computed)   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %bo.scalar.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n  // boolean formats and register-file transfers.\n  // TODO: Can we account for that in the cost model?\n  bool IsCmp = Pred != CmpInst::Predicate::BAD_ICMP_PREDICATE;\n  if (IsCmp)\n    for (User *U : I.users())\n```\nand the suffix:\n```cpp\n  }\n\n  // Get cost estimate for the insert element. This cost will factor into\n  // both sequences.\n  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "VectorCombine"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 1
+  }
+}

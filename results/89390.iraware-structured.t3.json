@@ -1,0 +1,323 @@
+{
+  "bug_id": "89390",
+  "condition": "iraware-structured",
+  "model": "qwen2.5-coder-14b",
+  "max_iterations": 4,
+  "trial": 3,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 2700.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.005,
+    "llm_prompt_tokens": 23788,
+    "llm_completion_tokens": 3164,
+    "wall_seconds": 229.505
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "iraware-structured",
+      "fixed": false,
+      "seconds": 51.817,
+      "feedback": {
+        "condition": "iraware-structured",
+        "prompt_chars": 2698,
+        "prompt_tokens_est": 675,
+        "shown_lines": 19,
+        "shown_instructions": 8,
+        "shown_blocks": 2,
+        "shown_values": 10,
+        "shown_chars": 1004,
+        "original_lines": 19,
+        "original_instructions": 8,
+        "original_blocks": 2,
+        "original_values": 10,
+        "original_chars": 1004,
+        "counterexample": true,
+        "failed_test": "shuf_srem_v4i32_poison",
+        "strategy": "iraware",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "size_after": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "seconds": 0.001,
+        "oracle_calls": 0,
+        "oracle_accepted": 0,
+        "oracle_rejected": 0,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 0.0,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 2443,
+        "completion_tokens": 791
+      }
+    },
+    {
+      "index": 1,
+      "condition": "iraware-structured",
+      "fixed": false,
+      "seconds": 53.728,
+      "feedback": {
+        "condition": "iraware-structured",
+        "prompt_chars": 2698,
+        "prompt_tokens_est": 675,
+        "shown_lines": 19,
+        "shown_instructions": 8,
+        "shown_blocks": 2,
+        "shown_values": 10,
+        "shown_chars": 1004,
+        "original_lines": 19,
+        "original_instructions": 8,
+        "original_blocks": 2,
+        "original_values": 10,
+        "original_chars": 1004,
+        "counterexample": true,
+        "failed_test": "shuf_srem_v4i32_poison",
+        "strategy": "iraware",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "size_after": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "seconds": 0.001,
+        "oracle_calls": 0,
+        "oracle_accepted": 0,
+        "oracle_rejected": 0,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 0.0,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 4779,
+        "completion_tokens": 791
+      }
+    },
+    {
+      "index": 2,
+      "condition": "iraware-structured",
+      "fixed": false,
+      "seconds": 50.405,
+      "feedback": {
+        "condition": "iraware-structured",
+        "prompt_chars": 2698,
+        "prompt_tokens_est": 675,
+        "shown_lines": 19,
+        "shown_instructions": 8,
+        "shown_blocks": 2,
+        "shown_values": 10,
+        "shown_chars": 1004,
+        "original_lines": 19,
+        "original_instructions": 8,
+        "original_blocks": 2,
+        "original_values": 10,
+        "original_chars": 1004,
+        "counterexample": true,
+        "failed_test": "shuf_srem_v4i32_poison",
+        "strategy": "iraware",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "size_after": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "seconds": 0.002,
+        "oracle_calls": 0,
+        "oracle_accepted": 0,
+        "oracle_rejected": 0,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 0.0,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 7115,
+        "completion_tokens": 791
+      }
+    },
+    {
+      "index": 3,
+      "condition": "iraware-structured",
+      "fixed": false,
+      "seconds": 50.046,
+      "feedback": {
+        "condition": "iraware-structured",
+        "prompt_chars": 2698,
+        "prompt_tokens_est": 675,
+        "shown_lines": 19,
+        "shown_instructions": 8,
+        "shown_blocks": 2,
+        "shown_values": 10,
+        "shown_chars": 1004,
+        "original_lines": 19,
+        "original_instructions": 8,
+        "original_blocks": 2,
+        "original_values": 10,
+        "original_chars": 1004,
+        "counterexample": true,
+        "failed_test": "shuf_srem_v4i32_poison",
+        "strategy": "iraware",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "size_after": {
+          "lines": 19,
+          "instructions": 8,
+          "blocks": 2,
+          "values": 10,
+          "chars": 1004
+        },
+        "seconds": 0.001,
+        "oracle_calls": 0,
+        "oracle_accepted": 0,
+        "oracle_rejected": 0,
+        "oracle_tool_failures": 0,
+        "oracle_seconds": 0.0,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 9451,
+        "completion_tokens": 791
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 126.84517192840576,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2024-04-19+0000"
+      ],
+      [
+        "hint:components",
+        "2024-04-19+0000"
+      ],
+      [
+        "alive2",
+        "2024-04-19+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2024-04-19+0000"
+      ],
+      [
+        "hint:issue",
+        "2024-04-19+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..e6fc6fcc1616 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1372,6 +1372,7 @@ bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n     auto *EI = cast<ExtractElementInst>(U);\n     Value *Idx = EI->getOperand(1);\n \n+\n     // Insert 'freeze' for poison indexes.\n     auto It = NeedFreeze.find(EI);\n     if (It != NeedFreeze.end())\n@@ -1438,6 +1439,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n   // Intersect flags from the old binops.\n   if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n+\n     NewInst->copyIRFlags(B0);\n     NewInst->andIRFlags(B1);\n   }\n",
+    "log": {
+      "model": "qwen2.5-coder-14b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in VectorCombine.\nIssue title: VectorCombine transform leading to srem by poison\nDetailed information:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @shuf_srem_v4i32_poison -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) {\n  %srem0 = srem <4 x i32> %a1, %a0\n  %srem1 = srem <4 x i32> splat (i32 1), %a0\n  %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  ret <4 x i32> %r\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) #0 {\n  %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  %r = srem <4 x i32> %1, %2\n  ret <4 x i32> %r\n}\n\nattributes #0 = { \"target-features\"=\"+sse2\" }\n\nWHAT THE TRANSFORMATION CHANGED:\n  modified:\n    %r\n      source: %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n      target: %r = srem <4 x i32> %1, %2\n  only in target:\n    %1: %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n    %2: %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  only in source:\n    %srem0: %srem0 = srem <4 x i32> %a1, %a0\n    %srem1: %srem1 = srem <4 x i32> splat (i32 1), %a0\n\nCRITICAL VALUES:\n    %r\n    %srem0\n    %srem1\n\nDEPENDENCY CHAIN (source):\n    %srem0 = srem <4 x i32> %a1, %a0\n    %srem1 = srem <4 x i32> splat (i32 1), %a0\n    %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    <4 x i32> %a0 = < #x00000001 (1), #x00000001 (1), #x00000001 (1), #x00000001 (1) >\n    <4 x i32> %a1 = < #x00000000 (0), #x00000000 (0), #x00000000 (0), #x00000000 (0) >\n\nDIVERGENCE (source vs target on that input):\n    %r: source = < #x00000000 (0), poison, #x00000000 (0), #x00000000 (0) >   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %r.\n\nPlease modify the following code in llvm/lib/Transforms/Vectorize/VectorCombine.cpp to fix the bug:\n```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n    Builder.SetInsertPoint(EI);\n    Value *GEP =\n        Builder.CreateInBoundsGEP(VecTy, Ptr, {Builder.getInt32(0), Idx});\n    auto *NewLoad = cast<LoadInst>(Builder.CreateLoad(\n        VecTy->getElementType(), GEP, EI->getName() + \".scalar\"));\n\n    Align ScalarOpAlignment = computeAlignmentAfterScalarization(\n        LI->getAlign(), VecTy->getElementType(), Idx, *DL);\n    NewLoad->setAlignment(ScalarOpAlignment);\n\n    replaceValue(*EI, *NewLoad);\n  }\n\n  FailureGuard.release();\n  return true;\n}\n\n/// Try to convert \"shuffle (binop), (binop)\" with a shared binop operand into\n/// \"binop (shuffle), (shuffle)\".\nbool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n  auto *VecTy = cast<FixedVectorType>(I.getType());\n  BinaryOperator *B0, *B1;\n  ArrayRef<int> Mask;\n  if (!match(&I, m_Shuffle(m_OneUse(m_BinOp(B0)), m_OneUse(m_BinOp(B1)),\n                           m_Mask(Mask))) ||\n      B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n    return false;\n\n  // Try to replace a binop with a shuffle if the shuffle is not costly.\n  // The new shuffle will choose from a single, common operand, so it may be\n  // cheaper than the existing two-operand shuffle.\n  SmallVector<int> UnaryMask = createUnaryMask(Mask, Mask.size());\n  Instruction::BinaryOps Opcode = B0->getOpcode();\n  InstructionCost BinopCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  InstructionCost ShufCost = TTI.getShuffleCost(\n      TargetTransformInfo::SK_PermuteSingleSrc, VecTy, UnaryMask);\n  if (ShufCost > BinopCost)\n    return false;\n\n  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n  Value *X = B0->getOperand(0), *Y = B0->getOperand(1);\n  Value *Z = B1->getOperand(0), *W = B1->getOperand(1);\n  if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n    std::swap(X, Y);\n\n  Value *Shuf0, *Shuf1;\n  if (X == Z) {\n    // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n    Shuf0 = Builder.CreateShuffleVector(X, UnaryMask);\n    Shuf1 = Builder.CreateShuffleVector(Y, W, Mask);\n  } else if (Y == W) {\n    // shuf (bo X, Y), (bo Z, Y) --> bo (shuf X, Z), (shuf Y)\n    Shuf0 = Builder.CreateShuffleVector(X, Z, Mask);\n    Shuf1 = Builder.CreateShuffleVector(Y, UnaryMask);\n  } else {\n    return false;\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n```\nand the suffix:\n```cpp\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n    Builder.SetInsertPoint(EI);\n    Value *GEP =\n        Builder.CreateInBoundsGEP(VecTy, Ptr, {Builder.getInt32(0), Idx});\n    auto *NewLoad = cast<LoadInst>(Builder.CreateLoad(\n        VecTy->getElementType(), GEP, EI->getName() + \".scalar\"));\n\n    Align ScalarOpAlignment = computeAlignmentAfterScalarization(\n        LI->getAlign(), VecTy->getElementType(), Idx, *DL);\n    NewLoad->setAlignment(ScalarOpAlignment);\n\n    replaceValue(*EI, *NewLoad);\n  }\n\n  FailureGuard.release();\n  return true;\n}\n\n/// Try to convert \"shuffle (binop), (binop)\" with a shared binop operand into\n/// \"binop (shuffle), (shuffle)\".\nbool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n  auto *VecTy = cast<FixedVectorType>(I.getType());\n  BinaryOperator *B0, *B1;\n  ArrayRef<int> Mask;\n  if (!match(&I, m_Shuffle(m_OneUse(m_BinOp(B0)), m_OneUse(m_BinOp(B1)),\n                           m_Mask(Mask))) ||\n      B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n    return false;\n\n  // Try to replace a binop with a shuffle if the shuffle is not costly.\n  // The new shuffle will choose from a single, common operand, so it may be\n  // cheaper than the existing two-operand shuffle.\n  SmallVector<int> UnaryMask = createUnaryMask(Mask, Mask.size());\n  Instruction::BinaryOps Opcode = B0->getOpcode();\n  InstructionCost BinopCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  InstructionCost ShufCost = TTI.getShuffleCost(\n      TargetTransformInfo::SK_PermuteSingleSrc, VecTy, UnaryMask);\n  if (ShufCost > BinopCost)\n    return false;\n\n  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n  Value *X = B0->getOperand(0), *Y = B0->getOperand(1);\n  Value *Z = B1->getOperand(0), *W = B1->getOperand(1);\n  if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n    std::swap(X, Y);\n\n  Value *Shuf0, *Shuf1;\n  if (X == Z) {\n    // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n    Shuf0 = Builder.CreateShuffleVector(X, UnaryMask);\n    Shuf1 = Builder.CreateShuffleVector(Y, W, Mask);\n  } else if (Y == W) {\n    // shuf (bo X, Y), (bo Z, Y) --> bo (shuf X, Z), (shuf Y)\n    Shuf0 = Builder.CreateShuffleVector(X, Z, Mask);\n    Shuf1 = Builder.CreateShuffleVector(Y, UnaryMask);\n  } else {\n    return false;\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @shuf_srem_v4i32_poison -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) {\n  %srem0 = srem <4 x i32> %a1, %a0\n  %srem1 = srem <4 x i32> splat (i32 1), %a0\n  %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  ret <4 x i32> %r\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) #0 {\n  %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  %r = srem <4 x i32> %1, %2\n  ret <4 x i32> %r\n}\n\nattributes #0 = { \"target-features\"=\"+sse2\" }\n\nWHAT THE TRANSFORMATION CHANGED:\n  modified:\n    %r\n      source: %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n      target: %r = srem <4 x i32> %1, %2\n  only in target:\n    %1: %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n    %2: %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  only in source:\n    %srem0: %srem0 = srem <4 x i32> %a1, %a0\n    %srem1: %srem1 = srem <4 x i32> splat (i32 1), %a0\n\nCRITICAL VALUES:\n    %r\n    %srem0\n    %srem1\n\nDEPENDENCY CHAIN (source):\n    %srem0 = srem <4 x i32> %a1, %a0\n    %srem1 = srem <4 x i32> splat (i32 1), %a0\n    %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    <4 x i32> %a0 = < #x00000001 (1), #x00000001 (1), #x00000001 (1), #x00000001 (1) >\n    <4 x i32> %a1 = < #x00000000 (0), #x00000000 (0), #x00000000 (0), #x00000000 (0) >\n\nDIVERGENCE (source vs target on that input):\n    %r: source = < #x00000000 (0), poison, #x00000000 (0), #x00000000 (0) >   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %r.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n```\nand the suffix:\n```cpp\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n    Builder.SetInsertPoint(EI);\n    Value *GEP =\n        Builder.CreateInBoundsGEP(VecTy, Ptr, {Builder.getInt32(0), Idx});\n    auto *NewLoad = cast<LoadInst>(Builder.CreateLoad(\n        VecTy->getElementType(), GEP, EI->getName() + \".scalar\"));\n\n    Align ScalarOpAlignment = computeAlignmentAfterScalarization(\n        LI->getAlign(), VecTy->getElementType(), Idx, *DL);\n    NewLoad->setAlignment(ScalarOpAlignment);\n\n    replaceValue(*EI, *NewLoad);\n  }\n\n  FailureGuard.release();\n  return true;\n}\n\n/// Try to convert \"shuffle (binop), (binop)\" with a shared binop operand into\n/// \"binop (shuffle), (shuffle)\".\nbool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n  auto *VecTy = cast<FixedVectorType>(I.getType());\n  BinaryOperator *B0, *B1;\n  ArrayRef<int> Mask;\n  if (!match(&I, m_Shuffle(m_OneUse(m_BinOp(B0)), m_OneUse(m_BinOp(B1)),\n                           m_Mask(Mask))) ||\n      B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n    return false;\n\n  // Try to replace a binop with a shuffle if the shuffle is not costly.\n  // The new shuffle will choose from a single, common operand, so it may be\n  // cheaper than the existing two-operand shuffle.\n  SmallVector<int> UnaryMask = createUnaryMask(Mask, Mask.size());\n  Instruction::BinaryOps Opcode = B0->getOpcode();\n  InstructionCost BinopCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  InstructionCost ShufCost = TTI.getShuffleCost(\n      TargetTransformInfo::SK_PermuteSingleSrc, VecTy, UnaryMask);\n  if (ShufCost > BinopCost)\n    return false;\n\n  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n  Value *X = B0->getOperand(0), *Y = B0->getOperand(1);\n  Value *Z = B1->getOperand(0), *W = B1->getOperand(1);\n  if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n    std::swap(X, Y);\n\n  Value *Shuf0, *Shuf1;\n  if (X == Z) {\n    // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n    Shuf0 = Builder.CreateShuffleVector(X, UnaryMask);\n    Shuf1 = Builder.CreateShuffleVector(Y, W, Mask);\n  } else if (Y == W) {\n    // shuf (bo X, Y), (bo Z, Y) --> bo (shuf X, Z), (shuf Y)\n    Shuf0 = Builder.CreateShuffleVector(X, Z, Mask);\n    Shuf1 = Builder.CreateShuffleVector(Y, UnaryMask);\n  } else {\n    return false;\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @shuf_srem_v4i32_poison -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) {\n  %srem0 = srem <4 x i32> %a1, %a0\n  %srem1 = srem <4 x i32> splat (i32 1), %a0\n  %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  ret <4 x i32> %r\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) #0 {\n  %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  %r = srem <4 x i32> %1, %2\n  ret <4 x i32> %r\n}\n\nattributes #0 = { \"target-features\"=\"+sse2\" }\n\nWHAT THE TRANSFORMATION CHANGED:\n  modified:\n    %r\n      source: %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n      target: %r = srem <4 x i32> %1, %2\n  only in target:\n    %1: %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n    %2: %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  only in source:\n    %srem0: %srem0 = srem <4 x i32> %a1, %a0\n    %srem1: %srem1 = srem <4 x i32> splat (i32 1), %a0\n\nCRITICAL VALUES:\n    %r\n    %srem0\n    %srem1\n\nDEPENDENCY CHAIN (source):\n    %srem0 = srem <4 x i32> %a1, %a0\n    %srem1 = srem <4 x i32> splat (i32 1), %a0\n    %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    <4 x i32> %a0 = < #x00000001 (1), #x00000001 (1), #x00000001 (1), #x00000001 (1) >\n    <4 x i32> %a1 = < #x00000000 (0), #x00000000 (0), #x00000000 (0), #x00000000 (0) >\n\nDIVERGENCE (source vs target on that input):\n    %r: source = < #x00000000 (0), poison, #x00000000 (0), #x00000000 (0) >   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %r.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n```\nand the suffix:\n```cpp\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n    Builder.SetInsertPoint(EI);\n    Value *GEP =\n        Builder.CreateInBoundsGEP(VecTy, Ptr, {Builder.getInt32(0), Idx});\n    auto *NewLoad = cast<LoadInst>(Builder.CreateLoad(\n        VecTy->getElementType(), GEP, EI->getName() + \".scalar\"));\n\n    Align ScalarOpAlignment = computeAlignmentAfterScalarization(\n        LI->getAlign(), VecTy->getElementType(), Idx, *DL);\n    NewLoad->setAlignment(ScalarOpAlignment);\n\n    replaceValue(*EI, *NewLoad);\n  }\n\n  FailureGuard.release();\n  return true;\n}\n\n/// Try to convert \"shuffle (binop), (binop)\" with a shared binop operand into\n/// \"binop (shuffle), (shuffle)\".\nbool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n  auto *VecTy = cast<FixedVectorType>(I.getType());\n  BinaryOperator *B0, *B1;\n  ArrayRef<int> Mask;\n  if (!match(&I, m_Shuffle(m_OneUse(m_BinOp(B0)), m_OneUse(m_BinOp(B1)),\n                           m_Mask(Mask))) ||\n      B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n    return false;\n\n  // Try to replace a binop with a shuffle if the shuffle is not costly.\n  // The new shuffle will choose from a single, common operand, so it may be\n  // cheaper than the existing two-operand shuffle.\n  SmallVector<int> UnaryMask = createUnaryMask(Mask, Mask.size());\n  Instruction::BinaryOps Opcode = B0->getOpcode();\n  InstructionCost BinopCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  InstructionCost ShufCost = TTI.getShuffleCost(\n      TargetTransformInfo::SK_PermuteSingleSrc, VecTy, UnaryMask);\n  if (ShufCost > BinopCost)\n    return false;\n\n  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n  Value *X = B0->getOperand(0), *Y = B0->getOperand(1);\n  Value *Z = B1->getOperand(0), *W = B1->getOperand(1);\n  if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n    std::swap(X, Y);\n\n  Value *Shuf0, *Shuf1;\n  if (X == Z) {\n    // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n    Shuf0 = Builder.CreateShuffleVector(X, UnaryMask);\n    Shuf1 = Builder.CreateShuffleVector(Y, W, Mask);\n  } else if (Y == W) {\n    // shuf (bo X, Y), (bo Z, Y) --> bo (shuf X, Z), (shuf Y)\n    Shuf0 = Builder.CreateShuffleVector(X, Z, Mask);\n    Shuf1 = Builder.CreateShuffleVector(Y, UnaryMask);\n  } else {\n    return false;\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @shuf_srem_v4i32_poison -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) {\n  %srem0 = srem <4 x i32> %a1, %a0\n  %srem1 = srem <4 x i32> splat (i32 1), %a0\n  %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  ret <4 x i32> %r\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) #0 {\n  %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  %r = srem <4 x i32> %1, %2\n  ret <4 x i32> %r\n}\n\nattributes #0 = { \"target-features\"=\"+sse2\" }\n\nWHAT THE TRANSFORMATION CHANGED:\n  modified:\n    %r\n      source: %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n      target: %r = srem <4 x i32> %1, %2\n  only in target:\n    %1: %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n    %2: %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  only in source:\n    %srem0: %srem0 = srem <4 x i32> %a1, %a0\n    %srem1: %srem1 = srem <4 x i32> splat (i32 1), %a0\n\nCRITICAL VALUES:\n    %r\n    %srem0\n    %srem1\n\nDEPENDENCY CHAIN (source):\n    %srem0 = srem <4 x i32> %a1, %a0\n    %srem1 = srem <4 x i32> splat (i32 1), %a0\n    %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    <4 x i32> %a0 = < #x00000001 (1), #x00000001 (1), #x00000001 (1), #x00000001 (1) >\n    <4 x i32> %a1 = < #x00000000 (0), #x00000000 (0), #x00000000 (0), #x00000000 (0) >\n\nDIVERGENCE (source vs target on that input):\n    %r: source = < #x00000000 (0), poison, #x00000000 (0), #x00000000 (0) >   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %r.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n```\nand the suffix:\n```cpp\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n    Builder.SetInsertPoint(EI);\n    Value *GEP =\n        Builder.CreateInBoundsGEP(VecTy, Ptr, {Builder.getInt32(0), Idx});\n    auto *NewLoad = cast<LoadInst>(Builder.CreateLoad(\n        VecTy->getElementType(), GEP, EI->getName() + \".scalar\"));\n\n    Align ScalarOpAlignment = computeAlignmentAfterScalarization(\n        LI->getAlign(), VecTy->getElementType(), Idx, *DL);\n    NewLoad->setAlignment(ScalarOpAlignment);\n\n    replaceValue(*EI, *NewLoad);\n  }\n\n  FailureGuard.release();\n  return true;\n}\n\n/// Try to convert \"shuffle (binop), (binop)\" with a shared binop operand into\n/// \"binop (shuffle), (shuffle)\".\nbool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n  auto *VecTy = cast<FixedVectorType>(I.getType());\n  BinaryOperator *B0, *B1;\n  ArrayRef<int> Mask;\n  if (!match(&I, m_Shuffle(m_OneUse(m_BinOp(B0)), m_OneUse(m_BinOp(B1)),\n                           m_Mask(Mask))) ||\n      B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n    return false;\n\n  // Try to replace a binop with a shuffle if the shuffle is not costly.\n  // The new shuffle will choose from a single, common operand, so it may be\n  // cheaper than the existing two-operand shuffle.\n  SmallVector<int> UnaryMask = createUnaryMask(Mask, Mask.size());\n  Instruction::BinaryOps Opcode = B0->getOpcode();\n  InstructionCost BinopCost = TTI.getArithmeticInstrCost(Opcode, VecTy);\n  InstructionCost ShufCost = TTI.getShuffleCost(\n      TargetTransformInfo::SK_PermuteSingleSrc, VecTy, UnaryMask);\n  if (ShufCost > BinopCost)\n    return false;\n\n  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n  Value *X = B0->getOperand(0), *Y = B0->getOperand(1);\n  Value *Z = B1->getOperand(0), *W = B1->getOperand(1);\n  if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n    std::swap(X, Y);\n\n  Value *Shuf0, *Shuf1;\n  if (X == Z) {\n    // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n    Shuf0 = Builder.CreateShuffleVector(X, UnaryMask);\n    Shuf1 = Builder.CreateShuffleVector(Y, W, Mask);\n  } else if (Y == W) {\n    // shuf (bo X, Y), (bo Z, Y) --> bo (shuf X, Z), (shuf Y)\n    Shuf0 = Builder.CreateShuffleVector(X, Z, Mask);\n    Shuf1 = Builder.CreateShuffleVector(Y, UnaryMask);\n  } else {\n    return false;\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @shuf_srem_v4i32_poison -- Source is more defined than target\n\nVIOLATED PROPERTY:\n    UB refinement\n\nSOURCE (pre-transformation IR):\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) {\n  %srem0 = srem <4 x i32> %a1, %a0\n  %srem1 = srem <4 x i32> splat (i32 1), %a0\n  %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  ret <4 x i32> %r\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-unknown-unknown\"\n\ndefine <4 x i32> @shuf_srem_v4i32_poison(<4 x i32> %a0, <4 x i32> %a1) #0 {\n  %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n  %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  %r = srem <4 x i32> %1, %2\n  ret <4 x i32> %r\n}\n\nattributes #0 = { \"target-features\"=\"+sse2\" }\n\nWHAT THE TRANSFORMATION CHANGED:\n  modified:\n    %r\n      source: %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n      target: %r = srem <4 x i32> %1, %2\n  only in target:\n    %1: %1 = shufflevector <4 x i32> %a1, <4 x i32> <i32 1, i32 1, i32 1, i32 1>, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n    %2: %2 = shufflevector <4 x i32> %a0, <4 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 2, i32 3>\n  only in source:\n    %srem0: %srem0 = srem <4 x i32> %a1, %a0\n    %srem1: %srem1 = srem <4 x i32> splat (i32 1), %a0\n\nCRITICAL VALUES:\n    %r\n    %srem0\n    %srem1\n\nDEPENDENCY CHAIN (source):\n    %srem0 = srem <4 x i32> %a1, %a0\n    %srem1 = srem <4 x i32> splat (i32 1), %a0\n    %r = shufflevector <4 x i32> %srem0, <4 x i32> %srem1, <4 x i32> <i32 0, i32 poison, i32 6, i32 3>\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    <4 x i32> %a0 = < #x00000001 (1), #x00000001 (1), #x00000001 (1), #x00000001 (1) >\n    <4 x i32> %a1 = < #x00000000 (0), #x00000000 (0), #x00000000 (0), #x00000000 (0) >\n\nDIVERGENCE (source vs target on that input):\n    %r: source = < #x00000000 (0), poison, #x00000000 (0), #x00000000 (0) >   target = UB triggered!\n\nINTERPRETATION:\n    A transformation may not introduce undefined behaviour. Any execution that is UB-free in the source must remain UB-free in the target.\n    The earliest reported divergence is at %r.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    // Insert 'freeze' for poison indexes.\n    auto It = NeedFreeze.find(EI);\n    if (It != NeedFreeze.end())\n      It->second.freeze(Builder, *cast<Instruction>(Idx));\n\n```\nand the suffix:\n```cpp\n  }\n\n  Value *NewBO = Builder.CreateBinOp(Opcode, Shuf0, Shuf1);\n  // Intersect flags from the old binops.\n  if (auto *NewInst = dyn_cast<Instruction>(NewBO)) {\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "VectorCombine"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 3
+  }
+}

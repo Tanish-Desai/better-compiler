@@ -1,0 +1,219 @@
+{
+  "bug_id": "126974",
+  "condition": "raw-structured",
+  "model": "qwen2.5-coder-14b",
+  "max_iterations": 4,
+  "trial": 3,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 2048.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "llm_prompt_tokens": 15412,
+    "llm_completion_tokens": 2780,
+    "wall_seconds": 273.079
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "raw-structured",
+      "fixed": false,
+      "seconds": 58.34,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 2045,
+        "prompt_tokens_est": 512,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "original_lines": 28,
+        "original_instructions": 10,
+        "original_blocks": 6,
+        "original_values": 6,
+        "original_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 1609,
+        "completion_tokens": 695
+      }
+    },
+    {
+      "index": 1,
+      "condition": "raw-structured",
+      "fixed": false,
+      "seconds": 61.252,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 2045,
+        "prompt_tokens_est": 512,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "original_lines": 28,
+        "original_instructions": 10,
+        "original_blocks": 6,
+        "original_values": 6,
+        "original_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 3105,
+        "completion_tokens": 695
+      }
+    },
+    {
+      "index": 2,
+      "condition": "raw-structured",
+      "fixed": false,
+      "seconds": 59.703,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 2045,
+        "prompt_tokens_est": 512,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "original_lines": 28,
+        "original_instructions": 10,
+        "original_blocks": 6,
+        "original_values": 6,
+        "original_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 4601,
+        "completion_tokens": 695
+      }
+    },
+    {
+      "index": 3,
+      "condition": "raw-structured",
+      "fixed": false,
+      "seconds": 60.543,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 2045,
+        "prompt_tokens_est": 512,
+        "shown_lines": 28,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 6,
+        "shown_chars": 1105,
+        "original_lines": 28,
+        "original_instructions": 10,
+        "original_blocks": 6,
+        "original_values": 6,
+        "original_chars": 1105,
+        "counterexample": true,
+        "failed_test": "pr126974"
+      },
+      "llm": {
+        "prompt_tokens": 6097,
+        "completion_tokens": 695
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 105.96298813819885,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-02-12+0000"
+      ],
+      [
+        "hint:components",
+        "2025-02-12+0000"
+      ],
+      [
+        "alive2",
+        "2025-02-12+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-02-12+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-02-12+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "patch": "diff --git a/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp b/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp\nindex 96d6db2ba5bf..04d6f67d7aa6 100644\n--- a/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp\n+++ b/llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp\n@@ -5604,6 +5604,7 @@ Instruction *InstCombinerImpl::foldICmpBinOp(ICmpInst &I,\n     return replaceInstUsesWith(I, V);\n \n   if (Value *V = foldShiftIntoShiftInAnotherHandOfAndInICmp(I, SQ, Builder))\n+\n     return replaceInstUsesWith(I, V);\n \n   return nullptr;\n@@ -5670,6 +5671,7 @@ Instruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n     }\n     // Otherwise (X != Z):\n     ICmpInst::Predicate NewPred = MinMax->getPredicate();\n+\n     auto MinMaxCmpXZ = IsCondKnownTrue(simplifyICmpInst(NewPred, X, Z, Q));\n     if (!MinMaxCmpXZ.has_value()) {\n       std::swap(X, Y);\n",
+    "log": {
+      "model": "qwen2.5-coder-14b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in InstCombine.\nIssue title: [RISC-V] Miscompile using rv64gcv\nDetailed information:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @pr126974 -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n  %cmp = icmp samesign ult i8 %umax, -32\n  ret i1 %cmp\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  ret i1 false\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in source:\n    %umax: %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp: %cmp = icmp samesign ult i8 %umax, -32\n\nCRITICAL VALUES:\n    %cmp\n    %umax\n\nDEPENDENCY CHAIN (source):\n    %cond = icmp sgt i8 %x, -2\n    %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp = icmp samesign ult i8 %umax, -32\n\nCONTROL FLOW (blocks entered by the failing execution):\n    %if.then\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = #x00 (0)\n\nDIVERGENCE (source vs target on that input):\n    (none)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x1 (1) while the target yields #x0 (0).\n\nPlease modify the following code in llvm/lib/Transforms/InstCombine/InstCombineCompares.cpp to fix the bug:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @pr126974 -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n  %cmp = icmp samesign ult i8 %umax, -32\n  ret i1 %cmp\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  ret i1 false\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in source:\n    %umax: %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp: %cmp = icmp samesign ult i8 %umax, -32\n\nCRITICAL VALUES:\n    %cmp\n    %umax\n\nDEPENDENCY CHAIN (source):\n    %cond = icmp sgt i8 %x, -2\n    %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp = icmp samesign ult i8 %umax, -32\n\nCONTROL FLOW (blocks entered by the failing execution):\n    %if.then\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = #x00 (0)\n\nDIVERGENCE (source vs target on that input):\n    (none)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x1 (1) while the target yields #x0 (0).\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @pr126974 -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n  %cmp = icmp samesign ult i8 %umax, -32\n  ret i1 %cmp\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  ret i1 false\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in source:\n    %umax: %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp: %cmp = icmp samesign ult i8 %umax, -32\n\nCRITICAL VALUES:\n    %cmp\n    %umax\n\nDEPENDENCY CHAIN (source):\n    %cond = icmp sgt i8 %x, -2\n    %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp = icmp samesign ult i8 %umax, -32\n\nCONTROL FLOW (blocks entered by the failing execution):\n    %if.then\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = #x00 (0)\n\nDIVERGENCE (source vs target on that input):\n    (none)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x1 (1) while the target yields #x0 (0).\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @pr126974 -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n  %cmp = icmp samesign ult i8 %umax, -32\n  ret i1 %cmp\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  ret i1 false\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in source:\n    %umax: %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp: %cmp = icmp samesign ult i8 %umax, -32\n\nCRITICAL VALUES:\n    %cmp\n    %umax\n\nDEPENDENCY CHAIN (source):\n    %cond = icmp sgt i8 %x, -2\n    %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp = icmp samesign ult i8 %umax, -32\n\nCONTROL FLOW (blocks entered by the failing execution):\n    %if.then\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = #x00 (0)\n\nDIVERGENCE (source vs target on that input):\n    (none)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x1 (1) while the target yields #x0 (0).\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n/// Fold icmp Pred min|max(X, Y), Z.\nInstruction *InstCombinerImpl::foldICmpWithMinMax(Instruction &I,\n                                                  MinMaxIntrinsic *MinMax,\n                                                  Value *Z, CmpPredicate Pred) {\n  Value *X = MinMax->getLHS();\n  Value *Y = MinMax->getRHS();\n  if (ICmpInst::isSigned(Pred) && !MinMax->isSigned())\n    return nullptr;\n  if (ICmpInst::isUnsigned(Pred) && MinMax->isSigned()) {\n    // Revert the transform signed pred -> unsigned pred\n    // TODO: We can flip the signedness of predicate if both operands of icmp\n    // are negative.\n    if (isKnownNonNegative(Z, SQ.getWithInstruction(&I)) &&\n        isKnownNonNegative(MinMax, SQ.getWithInstruction(&I))) {\n      Pred = ICmpInst::getFlippedSignednessPredicate(Pred);\n    } else\n      return nullptr;\n  }\n  SimplifyQuery Q = SQ.getWithInstruction(&I);\n  auto IsCondKnownTrue = [](Value *Val) -> std::optional<bool> {\n    if (!Val)\n      return std::nullopt;\n    if (match(Val, m_One()))\n      return true;\n    if (match(Val, m_Zero()))\n      return false;\n    return std::nullopt;\n  };\n  auto CmpXZ = IsCondKnownTrue(simplifyICmpInst(Pred, X, Z, Q));\n  auto CmpYZ = IsCondKnownTrue(simplifyICmpInst(Pred, Y, Z, Q));\n  if (!CmpXZ.has_value() && !CmpYZ.has_value())\n    return nullptr;\n  if (!CmpXZ.has_value()) {\n    std::swap(X, Y);\n    std::swap(CmpXZ, CmpYZ);\n  }\n\n  auto FoldIntoCmpYZ = [&]() -> Instruction * {\n    if (CmpYZ.has_value())\n      return replaceInstUsesWith(I, ConstantInt::getBool(I.getType(), *CmpYZ));\n    return ICmpInst::Create(Instruction::ICmp, Pred, Y, Z);\n  };\n\n  switch (Pred) {\n  case ICmpInst::ICMP_EQ:\n  case ICmpInst::ICMP_NE: {\n    // If X == Z:\n    //     Expr       Result\n    // min(X, Y) == Z X <= Y\n    // max(X, Y) == Z X >= Y\n    // min(X, Y) != Z X > Y\n    // max(X, Y) != Z X < Y\n    if ((Pred == ICmpInst::ICMP_EQ) == *CmpXZ) {\n      ICmpInst::Predicate NewPred =\n          ICmpInst::getNonStrictPredicate(MinMax->getPredicate());\n      if (Pred == ICmpInst::ICMP_NE)\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @pr126974 -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n  %cmp = icmp samesign ult i8 %umax, -32\n  ret i1 %cmp\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @pr126974(i8 %x) {\nentry:\n  %cond = icmp sgt i8 %x, -2\n  br i1 %cond, label %if.then, label %if.else\n\nif.then:                                          ; preds = %entry\n  ret i1 false\n\nif.else:                                          ; preds = %entry\n  ret i1 false\n}\n\n; Function Attrs: nocallback nosync nounwind speculatable willreturn memory(none)\ndeclare i8 @llvm.umax.i8(i8, i8) #0\n\nattributes #0 = { nocallback nosync nounwind speculatable willreturn memory(none) }\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in source:\n    %umax: %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp: %cmp = icmp samesign ult i8 %umax, -32\n\nCRITICAL VALUES:\n    %cmp\n    %umax\n\nDEPENDENCY CHAIN (source):\n    %cond = icmp sgt i8 %x, -2\n    %umax = call i8 @llvm.umax.i8(i8 %x, i8 -46)\n    %cmp = icmp samesign ult i8 %umax, -32\n\nCONTROL FLOW (blocks entered by the failing execution):\n    %if.then\n\nCOUNTEREXAMPLE INPUT:\n    i8 %x = #x00 (0)\n\nDIVERGENCE (source vs target on that input):\n    (none)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x1 (1) while the target yields #x0 (0).\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nPlease make sure the answer includes the prefix:\n```cpp\n    return replaceInstUsesWith(I, V);\n\n  return nullptr;\n}\n\n```\nand the suffix:\n```cpp\n        NewPred = ICmpInst::getInversePredicate(NewPred);\n      return ICmpInst::Create(Instruction::ICmp, NewPred, X, Y);\n    }\n    // Otherwise (X != Z):\n    ICmpInst::Predicate NewPred = MinMax->getPredicate();\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "InstCombine"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 3
+  }
+}
