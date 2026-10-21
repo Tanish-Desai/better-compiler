@@ -1,8 +1,9 @@
 # Running the sweep, day to day
 
-**Active Qwen v2 sweep, 2026-10-21:**
-[`SWEEP_COMPLETION_PLAN.md`](SWEEP_COMPLETION_PLAN.md) has the current audit
-commands and completion plan. It preserves the running experiment.
+**Current H100 procedure, 2026-10-22:** [H100_V3.md](H100_V3.md) has the
+known-patch check, six-cell pilot and frozen 288-cell follow-up. Pause v2 at a
+completed-cell boundary and preserve its data. Earlier sweep commands below
+describe the original schedule and are superseded for new v3 evaluation.
 
 **Recovering the uploaded mixed-model H100 run?** Follow
 [`H100_RECOVERY.md`](H100_RECOVERY.md) first. Changing the model requires a

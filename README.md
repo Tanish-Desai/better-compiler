@@ -142,6 +142,11 @@ through unchanged, so a loop can route all its feedback through it.
 
 ## Running the experiment
 
+**Current H100 procedure (2026-10-22):** follow
+[docs/H100_V3.md](docs/H100_V3.md). The v2 snapshot exposed harness faults;
+its descriptive outcomes are in `our_paper/`, and its records remain intact.
+Validate the revised pilot before launching the frozen 288-cell follow-up.
+
 Needs `opt` built for each bug's `base_commit` and a model endpoint. The
 runner is an OpenAI-compatible client, so a local vLLM server is a drop-in.
 See [`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md) for which model and how
@@ -149,20 +154,19 @@ to serve it.
 
 ```bash
 export LAB_LLM_URL=http://<h100-host>:8000/v1   # LAB_LLVM_* are set in the image
-export LAB_LLM_TOKEN=... LAB_LLM_MODEL=... LAB_LLM_TEMP=0.8
+export LAB_LLM_TOKEN=... LAB_LLM_MODEL=qwen3-coder-30b LAB_LLM_TEMP=0.8
+export LAB_LLM_MAX_TOKENS=8192
 
-python3 scripts/check_llm_endpoint.py           # preflight, seconds not hours
+python3 scripts/check_llm_endpoint.py --repair-format
 
-python3 examples/repair_experiment.py --sample --repeat 3 --out results/ \
-    --condition baseline raw-plain generic-plain llvmreduce-plain iraware-plain \
-                raw-structured generic-structured llvmreduce-structured \
-                iraware-structured
+python3 examples/repair_experiment.py --protocol data/repair_v3_protocol.json \
+    --out results-qwen3-v3 --plan
+# After the known-patch check and pilot in H100_V3.md pass, omit --plan.
 
-python3 examples/repair_experiment.py --sample --repeat 3 --out results/ \
-    --no-promotion --condition iraware-plain iraware-structured
-
-python3 examples/summarize_results.py results/
-python3 examples/analyze_significance.py results/
+python3 examples/summarize_results.py results-qwen3-v3 \
+    --protocol data/repair_v3_protocol.json
+python3 examples/analyze_significance.py results-qwen3-v3 \
+    --protocol data/repair_v3_protocol.json --final
 ```
 
 Passing every condition to one invocation runs the sweep **bug-major**: all

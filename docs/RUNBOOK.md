@@ -1,5 +1,10 @@
 # Runbook: running the sweep on the H100 server
 
+**2026-10-22 update:** [H100_V3.md](H100_V3.md) is the current pilot and
+evaluation procedure after the v2 audit. Preserve old results and use a fresh
+v3 directory. The setup below remains useful; its original sweep schedule is
+historical.
+
 **What this is:** the end-to-end procedure for actually running the experiment,
 from a bare server to a results table. It assumes no prior knowledge of the
 repo's internals — follow it top to bottom.
