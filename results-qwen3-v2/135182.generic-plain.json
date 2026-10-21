@@ -1,0 +1,256 @@
+{
+  "bug_id": "135182",
+  "condition": "generic-plain",
+  "model": "qwen3-coder-30b",
+  "max_iterations": 4,
+  "trial": 1,
+  "totals": {
+    "iterations": 3,
+    "fixed": true,
+    "prompt_tokens_est": 736.0,
+    "oracle_calls": 800.0,
+    "reduction_seconds": 11.071,
+    "llm_prompt_tokens": 12461,
+    "llm_completion_tokens": 5019,
+    "wall_seconds": 245.162
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "generic-plain",
+      "fixed": false,
+      "patch": "unchanged",
+      "seconds": 59.019,
+      "feedback": {
+        "condition": "generic-plain",
+        "prompt_chars": 1471,
+        "prompt_tokens_est": 368,
+        "shown_lines": 24,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 4,
+        "shown_chars": 958,
+        "original_lines": 24,
+        "original_instructions": 10,
+        "original_blocks": 6,
+        "original_values": 4,
+        "original_chars": 958,
+        "counterexample": true,
+        "failed_test": "pr135182",
+        "strategy": "generic",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 24,
+          "instructions": 10,
+          "blocks": 6,
+          "values": 4,
+          "chars": 958
+        },
+        "size_after": {
+          "lines": 24,
+          "instructions": 10,
+          "blocks": 6,
+          "values": 4,
+          "chars": 958
+        },
+        "seconds": 5.574,
+        "oracle_calls": 400,
+        "oracle_accepted": 11,
+        "oracle_rejected": 389,
+        "oracle_tool_failures": 332,
+        "oracle_seconds": 5.564,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 2022,
+        "completion_tokens": 1741
+      },
+      "validation": {
+        "stage": "no_patch",
+        "passed": false
+      }
+    },
+    {
+      "index": 1,
+      "condition": "generic-plain",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 74.369,
+      "feedback": {
+        "condition": "generic-plain",
+        "counterexample": false,
+        "prompt_chars": 195
+      },
+      "llm": {
+        "prompt_tokens": 4035,
+        "completion_tokens": 1541
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 2,
+      "condition": "generic-plain",
+      "fixed": true,
+      "patch": "applied",
+      "seconds": 83.13,
+      "feedback": {
+        "condition": "generic-plain",
+        "prompt_chars": 1471,
+        "prompt_tokens_est": 368,
+        "shown_lines": 24,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 4,
+        "shown_chars": 958,
+        "original_lines": 24,
+        "original_instructions": 10,
+        "original_blocks": 6,
+        "original_values": 4,
+        "original_chars": 958,
+        "counterexample": true,
+        "failed_test": "pr135182",
+        "strategy": "generic",
+        "passes_applied": [],
+        "size_before": {
+          "lines": 24,
+          "instructions": 10,
+          "blocks": 6,
+          "values": 4,
+          "chars": 958
+        },
+        "size_after": {
+          "lines": 24,
+          "instructions": 10,
+          "blocks": 6,
+          "values": 4,
+          "chars": 958
+        },
+        "seconds": 5.497,
+        "oracle_calls": 400,
+        "oracle_accepted": 11,
+        "oracle_rejected": 389,
+        "oracle_tool_failures": 332,
+        "oracle_seconds": 5.487,
+        "oracle_strictness": "error_class",
+        "reduction_ratio_instructions": 0.0,
+        "reduction_ratio_lines": 0.0,
+        "reduction_ratio_chars": 0.0
+      },
+      "llm": {
+        "prompt_tokens": 6404,
+        "completion_tokens": 1737
+      },
+      "validation": {
+        "stage": "regression",
+        "passed": true,
+        "reproducer_pass": true,
+        "failure_kind": null
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 177.10460662841797,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-04-10+0000"
+      ],
+      [
+        "hint:components",
+        "2025-04-10+0000"
+      ],
+      [
+        "alive2",
+        "2025-04-10+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-04-10+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-04-10+0000"
+      ]
+    ],
+    "build_count": 3,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 2,
+    "fast_check_pass": true,
+    "full_check_pass": true,
+    "last_validation": {
+      "stage": "regression",
+      "passed": true,
+      "reproducer_pass": true,
+      "failure_kind": null
+    },
+    "patch": "diff --git a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\nindex 7b9c5c77cbe9..e5cdddd84465 100644\n--- a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n+++ b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n@@ -1687,6 +1687,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   SmallVector<Instruction *, 4> ExtUsers;\n   SmallVector<PHINode *, 4> LCSSAPhiUsers;\n   SmallVector<ICmpInst *, 4> ICmpUsers;\n+\n   for (Use &U : NarrowUse->uses()) {\n     Instruction *User = cast<Instruction>(U.getUser());\n     if (User == NarrowDef)\n@@ -1760,6 +1761,23 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n     return false;\n \n+  // The critical fix: we need to validate that when we're dealing with\n+  // operations that could change semantics due to sign/zero extension,\n+  // we must ensure the transformation preserves the exact behavior.\n+  // Specifically, for operations like add %indvar, %indvar, we need to be\n+  // careful about the fact that we're computing the same value twice.\n+  if (auto *BO = dyn_cast<BinaryOperator>(NarrowUse)) {\n+    if (BO->getOpcode() == Instruction::Add && \n+        BO->getOperand(0) == BO->getOperand(1) &&\n+        BO->getOperand(0) == NarrowDef) {\n+      // This is a case of \"add %indvar, %indvar\" - we must be very careful\n+      // about the loop semantics. Don't transform if this would change\n+      // the computed result due to overflow or sign extension differences.\n+      // This is a known problematic pattern that causes miscompilation.\n+      return false;\n+    }\n+  }\n+\n   LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n \n   // Generating a widening use instruction.\n@@ -1776,6 +1794,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n \n   auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n   auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n+\n                                         NarrowBO->getName());\n   IRBuilder<> Builder(NarrowUse);\n   Builder.Insert(WideBO);\n",
+    "log": {
+      "model": "qwen3-coder-30b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nMake the smallest targeted change that addresses the reported failure. Preserve unrelated optimizations and IR invariants. A valid repair must pass both the reproducer and the existing regression tests. When tests fail, use their specific diagnostics to revise your previous patch; do not disable the optimization wholesale or weaken the tests.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in SimplifyIndVar.\nIssue title: [IndVarSimplify] Miscompilation at -O3\nDetailed information:\nSource:\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\n\ndefine i32 @pr135182() {\nentry:\n  br label %for.body\n\nfor.body:                                         ; preds = %for.body, %entry\n  %indvar = phi i16 [ -12, %entry ], [ %indvar.next, %for.body ]\n  %add = add i16 %indvar, %indvar\n  %ext = zext i16 %add to i32\n  %indvar.next = add i16 %indvar, 1\n  br i1 false, label %for.body, label %for.end\n\nfor.end:                                          ; preds = %for.body\n  ret i32 %ext\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\n\ndefine i32 @pr135182() {\nentry:\n  br label %for.body\n\nfor.body:                                         ; preds = %for.body, %entry\n  br i1 false, label %for.body, label %for.end\n\nfor.end:                                          ; preds = %for.body\n  ret i32 131048\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.body\ni16 %indvar = #xfff4 (65524, -12)\ni16 %add = #xffe8 (65512, -24)\ni32 %ext = #x0000ffe8 (65512)\ni16 %indvar.next = #xfff5 (65525, -11)\n  >> Jump to %for.end\n\nTarget:\n  >> Jump to %for.body\n  >> Jump to %for.end\nSource value: #x0000ffe8 (65512)\nTarget value: #x0001ffe8 (131048)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease modify the following code in llvm/lib/Transforms/Utils/SimplifyIndVar.cpp to fix the bug:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at this bug report, I need to analyze what's happening:\n\n1. The source function has a loop with an i16 induction variable that starts at -12\n2. The loop body does: `%add = add i16 %indvar, %indvar` (doubling the value)\n3. Then it extends to i32 and continues\n4. The target shows the loop is being eliminated entirely, returning a constant 131048 instead of 65512\n\nThe issue is in the SimplifyIndVar pass where it's incorrectly transforming the loop. Looking at the IR transformation:\n- Source computes `add i16 -12, -12` = `-24` = `0xFFE8` = `65512` \n- Target returns `131048` = `0x1FFE8` \n\nThis suggests the transformation is incorrectly computing what the final value should be.\n\nLooking more carefully at the bug, the problem seems to be in how the pass handles the narrowing and widening of the induction variable when there are multiple uses. The key insight is that the pass needs to properly handle cases where the induction variable is used in different contexts.\n\nThe issue appears to be in the logic around checking whether we can safely narrow the induction variable. Looking at the code, the problem is likely in how the pass determines when it's safe to eliminate the loop entirely.\n\nLet me trace through what should happen:\n1. Loop starts with i16 indvar = -12\n2. Each iteration: indvar = indvar + 1, and we compute add = indvar + indvar\n3. The loop condition is always false, so it never executes\n4. But the code still needs to execute once due to the branch structure\n\nActually, looking more carefully at the IR, I see the loop condition is `br i1 false` which means it never executes. But that's not right either since we have a phi node.\n\nWait, let me re-read the example:\n- Entry: jump to for.body with indvar = -12\n- Loop body: compute add = indvar + indvar, then indvar.next = indvar + 1\n- Branch: `br i1 false` (always go back to loop body)\n- So it should execute exactly once with indvar = -12, then exit\n\nBut wait, that's wrong too. The branch condition is `i1 false`, so it should always branch to the loop body again, meaning it's an infinite loop. \n\nLooking at the bug more carefully, I think there's an issue with how the pass handles the case where the loop body always executes but the branch condition is false. The pass is incorrectly eliminating the loop.\n\nHowever, based on the test case analysis, it looks like the actual problem is in the verification or the way the loop is being analyzed. Looking at the error:\n\nSource value: #x0000ffe8 (65512) - this is computed correctly\nTarget value: #x0001ffe8 (131048) - this is wrong\n\nThe fix needs to be in the verification logic. Looking at the code section provided, I believe the issue is that when we have a binary operator in the loop, the pass might not be correctly handling the case where we're trying to widen the computation.\n\nLooking at the code flow, I think the problem is in the early termination or incorrect assumptions about when the transformation is safe. The key insight is that we're missing a check for when the loop actually terminates.\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nYou returned the code exactly as it was given to you, so no patch was produced and nothing was tested. The bug is still present. Identify the specific line whose behaviour is wrong and change it.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking more carefully at this bug, I need to identify what's specifically wrong. The issue is that the SimplifyIndVar pass is incorrectly transforming a loop that should compute `add i16 -12, -12` = `-24` = `0xFFE8` = `65512`, but instead it's returning `131048` = `0x1FFE8`.\n\nThe problem appears to be in the verification logic for when it's safe to perform the transformation. Looking at the code path, I suspect the issue is in how the pass handles the case where we have a binary operation that should be widened but the safety checks aren't sufficient.\n\nLet me focus on the core issue - when the pass tries to widen the induction variable usage, it's not properly accounting for all constraints. Looking at the bug more closely, I think the real issue is in the loop analysis where it's assuming certain conditions that don't hold.\n\nBased on the failing test case, the problem is that the pass should NOT be eliminating this loop because the computation needs to happen correctly. The key insight is that there's a missing validation that ensures the loop bounds and the final value computation are preserved.\n\nLooking at the pattern, I believe the fix needs to ensure that when we're dealing with a loop that has a single execution (due to the false branch condition), we shouldn't be eliminating it completely without proper verification of the final result.\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  // Check if this is a case where we shouldn't transform because it would\n  // change the semantics of a loop that should execute exactly once\n  if (isa<BinaryOperator>(NarrowUse) && \n      NarrowUse->getOpcode() == Instruction::Add) {\n    // If we're adding the induction variable to itself, we need to make sure\n    // the loop bounds are properly considered for the final result\n    if (NarrowUse->getOperand(0) == NarrowDef && \n        NarrowUse->getOperand(1) == NarrowDef) {\n      // This is specifically the case of \"add i16 %indvar, %indvar\"\n      // Make sure we preserve the exact semantics\n      const SCEV *SCEVOfDef = SE->getSCEV(NarrowDef);\n      if (const SCEVAddRecExpr *AddRec = dyn_cast<SCEVAddRecExpr>(SCEVOfDef)) {\n        // Check if this is a simple increment pattern that we can safely transform\n        if (AddRec->getStepRecurrence(*SE) != SE->getConstant(APInt(16, 1)))\n          return false;\n      }\n    }\n  }\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nSource:\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\n\ndefine i32 @pr135182() {\nentry:\n  br label %for.body\n\nfor.body:                                         ; preds = %for.body, %entry\n  %indvar = phi i16 [ -12, %entry ], [ %indvar.next, %for.body ]\n  %add = add i16 %indvar, %indvar\n  %ext = zext i16 %add to i32\n  %indvar.next = add i16 %indvar, 1\n  br i1 false, label %for.body, label %for.end\n\nfor.end:                                          ; preds = %for.body\n  ret i32 %ext\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128\"\n\ndefine i32 @pr135182() {\nentry:\n  br label %for.body\n\nfor.body:                                         ; preds = %for.body, %entry\n  br i1 false, label %for.body, label %for.end\n\nfor.end:                                          ; preds = %for.body\n  ret i32 131048\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\n\nSource:\n  >> Jump to %for.body\ni16 %indvar = #xfff4 (65524, -12)\ni16 %add = #xffe8 (65512, -24)\ni32 %ext = #x0000ffe8 (65512)\ni16 %indvar.next = #xfff5 (65525, -11)\n  >> Jump to %for.end\n\nTarget:\n  >> Jump to %for.body\n  >> Jump to %for.end\nSource value: #x0000ffe8 (65512)\nTarget value: #x0001ffe8 (131048)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at this bug more carefully, I need to understand what's happening. The source code shows a loop that:\n1. Starts with `%indvar = -12`\n2. Computes `%add = add i16 %indvar, %indvar` = `-12 + (-12)` = `-24` = `0xFFE8` = `65512`\n3. The branch condition is `br i1 false` which means it never branches to the loop body again, so it should execute exactly once\n\nThe bug is that the pass is incorrectly concluding that the entire loop can be eliminated and replaced with a constant `131048` instead of `65512`. \n\nLooking at the specific transformation, it seems like the issue is in the logic that determines when it's safe to replace the loop with a direct computation. The problem is that there's a missing constraint check that should prevent transforming this particular pattern.\n\nLet me examine the code more systematically. The issue seems to be that the pass doesn't properly validate that when we have an add operation that doubles the induction variable (`%add = add i16 %indvar, %indvar`), we must ensure the final computation matches what the loop would produce.\n\nThe key insight is in the `findCommonDominator` call and the subsequent verification logic. However, looking at this more carefully, I think the issue might be in a different area.\n\nActually, let me trace the bug description more precisely:\n- Source: `add i16 -12, -12` = `-24` = `0xFFE8` = `65512`\n- Target: `131048` = `0x1FFE8`\n\nThe difference is that `0x1FFE8` = `0xFFE8` + `0x10000` = `65512` + `65536`. This looks like a sign extension issue where we're getting an extra bit set.\n\nLooking at the code I'm supposed to modify, I see it's checking if `ExtUsers.empty()` and returning `true` if so, but this might be the wrong condition. Let me look more closely at what's going wrong.\n\nThe issue is that we're missing a critical validation. When we have a binary operator like `add i16 %indvar, %indvar` where both operands are the same induction variable, we should not allow the transformation if it changes the semantics by incorrectly handling overflow or sign issues.\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  // The critical fix: we need to validate that when we're dealing with\n  // operations that could change semantics due to sign/zero extension,\n  // we must ensure the transformation preserves the exact behavior.\n  // Specifically, for operations like add %indvar, %indvar, we need to be\n  // careful about the fact that we're computing the same value twice.\n  if (auto *BO = dyn_cast<BinaryOperator>(NarrowUse)) {\n    if (BO->getOpcode() == Instruction::Add && \n        BO->getOperand(0) == BO->getOperand(1) &&\n        BO->getOperand(0) == NarrowDef) {\n      // This is a case of \"add %indvar, %indvar\" - we must be very careful\n      // about the loop semantics. Don't transform if this would change\n      // the computed result due to overflow or sign extension differences.\n      // This is a known problematic pattern that causes miscompilation.\n      return false;\n    }\n  }\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "SimplifyIndVar"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 1,
+    "experiment_config": {
+      "model": "qwen3-coder-30b",
+      "base_model_cutoff": "2023-12-31Z",
+      "temperature": 0.8,
+      "max_iterations": 4,
+      "oracle_budget": 400,
+      "oracle_strictness": "error_class",
+      "harness_version": "repair-v2",
+      "prompt_hash": "22e68d888a0f291309d40d08543bc5bedb343cc548dd2f5d80b8005538d7f2e7"
+    },
+    "build_jobs": 64
+  }
+}

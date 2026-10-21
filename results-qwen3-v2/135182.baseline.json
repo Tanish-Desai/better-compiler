@@ -1,0 +1,237 @@
+{
+  "bug_id": "135182",
+  "condition": "baseline",
+  "model": "qwen3-coder-30b",
+  "max_iterations": 4,
+  "trial": 1,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 96.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "llm_prompt_tokens": 19664,
+    "llm_completion_tokens": 4829,
+    "wall_seconds": 354.301
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "baseline",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 54.014,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 24,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 4,
+        "shown_chars": 958,
+        "counterexample": true,
+        "failed_test": "pr135182"
+      },
+      "llm": {
+        "prompt_tokens": 1449,
+        "completion_tokens": 1245
+      },
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 1,
+      "condition": "baseline",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 65.185,
+      "feedback": {
+        "condition": "baseline",
+        "counterexample": false,
+        "prompt_chars": 5967
+      },
+      "llm": {
+        "prompt_tokens": 4635,
+        "completion_tokens": 1165
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 2,
+      "condition": "baseline",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 66.229,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 24,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 4,
+        "shown_chars": 958,
+        "counterexample": true,
+        "failed_test": "pr135182"
+      },
+      "llm": {
+        "prompt_tokens": 6055,
+        "completion_tokens": 1215
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 3,
+      "condition": "baseline",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 66.394,
+      "feedback": {
+        "condition": "baseline",
+        "prompt_chars": 125,
+        "prompt_tokens_est": 32,
+        "shown_lines": 24,
+        "shown_instructions": 10,
+        "shown_blocks": 6,
+        "shown_values": 4,
+        "shown_chars": 958,
+        "counterexample": true,
+        "failed_test": "pr135182"
+      },
+      "llm": {
+        "prompt_tokens": 7525,
+        "completion_tokens": 1204
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 162.00066232681274,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-04-10+0000"
+      ],
+      [
+        "hint:components",
+        "2025-04-10+0000"
+      ],
+      [
+        "alive2",
+        "2025-04-10+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-04-10+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-04-10+0000"
+      ]
+    ],
+    "build_count": 5,
+    "build_failure_count": 1,
+    "fast_check_count": 1,
+    "full_check_count": 4,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "last_validation": {
+      "stage": "reproducer",
+      "passed": false,
+      "reproducer_pass": false,
+      "failure_kind": "error"
+    },
+    "patch": "diff --git a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\nindex 7b9c5c77cbe9..3b5f0da6de69 100644\n--- a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n+++ b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n@@ -1687,18 +1687,24 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   SmallVector<Instruction *, 4> ExtUsers;\n   SmallVector<PHINode *, 4> LCSSAPhiUsers;\n   SmallVector<ICmpInst *, 4> ICmpUsers;\n+\n   for (Use &U : NarrowUse->uses()) {\n     Instruction *User = cast<Instruction>(U.getUser());\n     if (User == NarrowDef)\n       continue;\n     if (!L->contains(User)) {\n-      auto *LCSSAPhi = cast<PHINode>(User);\n-      // Make sure there is only 1 input, so that we don't have to split\n-      // critical edges.\n-      if (LCSSAPhi->getNumOperands() != 1)\n-        return false;\n-      LCSSAPhiUsers.push_back(LCSSAPhi);\n-      continue;\n+      // This user is outside the loop, so it must be an LCSSA phi node\n+      // that connects the loop exit to the rest of the program.\n+      if (auto *LCSSAPhi = dyn_cast<PHINode>(User)) {\n+        // Make sure there is only 1 input, so that we don't have to split\n+        // critical edges.\n+        if (LCSSAPhi->getNumOperands() != 1)\n+          return false;\n+        LCSSAPhiUsers.push_back(LCSSAPhi);\n+        continue;\n+      }\n+      // If it's not a PHI node, we can't handle it\n+      return false;\n     }\n     if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n       auto Pred = ICmp->getPredicate();\n@@ -1776,6 +1782,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n \n   auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n   auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n+\n                                         NarrowBO->getName());\n   IRBuilder<> Builder(NarrowUse);\n   Builder.Insert(WideBO);\n",
+    "log": {
+      "model": "qwen3-coder-30b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nMake the smallest targeted change that addresses the reported failure. Preserve unrelated optimizations and IR invariants. A valid repair must pass both the reproducer and the existing regression tests. When tests fail, use their specific diagnostics to revise your previous patch; do not disable the optimization wholesale or weaken the tests.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in SimplifyIndVar.\nIssue title: [IndVarSimplify] Miscompilation at -O3\nDetailed information:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease modify the following code in llvm/lib/Transforms/Utils/SimplifyIndVar.cpp to fix the bug:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at the code, I can see the issue is in the logic that handles LCSSA phinode users. The problem is that when checking if a user is in the loop, the code doesn't properly handle the case where the user is a PHINode that's part of the LCSSA form but not necessarily in the loop body.\n\nThe key issue is in this section:\n```cpp\nif (!L->contains(User)) {\n  auto *LCSSAPhi = cast<PHINode>(User);\n  // Make sure there is only 1 input, so that we don't have to split\n  // critical edges.\n  if (LCSSAPhi->getNumOperands() != 1)\n    return false;\n  LCSSAPhiUsers.push_back(LCSSAPhi);\n  continue;\n}\n```\n\nThe condition `!L->contains(User)` means we're looking at users that are NOT in the loop, but then we assume they are LCSSA phinodes and add them to `LCSSAPhiUsers`. However, this logic is flawed because it doesn't properly distinguish between LCSSA phinodes that are part of the loop structure versus those that are outside.\n\nLet me examine more carefully what should happen:\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nCMake Deprecation Warning at /root/better-compiler-runtime/work/llvm-project/cmake/Modules/CMakePolicy.cmake:6 (cmake_policy):\n  The OLD behavior for policy CMP0116 will be removed from a future version\n  of CMake.\n\n  The cmake-policies(7) manual explains that the OLD behaviors of all\n  policies are deprecated and that a policy should be set to OLD only under\n  specific short-term circumstances.  Projects should be ported to the NEW\n  behavior and not rely on setting a policy to OLD.\nCall Stack (most recent call first):\n  CMakeLists.txt:7 (include)\n\n\n-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) \n-- LLVM host triple: x86_64-unknown-linux-gnu\n-- Native target architecture is X86\n-- Threads enabled.\n-- Doxygen disabled.\n-- Ninja version: 1.11.1\n-- Could NOT find OCaml (missing: OCAMLFIND OCAML_VERSION OCAML_STDLIB_PATH) \n-- Could NOT find OCaml (missing: OCAMLFIND OCAML_VERSION OCAML_STDLIB_PATH) \n-- OCaml bindings disabled.\n-- LLVM default target triple: x86_64-unknown-linux-gnu\n-- Building with -fPIC\n-- Targeting X86\n-- Targeting RISCV\n-- Targeting AArch64\n-- Targeting SystemZ\n-- Targeting Hexagon\n-- Targeting PowerPC\n-- Targeting NVPTX\n-- Failed to find LLVM FileCheck\n-- Google Benchmark version: v0.0.0, normalized to 0.0.0\n-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile\n-- Performing Test HAVE_POSIX_REGEX -- success\n-- Performing Test HAVE_STEADY_CLOCK -- success\n-- Performing Test HAVE_PTHREAD_AFFINITY -- success\n-- Configuring done (3.8s)\n-- Generating done (1.5s)\n-- Build files have been written to: /root/better-compiler-runtime/llvm-build\n\nFAILED: lib/Transforms/Utils/CMakeFiles/LLVMTransformUtils.dir/SimplifyIndVar.cpp.o \nccache /usr/bin/c++ -DGTEST_HAS_RTTI=0 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Transforms/Utils -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Transforms/Utils/CMakeFiles/LLVMTransformUtils.dir/SimplifyIndVar.cpp.o -MF lib/Transforms/Utils/CMakeFiles/LLVMTransformUtils.dir/SimplifyIndVar.cpp.o.d -o lib/Transforms/Utils/CMakeFiles/LLVMTransformUtils.dir/SimplifyIndVar.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1700:1: error: stray \u2018`\u2019 in program\n 1700 | ```\n      | ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1700:2: error: stray \u2018`\u2019 in program\n 1700 | ```\n      |  ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1700:3: error: stray \u2018`\u2019 in program\n 1700 | ```\n      |   ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1702:15: error: stray \u2018`\u2019 in program\n 1702 | The condition `!L->contains(User)` means we're looking at users that are NOT in the loop, but then we assume they are LCSSA phinodes and add them to `LCSSAPhiUsers`. However, this logic is flawed because it doesn't properly distinguish between LCSSA phinodes that are part of the loop structure versus those that are outside.\n      |               ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1702:34: error: stray \u2018`\u2019 in program\n 1702 | The condition `!L->contains(User)` means we're looking at users that are NOT in the loop, but then we assume they are LCSSA phinodes and add them to `LCSSAPhiUsers`. However, this logic is flawed because it doesn't properly distinguish between LCSSA phinodes that are part of the loop structure versus those that are outside.\n      |                                  ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1706:1: error: stray \u2018`\u2019 in program\n 1706 | ```cpp\n      | ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1706:2: error: stray \u2018`\u2019 in program\n 1706 | ```cpp\n      |  ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1706:3: error: stray \u2018`\u2019 in program\n 1706 | ```cpp\n      |   ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp: In member function \u2018bool {anonymous}::WidenIV::widenWithVariantUse(NarrowIVDefUse)\u2019:\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1691:22: error: expected primary-expression before \u2018)\u2019 token\n 1691 | if (!L->contains(User)) {\n      |                      ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1692:38: error: expected primary-expression before \u2018)\u2019 token\n 1692 |   auto *LCSSAPhi = cast<PHINode>(User);\n      |                                      ^\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1698:3: error: continue statement not within a loop\n 1698 |   continue;\n      |   ^~~~~~~~\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp:1702:1: error: \u2018The\u2019 was not declared in this scope\n 1702 | The condition `!L->contains(User)` means we're looking at users that are NOT in the loop, but then we assume they are LCSSA phinodes and add them to `LCSSAPhiUsers`. However, this logic is flawed because it doesn't properly distinguish between LCSSA phinodes that are part of the loop structure versus those that are outside.\n      | ^~~\nninja: build stopped: subcommand failed.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at the error messages, I can see that the response included markdown formatting characters (` ``` `) and explanatory text that shouldn't be in the actual C++ source code. I need to provide only the clean C++ code without any markdown or extra text.\n\nLet me analyze the actual bug more carefully. Looking at the original code, the issue seems to be in how LCSSA phinode users are handled. The problem is likely in this section where it assumes that if a user is not contained in the loop, it must be an LCSSA phi node.\n\nHowever, I notice the issue might be more subtle. Looking at the logic again, let me focus on just providing the correct implementation:\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      // This user is outside the loop, so it must be an LCSSA phi node\n      // that connects the loop exit to the rest of the program.\n      auto *LCSSAPhi = cast<PHINode>(User);\n      // Make sure there is only 1 input, so that we don't have to split\n      // critical edges.\n      if (LCSSAPhi->getNumOperands() != 1)\n        return false;\n      LCSSAPhiUsers.push_back(LCSSAPhi);\n      continue;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at the issue more carefully, I need to understand what the real bug is. The problem is that the current code has a logical flaw in handling LCSSA phinode users. Let me re-read the original code and identify the exact issue.\n\nThe key issue appears to be in the logic flow. When we encounter a user that's NOT in the loop (which would be an LCSSA phi), we assume it's a PHINode and proceed. But we should be more careful about what we're doing.\n\nLooking at the code structure and the error message about refinement, the issue might be that we're not properly checking whether the user is actually a PHI node before casting it, or there's a logic error in how we're handling the control flow.\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      // This user is outside the loop, so it should be an LCSSA phi node\n      // that connects the loop exit to the rest of the program.\n      if (isa<PHINode>(User)) {\n        auto *LCSSAPhi = cast<PHINode>(User);\n        // Make sure there is only 1 input, so that we don't have to split\n        // critical edges.\n        if (LCSSAPhi->getNumOperands() != 1)\n          return false;\n        LCSSAPhiUsers.push_back(LCSSAPhi);\n        continue;\n      } else {\n        // If it's not a PHI node, we cannot handle it\n        return false;\n      }\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at this more carefully, I realize I need to approach this differently. Since I'm getting feedback that the transformation is incorrect and that alive2 reports the optimized IR doesn't refine the original, I should examine what the actual issue is.\n\nLooking at the code structure, I believe the real issue might be in the condition check itself. Let me look at this more systematically - the core logic needs to ensure that when we have a user that's not in the loop, it's indeed an LCSSA phi node that we can safely process.\n\nThe problem may be that the current approach assumes that any user not in the loop must be an LCSSA phi, but that's not necessarily true. Let me provide a cleaner fix that focuses on the actual logic issue:\n\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n      // This user is outside the loop, so it must be an LCSSA phi node\n      // that connects the loop exit to the rest of the program.\n      if (auto *LCSSAPhi = dyn_cast<PHINode>(User)) {\n        // Make sure there is only 1 input, so that we don't have to split\n        // critical edges.\n        if (LCSSAPhi->getNumOperands() != 1)\n          return false;\n        LCSSAPhiUsers.push_back(LCSSAPhi);\n        continue;\n      }\n      // If it's not a PHI node, we can't handle it\n      return false;\n    }\n    if (auto *ICmp = dyn_cast<ICmpInst>(User)) {\n      auto Pred = ICmp->getPredicate();\n      // We have 3 types of predicates: signed, unsigned and equality\n      // predicates. For equality, it's legal to widen icmp for either sign and\n      // zero extend. For sign extend, we can also do so for signed predicates,\n      // likeweise for zero extend we can widen icmp for unsigned predicates.\n      if (ExtKind == ExtendKind::Zero && ICmpInst::isSigned(Pred))\n        return false;\n      if (ExtKind == ExtendKind::Sign && ICmpInst::isUnsigned(Pred))\n        return false;\n      ICmpUsers.push_back(ICmp);\n      continue;\n    }\n    if (ExtKind == ExtendKind::Sign)\n      User = dyn_cast<SExtInst>(User);\n    else\n      User = dyn_cast<ZExtInst>(User);\n    if (!User || User->getType() != WideType)\n      return false;\n    ExtUsers.push_back(User);\n  }\n  if (ExtUsers.empty()) {\n    DeadInsts.emplace_back(NarrowUse);\n    return true;\n  }\n\n  // We'll prove some facts that should be true in the context of ext users. If\n  // there is no users, we are done now. If there are some, pick their common\n  // dominator as context.\n  const Instruction *CtxI = findCommonDominator(ExtUsers, *DT);\n\n  if (!CanSignExtend && !CanZeroExtend) {\n    // Because InstCombine turns 'sub nuw' to 'add' losing the no-wrap flag, we\n    // will most likely not see it. Let's try to prove it.\n    if (OpCode != Instruction::Add)\n      return false;\n    if (ExtKind != ExtendKind::Zero)\n      return false;\n    const SCEV *LHS = SE->getSCEV(OBO->getOperand(0));\n    const SCEV *RHS = SE->getSCEV(OBO->getOperand(1));\n    // TODO: Support case for NarrowDef = NarrowUse->getOperand(1).\n    if (NarrowUse->getOperand(0) != NarrowDef)\n      return false;\n    if (!SE->isKnownNegative(RHS))\n      return false;\n    bool ProvedSubNUW = SE->isKnownPredicateAt(ICmpInst::ICMP_UGE, LHS,\n                                               SE->getNegativeSCEV(RHS), CtxI);\n    if (!ProvedSubNUW)\n      return false;\n    // In fact, our 'add' is 'sub nuw'. We will need to widen the 2nd operand as\n    // neg(zext(neg(op))), which is basically sext(op).\n    AnotherOpExtKind = ExtendKind::Sign;\n  }\n\n  // Verifying that Defining operand is an AddRec\n  const SCEV *Op1 = SE->getSCEV(WideDef);\n  const SCEVAddRecExpr *AddRecOp1 = dyn_cast<SCEVAddRecExpr>(Op1);\n  if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n    return false;\n\n  LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n\n  // Generating a widening use instruction.\n  Value *LHS =\n      (NarrowUse->getOperand(0) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(0), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n  Value *RHS =\n      (NarrowUse->getOperand(1) == NarrowDef)\n          ? WideDef\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nThe transformation performed by this pass is incorrect: alive2 reports that the optimized IR does not refine the original IR.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  for (Use &U : NarrowUse->uses()) {\n    Instruction *User = cast<Instruction>(U.getUser());\n    if (User == NarrowDef)\n      continue;\n    if (!L->contains(User)) {\n```\nand the suffix:\n```cpp\n          : createExtendInst(NarrowUse->getOperand(1), WideType,\n                             AnotherOpExtKind == ExtendKind::Sign, NarrowUse);\n\n  auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "SimplifyIndVar"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 1,
+    "experiment_config": {
+      "model": "qwen3-coder-30b",
+      "base_model_cutoff": "2023-12-31Z",
+      "temperature": 0.8,
+      "max_iterations": 4,
+      "oracle_budget": 400,
+      "oracle_strictness": "error_class",
+      "harness_version": "repair-v2",
+      "prompt_hash": "22e68d888a0f291309d40d08543bc5bedb343cc548dd2f5d80b8005538d7f2e7"
+    },
+    "build_jobs": 64
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "bug_id": "143123",
+  "condition": "raw-plain",
+  "model": "qwen3-coder-30b",
+  "max_iterations": 4,
+  "trial": 3,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 206.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "llm_prompt_tokens": 17098,
+    "llm_completion_tokens": 4564,
+    "wall_seconds": 283.035
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "raw-plain",
+      "fixed": false,
+      "patch": "unchanged",
+      "seconds": 41.496,
+      "feedback": {
+        "condition": "raw-plain",
+        "prompt_chars": 822,
+        "prompt_tokens_est": 206,
+        "shown_lines": 12,
+        "shown_instructions": 6,
+        "shown_blocks": 2,
+        "shown_values": 6,
+        "shown_chars": 407,
+        "original_lines": 12,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 407,
+        "counterexample": true,
+        "failed_test": "test_select_nnan_nsz_fcmp_olt"
+      },
+      "llm": {
+        "prompt_tokens": 1639,
+        "completion_tokens": 823
+      },
+      "validation": {
+        "stage": "no_patch",
+        "passed": false
+      }
+    },
+    {
+      "index": 1,
+      "condition": "raw-plain",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 70.948,
+      "feedback": {
+        "condition": "raw-plain",
+        "counterexample": false,
+        "prompt_chars": 195
+      },
+      "llm": {
+        "prompt_tokens": 2781,
+        "completion_tokens": 1318
+      },
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 2,
+      "condition": "raw-plain",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 71.146,
+      "feedback": {
+        "condition": "raw-plain",
+        "counterexample": false,
+        "prompt_chars": 2674
+      },
+      "llm": {
+        "prompt_tokens": 5164,
+        "completion_tokens": 1284
+      },
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 3,
+      "condition": "raw-plain",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 91.035,
+      "feedback": {
+        "condition": "raw-plain",
+        "counterexample": false,
+        "prompt_chars": 2678
+      },
+      "llm": {
+        "prompt_tokens": 7514,
+        "completion_tokens": 1139
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 212.92033171653748,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-06-06+0000"
+      ],
+      [
+        "hint:components",
+        "2025-06-06+0000"
+      ],
+      [
+        "alive2",
+        "2025-06-06+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-06-06+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-06-06+0000"
+      ]
+    ],
+    "build_count": 4,
+    "build_failure_count": 2,
+    "fast_check_count": 1,
+    "full_check_count": 3,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "last_validation": {
+      "stage": "reproducer",
+      "passed": false,
+      "reproducer_pass": false,
+      "failure_kind": "error"
+    },
+    "patch": "diff --git a/llvm/lib/Analysis/ValueTracking.cpp b/llvm/lib/Analysis/ValueTracking.cpp\nindex d6bb852e208f..3979d11606ef 100644\n--- a/llvm/lib/Analysis/ValueTracking.cpp\n+++ b/llvm/lib/Analysis/ValueTracking.cpp\n@@ -8627,6 +8627,7 @@ static SelectPatternResult matchSelectPattern(CmpInst::Predicate Pred,\n   RHS = CmpRHS;\n \n   // Signed zero may return inconsistent results between implementations.\n+\n   //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n   //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n   // Therefore, we behave conservatively and only proceed if at least one of the\n@@ -8687,7 +8688,20 @@ static SelectPatternResult matchSelectPattern(CmpInst::Predicate Pred,\n     }\n   }\n \n-  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n+  // The transformation logic should not be applied when we have nnan/nsz flags\n+  // because it can change the behavior with respect to signed zeros.\n+  // Check if we have strict floating-point flags that prevent this transformation.\n+  bool AllowTransformation = true;\n+  \n+  // If we have noNaN flag, we can't do the transformation safely in some cases\n+  // If we have noSignedZeros flag, we also shouldn't do certain transformations\n+  if (FMF.noNaNs() || FMF.noSignedZeros()) {\n+    // When we have nnan or nsz flags, we should be conservative\n+    // and avoid transformations that might alter behavior with signed zeros\n+    AllowTransformation = false;\n+  }\n+  \n+  if (AllowTransformation && TrueVal == CmpRHS && FalseVal == CmpLHS) {\n     std::swap(CmpLHS, CmpRHS);\n     Pred = CmpInst::getSwappedPredicate(Pred);\n     if (NaNBehavior == SPNB_RETURNS_NAN)\n@@ -8697,6 +8711,7 @@ static SelectPatternResult matchSelectPattern(CmpInst::Predicate Pred,\n     Ordered = !Ordered;\n   }\n \n+\n   // ([if]cmp X, Y) ? X : Y\n   if (TrueVal == CmpLHS && FalseVal == CmpRHS)\n     return getSelectPattern(Pred, NaNBehavior, Ordered);\n",
+    "log": {
+      "model": "qwen3-coder-30b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nMake the smallest targeted change that addresses the reported failure. Preserve unrelated optimizations and IR invariants. A valid repair must pass both the reproducer and the existing regression tests. When tests fail, use their specific diagnostics to revise your previous patch; do not disable the optimization wholesale or weaken the tests.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in ValueTracking.\nIssue title: [InstCombine] fcmp is incorrectly inverted\nDetailed information:\nSource:\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %cmp = fcmp olt float %x, 0.000000e+00\n  %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n  ret float %sel\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %.inv = fcmp oge float %x, 0.000000e+00\n  %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  ret float %sel1\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\nfloat %x = #x7f800010 (SNaN)\n\nSource:\ni1 %cmp = #x0 (0)\nfloat %sel = #x80000000 (-0.0)\n\nTarget:\ni1 %.inv = #x0 (0)\nfloat %sel1 = #x7f800010 (SNaN)\nSource value: #x80000000 (-0.0)\nTarget value: #x7f800010 (SNaN)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease modify the following code in llvm/lib/Analysis/ValueTracking.cpp to fix the bug:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    std::swap(CmpLHS, CmpRHS);\n    Pred = CmpInst::getSwappedPredicate(Pred);\n    if (NaNBehavior == SPNB_RETURNS_NAN)\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    std::swap(CmpLHS, CmpRHS);\n    Pred = CmpInst::getSwappedPredicate(Pred);\n    if (NaNBehavior == SPNB_RETURNS_NAN)\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nYou returned the code exactly as it was given to you, so no patch was produced and nothing was tested. The bug is still present. Identify the specific line whose behaviour is wrong and change it.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at the bug report, the issue is in the InstCombine pass where `fcmp olt` is being incorrectly inverted to `fcmp oge` in a select pattern. The problem occurs when dealing with NaN values and the signed zero handling.\n\nThe bug is in the logic that determines when to perform the transformation. Looking at the example:\n- Source: `fcmp olt float %x, 0.0` followed by `select nnan nsz i1 %cmp, float %x, float -0.0`\n- Target: `fcmp oge float %x, 0.0` followed by `select i1 %.inv, float -0.000000e+00, float %x`\n\nThe issue is that when we have `nnan nsz` flags, we should not be inverting the comparison predicate inappropriately. The problem is specifically in how the predicate swapping is handled when the select pattern matches.\n\nLet me examine the code more carefully. The issue is in the condition check for when to apply the transformation. Looking at the bug report more closely:\n\nWhen we have `fcmp olt` with `nnan nsz` flags and the select pattern matches, the code incorrectly assumes it can swap the operands and invert the predicate without considering that `nsz` (no signed zeros) might affect the semantics.\n\nThe core issue appears to be that when we have `nnan nsz` flags, we shouldn't be applying this transformation at all because the flags indicate that signed zero behavior matters and the transformation could change semantics.\n\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  // Don't perform the transformation when we have nnan/nsz flags as it can\n  // change the behavior with respect to signed zeros\n  if (FMF.noNaN() && FMF.noSignedZeros()) {\n    if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n      std::swap(CmpLHS, CmpRHS);\n      Pred = CmpInst::getSwappedPredicate(Pred);\n      if (NaNBehavior == SPNB_RETURNS_NAN)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      Ordered = !Ordered;\n    }\n  } else {\n    // For cases without strict flags, proceed with normal logic\n    if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n      std::swap(CmpLHS, CmpRHS);\n      Pred = CmpInst::getSwappedPredicate(Pred);\n      if (NaNBehavior == SPNB_RETURNS_NAN)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      Ordered = !Ordered;\n    }\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\n-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) \n-- LLVM host triple: x86_64-unknown-linux-gnu\n-- Native target architecture is X86\n-- Threads enabled.\n-- Doxygen disabled.\n-- Ninja version: 1.11.1\n-- Could NOT find OCaml (missing: OCAMLFIND OCAML_VERSION OCAML_STDLIB_PATH) \n-- Could NOT find OCaml (missing: OCAMLFIND OCAML_VERSION OCAML_STDLIB_PATH) \n-- OCaml bindings disabled.\n-- LLVM default target triple: x86_64-unknown-linux-gnu\n-- Building with -fPIC\n-- Targeting X86\n-- Targeting RISCV\n-- Targeting AArch64\n-- Targeting SystemZ\n-- Targeting Hexagon\n-- Targeting PowerPC\n-- Targeting NVPTX\n-- Failed to find LLVM FileCheck\n-- Google Benchmark version: v0.0.0, normalized to 0.0.0\n-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile\n-- Performing Test HAVE_POSIX_REGEX -- success\n-- Performing Test HAVE_STEADY_CLOCK -- success\n-- Performing Test HAVE_PTHREAD_AFFINITY -- success\n-- Configuring done (2.8s)\n-- Generating done (1.1s)\n-- Build files have been written to: /root/better-compiler-runtime/llvm-build\n\nFAILED: lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o \nccache /usr/bin/c++ -DGTEST_HAS_RTTI=0 -DHAS_LOGF128 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Analysis -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o -MF lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o.d -o lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis/ValueTracking.cpp\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis/ValueTracking.cpp: In function \u2018llvm::SelectPatternResult matchSelectPattern(llvm::CmpInst::Predicate, llvm::FastMathFlags, llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*&, llvm::Value*&, unsigned int)\u2019:\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis/ValueTracking.cpp:8693:11: error: \u2018class llvm::FastMathFlags\u2019 has no member named \u2018noNaN\u2019; did you mean \u2018noNaNs\u2019?\n 8693 |   if (FMF.noNaN() && FMF.noSignedZeros()) {\n      |           ^~~~~\n      |           noNaNs\nninja: build stopped: subcommand failed.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at the error message, I need to use the correct method name for checking FastMathFlags. The error shows `noNaN` should be `noNaNs`. However, looking more carefully at the bug report, I think the real issue is different.\n\nThe problem is that the transformation should not happen when there are `nnan` and `nsz` flags because these flags specify that NaN values and signed zeros should be handled specially, and the inversion would change the semantics.\n\nBut actually, let me re-read the bug report more carefully. The issue isn't with the flags checking per se, but rather with the fundamental transformation logic. The problem is that the code path for handling the select pattern transformation is too broad.\n\nLooking at the actual failing case:\n- Input: `fcmp olt float %x, 0.000000e+00` with `select nnan nsz i1 %cmp, float %x, float -0.000000e+00`\n- Output: `fcmp oge float %x, 0.000000e+00` with `select i1 %.inv, float -0.000000e+00, float %x`\n\nThe transformation should NOT happen when there are `nnan nsz` flags because it changes the behavior with respect to signed zeros. \n\nLet me look at the original code structure and understand where the actual fix needs to go. The issue is that we're doing the swap regardless of whether it's safe or not when flags like `nnan` and `nsz` are present.\n\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  // Only perform the transformation when we don't have strict floating point\n  // flags that would change the behavior. Specifically, avoid transformation\n  // when nnan or nsz flags are present as they affect NaN and signed zero handling.\n  if (!FMF.noNaN() || !FMF.noSignedZeros()) {\n    // Transformation is allowed - proceed with the standard logic\n    if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n      std::swap(CmpLHS, CmpRHS);\n      Pred = CmpInst::getSwappedPredicate(Pred);\n      if (NaNBehavior == SPNB_RETURNS_NAN)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      Ordered = !Ordered;\n    }\n  } else {\n    // With nnan/nsz flags, we must be conservative and not transform\n    // This prevents incorrect inversion of comparisons that would\n    // change semantics regarding signed zeros\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\n-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) \n-- LLVM host triple: x86_64-unknown-linux-gnu\n-- Native target architecture is X86\n-- Threads enabled.\n-- Doxygen disabled.\n-- Ninja version: 1.11.1\n-- Could NOT find OCaml (missing: OCAMLFIND OCAML_VERSION OCAML_STDLIB_PATH) \n-- Could NOT find OCaml (missing: OCAMLFIND OCAML_VERSION OCAML_STDLIB_PATH) \n-- OCaml bindings disabled.\n-- LLVM default target triple: x86_64-unknown-linux-gnu\n-- Building with -fPIC\n-- Targeting X86\n-- Targeting RISCV\n-- Targeting AArch64\n-- Targeting SystemZ\n-- Targeting Hexagon\n-- Targeting PowerPC\n-- Targeting NVPTX\n-- Failed to find LLVM FileCheck\n-- Google Benchmark version: v0.0.0, normalized to 0.0.0\n-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile\n-- Performing Test HAVE_POSIX_REGEX -- success\n-- Performing Test HAVE_STEADY_CLOCK -- success\n-- Performing Test HAVE_PTHREAD_AFFINITY -- success\n-- Configuring done (3.0s)\n-- Generating done (1.7s)\n-- Build files have been written to: /root/better-compiler-runtime/llvm-build\n\nFAILED: lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o \nccache /usr/bin/c++ -DGTEST_HAS_RTTI=0 -DHAS_LOGF128 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Analysis -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o -MF lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o.d -o lib/Analysis/CMakeFiles/LLVMAnalysis.dir/ValueTracking.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis/ValueTracking.cpp\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis/ValueTracking.cpp: In function \u2018llvm::SelectPatternResult matchSelectPattern(llvm::CmpInst::Predicate, llvm::FastMathFlags, llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*, llvm::Value*&, llvm::Value*&, unsigned int)\u2019:\n/root/better-compiler-runtime/work/llvm-project/llvm/lib/Analysis/ValueTracking.cpp:8694:12: error: \u2018class llvm::FastMathFlags\u2019 has no member named \u2018noNaN\u2019; did you mean \u2018noNaNs\u2019?\n 8694 |   if (!FMF.noNaN() || !FMF.noSignedZeros()) {\n      |            ^~~~~\n      |            noNaNs\nninja: build stopped: subcommand failed.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "I see the issue now. I need to use the correct API methods for FastMathFlags. Let me look at the actual LLVM API to understand the correct method names. Based on the error, it should be `noNaNs` instead of `noNaN`.\n\nHowever, I think I'm overcomplicating this. Let me revert to a simpler approach that fixes the root cause. The actual problem seems to be that the transformation logic needs to consider that when we have `nnan nsz` flags, we shouldn't be performing the predicate inversion because it changes the behavior with signed zeros.\n\nLooking at the issue again, the real fix is to NOT do the transformation when we have `nnan nsz` flags, which means we should not execute the predicate swapping logic when these flags are present.\n\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  // The transformation logic should not be applied when we have nnan/nsz flags\n  // because it can change the behavior with respect to signed zeros.\n  // Check if we have strict floating-point flags that prevent this transformation.\n  bool AllowTransformation = true;\n  \n  // If we have noNaN flag, we can't do the transformation safely in some cases\n  // If we have noSignedZeros flag, we also shouldn't do certain transformations\n  if (FMF.noNaNs() || FMF.noSignedZeros()) {\n    // When we have nnan or nsz flags, we should be conservative\n    // and avoid transformations that might alter behavior with signed zeros\n    AllowTransformation = false;\n  }\n  \n  if (AllowTransformation && TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    std::swap(CmpLHS, CmpRHS);\n    Pred = CmpInst::getSwappedPredicate(Pred);\n    if (NaNBehavior == SPNB_RETURNS_NAN)\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nSource:\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %cmp = fcmp olt float %x, 0.000000e+00\n  %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n  ret float %sel\n}\n\nTarget:\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %.inv = fcmp oge float %x, 0.000000e+00\n  %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  ret float %sel1\n}\n\nTransformation doesn't verify!\n\nERROR: Value mismatch\n\nExample:\nfloat %x = #x7f800010 (SNaN)\n\nSource:\ni1 %cmp = #x0 (0)\nfloat %sel = #x80000000 (-0.0)\n\nTarget:\ni1 %.inv = #x0 (0)\nfloat %sel1 = #x7f800010 (SNaN)\nSource value: #x80000000 (-0.0)\nTarget value: #x7f800010 (SNaN)\n\nSummary:\n  0 correct transformations\n  1 incorrect transformations\n  0 failed-to-prove transformations\n  0 Alive2 errors\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "ValueTracking"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 3,
+    "experiment_config": {
+      "model": "qwen3-coder-30b",
+      "base_model_cutoff": "2023-12-31Z",
+      "temperature": 0.8,
+      "max_iterations": 4,
+      "oracle_budget": 400,
+      "oracle_strictness": "error_class",
+      "harness_version": "repair-v2",
+      "prompt_hash": "22e68d888a0f291309d40d08543bc5bedb343cc548dd2f5d80b8005538d7f2e7"
+    },
+    "build_jobs": 64
+  }
+}

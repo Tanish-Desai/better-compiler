@@ -1,0 +1,10 @@
+{
+  "model": "qwen3-coder-30b",
+  "base_model_cutoff": "2023-12-31Z",
+  "temperature": 0.8,
+  "max_iterations": 4,
+  "oracle_budget": 400,
+  "oracle_strictness": "error_class",
+  "harness_version": "repair-v2",
+  "prompt_hash": "22e68d888a0f291309d40d08543bc5bedb343cc548dd2f5d80b8005538d7f2e7"
+}

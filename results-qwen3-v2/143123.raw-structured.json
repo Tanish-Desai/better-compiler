@@ -1,0 +1,250 @@
+{
+  "bug_id": "143123",
+  "condition": "raw-structured",
+  "model": "qwen3-coder-30b",
+  "max_iterations": 4,
+  "trial": 1,
+  "totals": {
+    "iterations": 4,
+    "fixed": false,
+    "prompt_tokens_est": 1284.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "llm_prompt_tokens": 17861,
+    "llm_completion_tokens": 4602,
+    "wall_seconds": 352.706
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "raw-structured",
+      "fixed": false,
+      "patch": "unchanged",
+      "seconds": 40.609,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 1711,
+        "prompt_tokens_est": 428,
+        "shown_lines": 12,
+        "shown_instructions": 6,
+        "shown_blocks": 2,
+        "shown_values": 6,
+        "shown_chars": 407,
+        "original_lines": 12,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 407,
+        "counterexample": true,
+        "failed_test": "test_select_nnan_nsz_fcmp_olt"
+      },
+      "llm": {
+        "prompt_tokens": 1936,
+        "completion_tokens": 823
+      },
+      "validation": {
+        "stage": "no_patch",
+        "passed": false
+      }
+    },
+    {
+      "index": 1,
+      "condition": "raw-structured",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 101.592,
+      "feedback": {
+        "condition": "raw-structured",
+        "counterexample": false,
+        "prompt_chars": 195
+      },
+      "llm": {
+        "prompt_tokens": 3078,
+        "completion_tokens": 1375
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 2,
+      "condition": "raw-structured",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 93.006,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 1711,
+        "prompt_tokens_est": 428,
+        "shown_lines": 12,
+        "shown_instructions": 6,
+        "shown_blocks": 2,
+        "shown_values": 6,
+        "shown_chars": 407,
+        "original_lines": 12,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 407,
+        "counterexample": true,
+        "failed_test": "test_select_nnan_nsz_fcmp_olt"
+      },
+      "llm": {
+        "prompt_tokens": 5372,
+        "completion_tokens": 1184
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    },
+    {
+      "index": 3,
+      "condition": "raw-structured",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 94.732,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 1711,
+        "prompt_tokens_est": 428,
+        "shown_lines": 12,
+        "shown_instructions": 6,
+        "shown_blocks": 2,
+        "shown_values": 6,
+        "shown_chars": 407,
+        "original_lines": 12,
+        "original_instructions": 6,
+        "original_blocks": 2,
+        "original_values": 6,
+        "original_chars": 407,
+        "counterexample": true,
+        "failed_test": "test_select_nnan_nsz_fcmp_olt"
+      },
+      "llm": {
+        "prompt_tokens": 7475,
+        "completion_tokens": 1220
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 215.71918082237244,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-06-06+0000"
+      ],
+      [
+        "hint:components",
+        "2025-06-06+0000"
+      ],
+      [
+        "alive2",
+        "2025-06-06+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-06-06+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-06-06+0000"
+      ]
+    ],
+    "build_count": 4,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 3,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "last_validation": {
+      "stage": "reproducer",
+      "passed": false,
+      "reproducer_pass": false,
+      "failure_kind": "error"
+    },
+    "patch": "diff --git a/llvm/lib/Analysis/ValueTracking.cpp b/llvm/lib/Analysis/ValueTracking.cpp\nindex d6bb852e208f..0f40728c1877 100644\n--- a/llvm/lib/Analysis/ValueTracking.cpp\n+++ b/llvm/lib/Analysis/ValueTracking.cpp\n@@ -8627,6 +8627,7 @@ static SelectPatternResult matchSelectPattern(CmpInst::Predicate Pred,\n   RHS = CmpRHS;\n \n   // Signed zero may return inconsistent results between implementations.\n+\n   //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n   //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n   // Therefore, we behave conservatively and only proceed if at least one of the\n@@ -8687,16 +8688,23 @@ static SelectPatternResult matchSelectPattern(CmpInst::Predicate Pred,\n     }\n   }\n \n+  // Don't perform predicate swapping when we have nnan/nsz flags\n+  // because these flags affect how NaN values are handled and can\n+  // make the inversion invalid\n   if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n-    std::swap(CmpLHS, CmpRHS);\n-    Pred = CmpInst::getSwappedPredicate(Pred);\n-    if (NaNBehavior == SPNB_RETURNS_NAN)\n-      NaNBehavior = SPNB_RETURNS_OTHER;\n-    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n-      NaNBehavior = SPNB_RETURNS_NAN;\n-    Ordered = !Ordered;\n+    // If we have nnan or nsz flags, we cannot safely swap the predicate\n+    if (FMF.noNaNs() || FMF.noSignedZeros()) {\n+      std::swap(CmpLHS, CmpRHS);\n+      Pred = CmpInst::getSwappedPredicate(Pred);\n+      if (NaNBehavior == SPNB_RETURNS_NAN)\n+        NaNBehavior = SPNB_RETURNS_OTHER;\n+      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n+        NaNBehavior = SPNB_RETURNS_NAN;\n+      Ordered = !Ordered;\n+    }\n   }\n \n+\n   // ([if]cmp X, Y) ? X : Y\n   if (TrueVal == CmpLHS && FalseVal == CmpRHS)\n     return getSelectPattern(Pred, NaNBehavior, Ordered);\n",
+    "log": {
+      "model": "qwen3-coder-30b",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nMake the smallest targeted change that addresses the reported failure. Preserve unrelated optimizations and IR invariants. A valid repair must pass both the reproducer and the existing regression tests. When tests fail, use their specific diagnostics to revise your previous patch; do not disable the optimization wholesale or weaken the tests.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in ValueTracking.\nIssue title: [InstCombine] fcmp is incorrectly inverted\nDetailed information:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @test_select_nnan_nsz_fcmp_olt -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %cmp = fcmp olt float %x, 0.000000e+00\n  %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n  ret float %sel\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %.inv = fcmp oge float %x, 0.000000e+00\n  %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  ret float %sel1\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %.inv: %.inv = fcmp oge float %x, 0.000000e+00\n    %sel1: %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  only in source:\n    %cmp: %cmp = fcmp olt float %x, 0.000000e+00\n    %sel: %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCRITICAL VALUES:\n    %.inv\n    %cmp\n    %sel\n    %sel1\n\nDEPENDENCY CHAIN (source):\n    %cmp = fcmp olt float %x, 0.000000e+00\n    %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    float %x = #x7f800010 (SNaN)\n\nDIVERGENCE (source vs target on that input):\n    %.inv: source = (not computed)   target = #x0 (0)\n    %sel1: source = (not computed)   target = #x7f800010 (SNaN)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x80000000 (-0.0) while the target yields #x7f800010 (SNaN).\n    The earliest reported divergence is at %.inv.\n\nPlease modify the following code in llvm/lib/Analysis/ValueTracking.cpp to fix the bug:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    std::swap(CmpLHS, CmpRHS);\n    Pred = CmpInst::getSwappedPredicate(Pred);\n    if (NaNBehavior == SPNB_RETURNS_NAN)\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    std::swap(CmpLHS, CmpRHS);\n    Pred = CmpInst::getSwappedPredicate(Pred);\n    if (NaNBehavior == SPNB_RETURNS_NAN)\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nYou returned the code exactly as it was given to you, so no patch was produced and nothing was tested. The bug is still present. Identify the specific line whose behaviour is wrong and change it.\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at the bug report, the issue is in the InstCombine pass where `fcmp olt` is being incorrectly inverted to `fcmp oge` in a select pattern with `nnan nsz` flags. The problem is that when we have a select with `nnan nsz` flags, we shouldn't be inverting the comparison predicate because those flags affect how NaN values are handled.\n\nLet me trace through what's happening:\n1. Source: `fcmp olt float %x, 0.0` followed by `select nnan nsz i1 %cmp, float %x, float -0.0`\n2. Target: `fcmp oge float %x, 0.0` followed by `select i1 %.inv, float -0.000000e+00, float %x`\n\nThe issue is in the logic that determines when to invert predicates. Looking at the code more carefully, I need to check where the predicate inversion happens and ensure it respects the `nnan nsz` flags.\n\nThe bug appears to be in the predicate swapping logic. When we have `select nnan nsz i1 %cmp, float %x, float -0.0`, the optimization should recognize that the `nnan nsz` flags mean we can safely invert the comparison, but it's doing so incorrectly.\n\nLooking at the specific case in the bug report:\n- Input: SNaN (`#x7f800010`)\n- Source returns `-0.0` (because the select with `nnan nsz` means NaN is treated specially)\n- Target returns SNaN (because the inverted comparison behaves differently with NaN)\n\nThe problem is likely in the condition checking around the `HasMismatchedZeros` variable usage. Let me examine the problematic area more carefully.\n\nActually, looking more closely at the bug report, the issue is that when we have `select nnan nsz i1 %cmp, float %x, float -0.0`, the current logic incorrectly inverts the comparison predicate even though the `nnan nsz` flags should prevent this optimization in certain cases.\n\nThe key insight is that the logic for handling `nnan nsz` flags needs to be more careful about when to allow predicate inversion.\n\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  // Check if we're dealing with a select that has nnan/nsz flags\n  // If so, we should be more conservative about predicate inversion\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    // For select with nnan/nsz flags, we need to be careful about \n    // predicate inversion since these flags affect NaN behavior\n    if (FMF.noNaNs() || FMF.noSignedZeros()) {\n      std::swap(CmpLHS, CmpRHS);\n      Pred = CmpInst::getSwappedPredicate(Pred);\n      if (NaNBehavior == SPNB_RETURNS_NAN)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      Ordered = !Ordered;\n    }\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @test_select_nnan_nsz_fcmp_olt -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %cmp = fcmp olt float %x, 0.000000e+00\n  %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n  ret float %sel\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %.inv = fcmp oge float %x, 0.000000e+00\n  %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  ret float %sel1\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %.inv: %.inv = fcmp oge float %x, 0.000000e+00\n    %sel1: %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  only in source:\n    %cmp: %cmp = fcmp olt float %x, 0.000000e+00\n    %sel: %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCRITICAL VALUES:\n    %.inv\n    %cmp\n    %sel\n    %sel1\n\nDEPENDENCY CHAIN (source):\n    %cmp = fcmp olt float %x, 0.000000e+00\n    %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    float %x = #x7f800010 (SNaN)\n\nDIVERGENCE (source vs target on that input):\n    %.inv: source = (not computed)   target = #x0 (0)\n    %sel1: source = (not computed)   target = #x7f800010 (SNaN)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x80000000 (-0.0) while the target yields #x7f800010 (SNaN).\n    The earliest reported divergence is at %.inv.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at this more carefully, I need to understand the exact problem. The issue is that the optimization is inverting `fcmp olt` to `fcmp oge` in a select with `nnan nsz` flags, but this inversion is incorrect.\n\nThe key insight from the bug report is that with `nnan nsz` flags, we shouldn't be inverting the comparison at all in this context because:\n\n1. `select nnan nsz i1 %cmp, float %x, float -0.0` means \"if cmp is true, return x, otherwise return -0.0\"\n2. With `nnan nsz`, NaN values are handled specially \n3. When we invert this to `select i1 %.inv, float -0.000000e+00, float %x`, we get different behavior with NaN inputs\n\nLooking at the actual problem area, the issue is in the final section where the predicate inversion logic occurs. The problem is that we're allowing predicate inversion without considering that `nnan nsz` flags make the transformation unsafe in certain cases.\n\nLet me look at the exact condition that needs to be fixed. The issue is that when we have a select with `nnan nsz` flags, we shouldn't perform the predicate swap in the last conditional block because it can change the semantics with respect to NaN handling.\n\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  // Only perform predicate swapping if we don't have nnan/nsz flags\n  // or if the select pattern is safe to transform\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    // For select with nnan/nsz flags, we should avoid predicate inversion\n    // to maintain correct NaN behavior\n    if (!FMF.noNaNs() && !FMF.noSignedZeros()) {\n      std::swap(CmpLHS, CmpRHS);\n      Pred = CmpInst::getSwappedPredicate(Pred);\n      if (NaNBehavior == SPNB_RETURNS_NAN)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      Ordered = !Ordered;\n    }\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @test_select_nnan_nsz_fcmp_olt -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %cmp = fcmp olt float %x, 0.000000e+00\n  %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n  ret float %sel\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %.inv = fcmp oge float %x, 0.000000e+00\n  %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  ret float %sel1\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %.inv: %.inv = fcmp oge float %x, 0.000000e+00\n    %sel1: %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  only in source:\n    %cmp: %cmp = fcmp olt float %x, 0.000000e+00\n    %sel: %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCRITICAL VALUES:\n    %.inv\n    %cmp\n    %sel\n    %sel1\n\nDEPENDENCY CHAIN (source):\n    %cmp = fcmp olt float %x, 0.000000e+00\n    %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    float %x = #x7f800010 (SNaN)\n\nDIVERGENCE (source vs target on that input):\n    %.inv: source = (not computed)   target = #x0 (0)\n    %sel1: source = (not computed)   target = #x7f800010 (SNaN)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x80000000 (-0.0) while the target yields #x7f800010 (SNaN).\n    The earliest reported divergence is at %.inv.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        },
+        {
+          "role": "assistant",
+          "content": "Looking at this very carefully, I realize I'm misunderstanding the fundamental issue. The problem isn't just about when to apply the predicate swap - it's that the entire predicate inversion logic is faulty when dealing with `nnan nsz` flags.\n\nLet me re-read the bug report:\n- Source: `select nnan nsz i1 %cmp, float %x, float -0.0` where `%cmp = fcmp olt float %x, 0.0`\n- Target: `select i1 %.inv, float -0.000000e+00, float %x` where `%.inv = fcmp oge float %x, 0.0`\n\nThe transformation is converting:\n- \"If x < 0, return x; otherwise return -0.0\" \nTO\n- \"If x >= 0, return -0.0; otherwise return x\"\n\nThese are NOT equivalent! The bug is that the optimization is blindly inverting the predicate without considering that the semantics of `nnan nsz` selects require preserving the original logic.\n\nThe issue is in this specific part of the code. The condition `if (TrueVal == CmpRHS && FalseVal == CmpLHS)` identifies a pattern that can be optimized, but it doesn't properly account for the `nnan nsz` flags that affect the semantics.\n\nThe real fix is to prevent predicate inversion when `nnan nsz` flags are present, because those flags indicate special handling of NaN values that changes the equivalence of the transformations.\n\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n  default: break;\n  case CmpInst::FCMP_OGT: case CmpInst::FCMP_OLT:\n  case CmpInst::FCMP_UGT: case CmpInst::FCMP_ULT:\n    if (!HasMismatchedZeros)\n      break;\n    [[fallthrough]];\n  case CmpInst::FCMP_OGE: case CmpInst::FCMP_OLE:\n  case CmpInst::FCMP_UGE: case CmpInst::FCMP_ULE:\n    if (!FMF.noSignedZeros() && !isKnownNonZero(CmpLHS) &&\n        !isKnownNonZero(CmpRHS))\n      return {SPF_UNKNOWN, SPNB_NA, false};\n  }\n\n  SelectPatternNaNBehavior NaNBehavior = SPNB_NA;\n  bool Ordered = false;\n\n  // When given one NaN and one non-NaN input:\n  //   - maxnum/minnum (C99 fmaxf()/fminf()) return the non-NaN input.\n  //   - A simple C99 (a < b ? a : b) construction will return 'b' (as the\n  //     ordered comparison fails), which could be NaN or non-NaN.\n  // so here we discover exactly what NaN behavior is required/accepted.\n  if (CmpInst::isFPPredicate(Pred)) {\n    bool LHSSafe = isKnownNonNaN(CmpLHS, FMF);\n    bool RHSSafe = isKnownNonNaN(CmpRHS, FMF);\n\n    if (LHSSafe && RHSSafe) {\n      // Both operands are known non-NaN.\n      NaNBehavior = SPNB_RETURNS_ANY;\n    } else if (CmpInst::isOrdered(Pred)) {\n      // An ordered comparison will return false when given a NaN, so it\n      // returns the RHS.\n      Ordered = true;\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    } else {\n      Ordered = false;\n      // An unordered comparison will return true when given a NaN, so it\n      // returns the LHS.\n      if (LHSSafe)\n        // LHS is non-NaN, so if RHS is NaN then non-NaN will be returned.\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (RHSSafe)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      else\n        // Completely unsafe.\n        return {SPF_UNKNOWN, SPNB_NA, false};\n    }\n  }\n\n  // Don't perform predicate swapping when we have nnan/nsz flags\n  // because these flags affect how NaN values are handled and can\n  // make the inversion invalid\n  if (TrueVal == CmpRHS && FalseVal == CmpLHS) {\n    // If we have nnan or nsz flags, we cannot safely swap the predicate\n    if (FMF.noNaNs() || FMF.noSignedZeros()) {\n      std::swap(CmpLHS, CmpRHS);\n      Pred = CmpInst::getSwappedPredicate(Pred);\n      if (NaNBehavior == SPNB_RETURNS_NAN)\n        NaNBehavior = SPNB_RETURNS_OTHER;\n      else if (NaNBehavior == SPNB_RETURNS_OTHER)\n        NaNBehavior = SPNB_RETURNS_NAN;\n      Ordered = !Ordered;\n    }\n  }\n```"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @test_select_nnan_nsz_fcmp_olt -- Value mismatch\n\nVIOLATED PROPERTY:\n    return-value equality\n\nSOURCE (pre-transformation IR):\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %cmp = fcmp olt float %x, 0.000000e+00\n  %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n  ret float %sel\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine float @test_select_nnan_nsz_fcmp_olt(float %x) {\n  %.inv = fcmp oge float %x, 0.000000e+00\n  %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  ret float %sel1\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %.inv: %.inv = fcmp oge float %x, 0.000000e+00\n    %sel1: %sel1 = select i1 %.inv, float -0.000000e+00, float %x\n  only in source:\n    %cmp: %cmp = fcmp olt float %x, 0.000000e+00\n    %sel: %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCRITICAL VALUES:\n    %.inv\n    %cmp\n    %sel\n    %sel1\n\nDEPENDENCY CHAIN (source):\n    %cmp = fcmp olt float %x, 0.000000e+00\n    %sel = select nnan nsz i1 %cmp, float %x, float -0.000000e+00\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    float %x = #x7f800010 (SNaN)\n\nDIVERGENCE (source vs target on that input):\n    %.inv: source = (not computed)   target = #x0 (0)\n    %sel1: source = (not computed)   target = #x7f800010 (SNaN)\n\nINTERPRETATION:\n    A transformation must preserve the returned value for every input on which the source is well-defined.\n    On the input above the source yields #x80000000 (-0.0) while the target yields #x7f800010 (SNaN).\n    The earliest reported divergence is at %.inv.\n\nPlease adjust code according to the feedback.\nPlease answer with the code directly. Do not include any additional information in the output.\nPlease answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.\nYour answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.\nPlease make sure the answer includes the prefix:\n```cpp\n  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0\n  //  minNum(0.0, -0.0)          // May return -0.0 or 0.0 (IEEE 754-2008 5.3.1)\n  // Therefore, we behave conservatively and only proceed if at least one of the\n  // operands is known to not be zero or if we don't care about signed zero.\n  switch (Pred) {\n```\nand the suffix:\n```cpp\n      NaNBehavior = SPNB_RETURNS_OTHER;\n    else if (NaNBehavior == SPNB_RETURNS_OTHER)\n      NaNBehavior = SPNB_RETURNS_NAN;\n    Ordered = !Ordered;\n  }\n```\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "ValueTracking"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 1,
+    "experiment_config": {
+      "model": "qwen3-coder-30b",
+      "base_model_cutoff": "2023-12-31Z",
+      "temperature": 0.8,
+      "max_iterations": 4,
+      "oracle_budget": 400,
+      "oracle_strictness": "error_class",
+      "harness_version": "repair-v2",
+      "prompt_hash": "22e68d888a0f291309d40d08543bc5bedb343cc548dd2f5d80b8005538d7f2e7"
+    },
+    "build_jobs": 64
+  }
+}
