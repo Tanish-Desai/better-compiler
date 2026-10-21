@@ -87,7 +87,9 @@ from typing import Dict, List, Optional, Sequence, Tuple
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
 from ce.benchmark import per_bug_outcomes  # noqa: E402
+from ce.analysis import select_complete_runs  # noqa: E402
 from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
+from ce.feedback import CONDITIONS  # noqa: E402
 
 #: The preregistered primary family: ``(better, worse, what it asks)``.
 #: "better" is the direction the hypothesis predicts, which is what makes the
@@ -201,7 +203,8 @@ ROW = ("{better:<34} {worse:<34} {n_bugs:>3} {fixed_better:>4}/{fixed_worse:<4} 
        "{p_one_sided:>9.4f}")
 
 
-def print_rows(rows: Sequence[dict], adjusted: Optional[Sequence[float]] = None) -> None:
+def print_rows(rows: Sequence[dict], adjusted: Optional[Sequence[float]] = None,
+               *, final: bool = False) -> None:
     header = ("{:<34} {:<34} {:>3} {:>9} {:>3} {:>3} {:>7} {:>9}").format(
         "better (hypothesised)", "worse", "n", "fixed", "b", "c", "diff", "p(1-sided)")
     if adjusted is not None:
@@ -212,7 +215,7 @@ def print_rows(rows: Sequence[dict], adjusted: Optional[Sequence[float]] = None)
         line = ROW.format(**row)
         if adjusted is not None:
             p = adjusted[i]
-            line += "  {:>9.4f}  {}".format(p, "*" if p < ALPHA else "")
+            line += "  {:>9.4f}  {}".format(p, "*" if final and p < ALPHA else "")
         print(line)
 
 
@@ -221,11 +224,22 @@ def main(argv=None) -> int:
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--model", help="select one model from historical mixed results")
+    parser.add_argument("--repeat", type=int, default=3,
+                        help="required completed trials per condition (default: 3)")
+    parser.add_argument("--condition", nargs="+", choices=sorted(CONDITIONS),
+                        default=list(CONDITIONS), help="expected main conditions; default: all nine")
+    parser.add_argument("--final", action="store_true",
+                        help="final analysis; requires every planned bug to have complete matched cells")
+    parser.add_argument("--sample", default=os.path.join(os.path.dirname(__file__),
+                        os.pardir, "data", "experiment_sample.json"),
+                        help="planned sample checked by --final (default: committed 24-bug sample)")
     parser.add_argument("--all-pairs", action="store_true",
                         help="also print the 36 exploratory pairs, uncorrected")
     parser.add_argument("--ablation", action="store_true",
                         help="test promotion-on against promotion-off, per iraware condition")
     args = parser.parse_args(argv)
+    if args.repeat < 1:
+        parser.error("--repeat must be positive")
 
     try:
         runs = load_experiment_runs(args.directory, args.model)
@@ -241,8 +255,18 @@ def main(argv=None) -> int:
         # of the same condition against itself across the promotion axis. The
         # two arms live in different files, so relabel one arm before pairing
         # (METHODOLOGY.md section 4; docs/IMPLEMENTATION.md Blocker 7).
-        outcomes = per_bug_outcomes([r for r in runs if _allow_promotion(r)])
-        off = per_bug_outcomes([r for r in runs if not _allow_promotion(r)])
+        ablation_conditions = tuple(c for c in args.condition if c.startswith("iraware"))
+        if not ablation_conditions:
+            parser.error("--ablation requires an iraware condition")
+        on_runs, on_coverage = select_complete_runs(
+            runs, repeats=args.repeat, conditions=ablation_conditions)
+        off_runs, off_coverage = select_complete_runs(
+            runs, repeats=args.repeat, conditions=ablation_conditions, promotion=False)
+        matched_bugs = set(on_coverage["complete_bugs"]) & set(off_coverage["complete_bugs"])
+        outcomes = per_bug_outcomes([r for r in on_runs if str(r["bug_id"]) in matched_bugs])
+        off = per_bug_outcomes([r for r in off_runs if str(r["bug_id"]) in matched_bugs])
+        coverage = {"promotion_on": on_coverage, "promotion_off": off_coverage,
+                    "complete_bugs": sorted(matched_bugs)}
         if not off:
             print(f"no --no-promotion run records in {args.directory}", file=sys.stderr)
             return 2
@@ -253,8 +277,26 @@ def main(argv=None) -> int:
             family.append((condition, key,
                            "ablation: does promote-operands change this condition?"))
     else:
-        outcomes = per_bug_outcomes([r for r in runs if _allow_promotion(r)])
+        matched, coverage = select_complete_runs(
+            runs, repeats=args.repeat, conditions=args.condition)
+        outcomes = per_bug_outcomes(matched)
         family = list(PRIMARY)
+
+    if args.final:
+        from examples.repair_experiment import sample_bug_ids
+        planned = set(sample_bug_ids(args.sample))
+        missing = planned - set(coverage["complete_bugs"])
+        if missing:
+            parser.error("Final analysis is incomplete; missing matched bugs: " + ", ".join(sorted(missing)))
+        if args.repeat != 3:
+            parser.error("The registered final analysis requires --repeat 3")
+        if not args.ablation and set(args.condition) != set(CONDITIONS):
+            parser.error("The registered final main analysis requires all nine conditions")
+        # Final rates concern the planned sample, not extra diagnostic bugs.
+        outcomes = {condition: {bug: fixed for bug, fixed in values.items() if bug in planned}
+                    for condition, values in outcomes.items()}
+        coverage["excluded_extra_bugs"] = sorted(set(coverage["complete_bugs"]) - planned)
+        coverage["complete_bugs"] = sorted(planned)
 
     primary = []
     for better, worse, question in family:
@@ -265,7 +307,9 @@ def main(argv=None) -> int:
         row["question"] = question
         primary.append(row)
 
-    adjusted = benjamini_hochberg([r["p_one_sided"] for r in primary])
+    # Missing comparisons do not shrink the registered multiple-testing family.
+    padded = [r["p_one_sided"] for r in primary] + [1.0] * (len(family) - len(primary))
+    adjusted = benjamini_hochberg(padded)[:len(primary)]
     for row, p in zip(primary, adjusted):
         row["p_bh"] = round(p, 6)
 
@@ -288,6 +332,10 @@ def main(argv=None) -> int:
             "test": "McNemar exact (binomial), one-sided in the preregistered direction",
             "correction": "Benjamini-Hochberg over the primary family",
             "unit": "one bug, outcome = pass@k",
+            "repeat_count": args.repeat,
+            "analysis_status": "final" if args.final else "interim_descriptive",
+            "coverage": coverage,
+            "registered_family_size": len(family),
             "primary": primary,
             "exploratory": exploratory,
         }, indent=2))
@@ -295,10 +343,13 @@ def main(argv=None) -> int:
 
     label = "promotion ablation" if args.ablation else "main sweep"
     print(f"McNemar exact, one-sided, alpha = {ALPHA} ({label})")
+    if not args.final:
+        print("INTERIM DESCRIPTIVE CHECK: p-values are diagnostic, not a stopping rule or final inference.")
+    print(f"Matched bugs: {len(coverage['complete_bugs'])}; completed trials per condition: {args.repeat}")
     print("b = fixed only by the hypothesised-better condition; "
           "c = fixed only by the other\n")
     print("PRIMARY (preregistered, Benjamini-Hochberg corrected together)")
-    print_rows(primary, adjusted)
+    print_rows(primary, adjusted, final=args.final)
     for row in primary:
         print(f"  {row['better']} vs {row['worse']}: {row['question']}")
 

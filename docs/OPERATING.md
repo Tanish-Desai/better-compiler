@@ -1,5 +1,9 @@
 # Running the sweep, day to day
 
+**Active Qwen v2 sweep, 2026-10-21:**
+[`SWEEP_COMPLETION_PLAN.md`](SWEEP_COMPLETION_PLAN.md) has the current audit
+commands and completion plan. It preserves the running experiment.
+
 **Recovering the uploaded mixed-model H100 run?** Follow
 [`H100_RECOVERY.md`](H100_RECOVERY.md) first. Changing the model requires a
 matching `LAB_LLM_MODEL` and a separate experiment directory.
@@ -8,9 +12,20 @@ This is the short, plain page. Setup lives in
 [`RUNBOOK_NATIVE.md`](RUNBOOK_NATIVE.md) (or [`RUNBOOK.md`](RUNBOOK.md) if you
 can use Docker). Once setup is done, this is all you need.
 
-**You do not need to set any environment variables.** `scripts/setup_native.sh`
-wrote them to `~/better-compiler-runtime/env.sh` and made `~/.bashrc` load that
-file, so every new shell already has them. If you ever want to check:
+`scripts/setup_native.sh` wrote environment defaults to
+`~/better-compiler-runtime/env.sh` and made `~/.bashrc` load that file. Those
+defaults may still name an earlier model. For the active Qwen3 v2 sweep,
+override the model settings **after** sourcing that file:
+
+```bash
+source ~/better-compiler-runtime/env.sh
+export LAB_LLM_URL=http://127.0.0.1:8000/v1
+export LAB_LLM_MODEL=qwen3-coder-30b
+export LAB_LLM_TOKEN=local-sweep
+export LAB_LLM_TEMP=0.8
+```
+
+The endpoint's served alias and the output manifest must match. Check:
 
 ```bash
 echo $LAB_LLM_URL        # should print http://127.0.0.1:8000/v1

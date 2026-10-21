@@ -12,6 +12,8 @@ Nothing here may be revised once the sweep starts. If something does have to
 change, the change goes in as a dated amendment below with its reason, and the
 result is reported as exploratory.
 
+See Section 7 for the dated 2026-10-21 reporting implementation clarification.
+
 ---
 
 ## 1. The two decisions
@@ -293,5 +295,18 @@ interrupted sweep resumes by rerunning the identical command.
 
 ## 7. Amendments
 
-*(none — append dated entries here if anything above has to change after the
-sweep begins, with the reason, and demote the affected result to exploratory)*
+### 2026-10-21: equal-budget completion checks in analysis
+
+Offline analysis now requires three completed, uniquely identified trials
+for every expected condition on each compared bug. Earlier analysis scripts
+checked only that a bug had been attempted, which could label unequal partial
+trial sets as pass@3. The repair runner, sample, primary hypotheses,
+directions, budgets, and outcomes are unchanged by this reporting correction.
+
+Interim comparisons are labelled descriptive;
+`analyze_significance.py --final` requires complete coverage of the planned
+sample. Missing primary contrasts retain their place in the multiple-testing
+family. This clarification does not license stopping or changing the
+experiment in response to interim p-values. A later change to reduction,
+prompts, validation or model configuration still requires a separate dated
+amendment and separately identified results.

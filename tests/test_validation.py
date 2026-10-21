@@ -81,6 +81,14 @@ def test_endpoint_error_is_not_hidden_by_unchanged_turns():
                      "iterations": [{"patch": "unchanged"}]}) == "llm_error"
 
 
+def test_noop_turn_is_not_reported_as_patch_application_failure():
+    record = {"iterations": [
+        {"patch": "unchanged", "llm": {"completion_tokens": 10}},
+        {"patch": "applied", "llm": {"completion_tokens": 10}},
+    ], "certificate": {"build_count": 2, "build_failure_count": 0}}
+    assert classify(record) == "no fix found (some unchanged turns)"
+
+
 def test_historical_noops_are_recovered_from_conversation():
     run = {"iterations": [{}], "certificate": {"log": {"messages": [
         {"role": "user", "content": "Please modify the following code in file.cpp to fix the bug:\n```cpp\nreturn 0;\n```"},

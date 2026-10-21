@@ -62,7 +62,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
 from ce.benchmark import summarize  # noqa: E402
+from ce.analysis import select_complete_runs  # noqa: E402
 from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
+from ce.feedback import CONDITIONS  # noqa: E402
 
 COLUMNS = (
     ("condition", 24),
@@ -99,7 +101,13 @@ def main(argv=None) -> int:
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--model", help="select one model from historical mixed results")
+    parser.add_argument("--repeat", type=int, default=3,
+                        help="required completed trials per condition (default: 3; pilot: 1)")
+    parser.add_argument("--condition", nargs="+", choices=sorted(CONDITIONS),
+                        default=list(CONDITIONS), help="expected conditions; default: all nine")
     args = parser.parse_args(argv)
+    if args.repeat < 1:
+        parser.error("--repeat must be positive")
 
     try:
         all_runs = load_experiment_runs(args.directory, args.model)
@@ -135,31 +143,36 @@ def main(argv=None) -> int:
 
     table = summarize(runs)
 
-    # Restrict to bugs attempted under every condition, so that a condition is
-    # not credited for an easier subset than the others faced.
-    by_condition: dict = {}
-    for run in runs:
-        by_condition.setdefault(run["condition"], set()).add(run["bug_id"])
-    common = set.intersection(*by_condition.values()) if by_condition else set()
-    paired = summarize([r for r in runs if r["bug_id"] in common]) if common else {}
+    # Merely having one record is not enough for pass@3. Require all expected
+    # trials, no interrupted records and every requested condition on the bug.
+    matched, coverage = select_complete_runs(
+        all_runs, repeats=args.repeat, conditions=args.condition)
+    paired = summarize(matched)
 
     ablation_table = summarize(ablation_runs) if ablation_runs else {}
 
     if args.json:
         print(json.dumps({
             "all": table,
+            "all_is_descriptive_only": True,
             "paired": paired,
-            "paired_bug_count": len(common),
+            "paired_bug_count": len(coverage["complete_bugs"]),
+            "coverage": coverage,
             "no_promotion_ablation": ablation_table,
         }, indent=2))
         return 0
 
-    print(f"All runs ({len(runs)} records)")
+    print(f"All runs ({len(runs)} records; descriptive only, possibly unequal trials)")
     print_table(table)
-    if paired and len(by_condition) > 1:
-        print(f"\nPaired over the {len(common)} bugs attempted under all "
-              f"{len(by_condition)} conditions")
+    print(f"\nEqual-budget comparison: {len(coverage['complete_bugs'])} complete bugs, "
+          f"{args.repeat} trials x {len(args.condition)} conditions")
+    if paired:
         print_table(paired)
+    else:
+        print("No complete matched bugs yet. Use --repeat 1 only for an actual one-trial pilot.")
+    if coverage["excluded_bugs"]:
+        print("Excluded partial/incomplete bugs: " + ", ".join(coverage["excluded_bugs"]))
+    print("Interim snapshots describe coverage; do not stop or change hypotheses on significance.")
     if ablation_table:
         print(f"\nNo-promotion ablation ({len(ablation_runs)} records) -- "
               f"compare each row against its counterpart above")

@@ -1,5 +1,9 @@
 # Runbook: running the sweep without Docker
 
+**Active Qwen v2 sweep, 2026-10-21:** use
+[`SWEEP_COMPLETION_PLAN.md`](SWEEP_COMPLETION_PLAN.md) for sharing the current
+snapshot, read-only diagnostics, completion checks, and the paper deadline.
+
 **For the mixed Qwen2.5/Qwen3 run uploaded on 2026-10-11**, use
 [`H100_RECOVERY.md`](H100_RECOVERY.md) for the required validation checks and
 the new nine-condition pilot before another full sweep.

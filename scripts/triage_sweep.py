@@ -144,6 +144,8 @@ def classify(run: dict) -> str:
             return "regression validation timed out"
         return "regression validation error"
     if unapplied > 0:
+        if "unchanged" in statuses and "mismatch" not in statuses:
+            return "no fix found (some unchanged turns)"
         return "no fix found (some turns unapplied)"
     return "no fix found"
 
@@ -184,8 +186,10 @@ def turn_level(runs: List[dict]) -> Dict[str, int]:
 def iraware_noop(runs: List[dict]) -> Dict[str, Dict[str, int]]:
     """Blocker 15: bugs where every ``iraware`` reduction removed nothing.
 
-    A no-op makes ``iraware``'s prompt byte-identical to ``raw``'s for that
-    bug, so the row stops measuring what it is labelled as.
+    This preserves the registered accepted-pass proxy. A tiny already reduced
+    witness may legitimately have no accepted pass. Inspect shown/original
+    sizes and fallback errors before interpreting this as a reducer defect;
+    structured feedback can still differ from raw-plain without shrinking IR.
     """
     total: Dict[str, int] = collections.Counter()
     noop: Dict[str, int] = collections.Counter()
@@ -258,6 +262,10 @@ def main(argv=None) -> int:
                  "turns with an empty reply"):
         print(f"  {name.ljust(width)}  {turns[name]:>4}")
     print(f"  {'turns that compiled'.ljust(width)}  {compiled:>4}")
+    if turns["turns that reached a build"]:
+        share = 100 * turns["build failures"] / turns["turns that reached a build"]
+        print(f"  Build failure share of attempted builds: {share:.1f}%")
+    print("  Stage 'error' alone does not distinguish compiler diagnostics, an Alive2 violation, or infrastructure.")
 
     # The number the buckets bury: of every patch that did compile, how many
     # got as far as making the bug's own reproducer pass -- before lit is even
@@ -272,8 +280,8 @@ def main(argv=None) -> int:
           + (f" ({', '.join(noop_bugs)})" if noop_bugs else ""))
     if len(noop["total"]) >= 8:
         if len(noop_bugs) >= NOOP_STOP_AND_FIX:
-            print("  -> preregistered decision: STOP AND FIX. Enough rows are "
-                  "compromised to bias the sweep toward a null result.")
+            print("  -> registered STOP AND FIX checkpoint: pause at a safe cell boundary and inspect "
+                  "actual shown sizes and fallback errors before changing the reducer.")
         elif len(noop_bugs) <= NOOP_RUN_TO_COMPLETION:
             print("  -> preregistered decision: run to completion, record as a "
                   "limitation in METHODOLOGY.md.")
@@ -282,6 +290,7 @@ def main(argv=None) -> int:
                   ">=4 stop). Judgement call; say which way and why.")
     else:
         print("  -> fewer than ~8 bugs seen; the decision point is ~10.")
+    print("  This counts accepted-pass lists, not actual IR shrinkage; use audit_sweep.py for displayed sizes.")
 
     # The verdict this whole script exists to support.
     #
