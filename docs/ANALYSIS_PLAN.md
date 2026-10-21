@@ -13,6 +13,8 @@ change, the change goes in as a dated amendment below with its reason, and the
 result is reported as exploratory.
 
 See Section 7 for the dated 2026-10-21 reporting implementation clarification.
+The 2026-10-22 amendment below replaces the execution schedule for new v3
+data; the original plan remains here as a record of the original design.
 
 ---
 
@@ -310,3 +312,53 @@ family. This clarification does not license stopping or changing the
 experiment in response to interim p-values. A later change to reduction,
 prompts, validation or model configuration still requires a separate dated
 amendment and separately identified results.
+
+### 2026-10-22: separate prospective v3 follow-up after the v2 audit
+
+The frozen development snapshot at `73f2ba1` contains 205 v2 records over
+eight bugs, including seven bugs with all 27 planned cells. It exposes
+greedy extraction of multiple fenced replies, replacement of neighboring
+definitions, lost per-test Alive2 arguments during feedback reduction, and
+discarded reduction progress at oracle-budget exhaustion. These are reasons
+to revise the harness, not evidence of a successful feedback intervention.
+
+Preserve all v2 records. Report their matched seven-bug comparisons as
+descriptive development evidence. Do not pool them with v3 or claim to have
+completed the original 24-bug factorial experiment.
+
+Before collecting v3 outcomes, freeze `data/repair_v3_protocol.json`:
+
+- The remaining 16 bugs are exactly the two remaining tiers of the original
+  deterministic sample. The eight v2 bugs and pilot bug `115575` are excluded.
+  Bug `115149` had prior exposure in the older clean-model diagnostics and
+  known-patch checks; this is not an entirely unseen test set.
+- Six arms preserve all four original primary contrasts: `baseline`,
+  `raw-plain`, `generic-plain`, `llvmreduce-plain`, `iraware-plain`, and
+  `iraware-structured`. Three trials and four repair turns are fixed for
+  every arm: **288 runs**, at most **1,152 model replies**. This supports
+  neither a full-factorial interaction claim nor a size-tier comparison
+  against the discarded v2 tier.
+- Retain the original P1-P4 directions, exact paired McNemar tests and
+  Benjamini-Hochberg correction across all four hypotheses. The unit remains
+  the bug. Report paired counts, effect sizes and uncertainty even when
+  statistical significance is absent. Do not add trials or remove bugs in
+  response to interim p-values. The original power simulation for 24 bugs
+  does not describe the smaller 16-bug follow-up.
+- Use `repair-v3` targeted search/replace edits, explicit 8,192-token output
+  allowance, temperature 0.8, 400 budgeted reduction-oracle calls and
+  `error_class` matching. Preserve verifier arguments, validate refreshed
+  feedback under the same policy, and record fallback to the original pair.
+  Record additional display-refresh verifier calls separately from the
+  candidate budget. A positive-only context-scoped cache preserves accepted
+  candidates without charging duplicate verifier calls.
+- Freeze the served weight revision and serving identity in run provenance
+  before generation. The protocol's null revision means unknown; it is not
+  a pin. The output manifest guards the model, budget, protocol hash, harness
+  source hash and dataset identity. A changed configuration uses a new output
+  directory and a separately reported experiment.
+
+This is a prospective schedule for revised-harness outcomes, selected after
+v2 development evidence. It remains an amended follow-up to the original
+preregistration and must be described as such. A better result is not
+guaranteed. Validate on the excluded development pilot before starting it;
+see [H100_V3.md](H100_V3.md).

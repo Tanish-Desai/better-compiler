@@ -28,14 +28,14 @@ from what the records already store:
     lands in a channel the client does not read does this.
 
 ``patch never applied``
-    The model did not echo the code window back verbatim, so ``apply_patch``
-    refused and the turn was spent on formatting rather than repair.
+    No usable source edit was applied. Depending on the harness version, this
+    can mean unmatched source, malformed SEARCH/REPLACE blocks, or a reply
+    stopped by its output limit. These causes are counted separately below.
     ``llvm_bench`` found patch invalidity to be a dominant failure mode, so
     this is expected to be non-zero -- the question is how large.
 
-    Detected exactly, not guessed: ``check_fast`` builds once before the loop
-    and every applied patch builds once more, so a run's builds should number
-    ``1 + iterations``. Whatever is missing never reached a build.
+    Recorded patch statuses take precedence. Historical build counts alone
+    cannot distinguish these failures from a no-op that was not built.
 
 ``build failed``
     The patch applied but did not compile. Real model output, wasted turn.
@@ -70,15 +70,17 @@ from typing import Dict, List, Optional
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
 from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
+from ce.patching import PatchFormatError  # noqa: E402
 from scripts.inspect_patches import conversation, normalise, extract_code  # noqa: E402
 
 #: Blocker 15's preregistered thresholds, over roughly the first ten bugs.
 NOOP_RUN_TO_COMPLETION = 2
 NOOP_STOP_AND_FIX = 4
+UNAPPLIED_PATCH_STATUSES = frozenset({"mismatch", "invalid_format", "truncated"})
 
 
 def patch_statuses(run: dict) -> List[Optional[str]]:
-    """Per-turn ``applied`` / ``unchanged`` / ``mismatch``, where recorded.
+    """Per-turn application, no-op, format and truncation statuses, where recorded.
 
     For records predating the guard, recover unchanged replies from stored
     conversations. Other missing statuses remain unknown: build counts alone
@@ -89,8 +91,14 @@ def patch_statuses(run: dict) -> List[Optional[str]]:
         hunk, replies = conversation(run)
         if hunk is not None and len(replies) == len(statuses):
             for index, reply in enumerate(replies):
-                if statuses[index] is None and normalise(extract_code(reply)) == normalise(hunk):
-                    statuses[index] = "unchanged"
+                if statuses[index] is None:
+                    try:
+                        if normalise(extract_code(reply)) == normalise(hunk):
+                            statuses[index] = "unchanged"
+                    except PatchFormatError:
+                        # A malformed historical response does not establish
+                        # either a no-op or an application failure by itself.
+                        pass
     return statuses
 
 
@@ -106,6 +114,10 @@ def classify(run: dict) -> str:
     statuses = patch_statuses(run)
     if statuses and all(s == "unchanged" for s in statuses):
         return "returned the code unchanged"
+    if statuses and all(s == "truncated" for s in statuses):
+        return "all replies hit output limit"
+    if statuses and all(s == "invalid_format" for s in statuses):
+        return "invalid patch format"
 
     validations = [i.get("validation") for i in run.get("iterations", [])]
     regressions = [v for v in validations if v and v.get("stage") == "regression"]
@@ -126,7 +138,9 @@ def classify(run: dict) -> str:
     builds = int(cert.get("build_count", 0) or 0)
     # check_fast builds once before the loop; each applied patch builds once
     # more. Anything short of that never reached a build.
-    unapplied = len(iterations) - max(0, builds - 1)
+    unapplied = (sum(s == "unchanged" or s in UNAPPLIED_PATCH_STATUSES for s in statuses)
+                 if statuses and all(s is not None for s in statuses)
+                 else len(iterations) - max(0, builds - 1))
     if iterations and unapplied >= len(iterations):
         return "patch never applied"
     if int(cert.get("build_failure_count", 0) or 0) >= max(1, builds - 1):
@@ -144,7 +158,7 @@ def classify(run: dict) -> str:
             return "regression validation timed out"
         return "regression validation error"
     if unapplied > 0:
-        if "unchanged" in statuses and "mismatch" not in statuses:
+        if "unchanged" in statuses and not any(s in UNAPPLIED_PATCH_STATUSES for s in statuses):
             return "no fix found (some unchanged turns)"
         return "no fix found (some turns unapplied)"
     return "no fix found"
@@ -172,7 +186,10 @@ def turn_level(runs: List[dict]) -> Dict[str, int]:
             out["turns that returned the code unchanged"] += sum(
                 1 for s in statuses if s == "unchanged")
             out["turns the patch did not apply"] += sum(
-                1 for s in statuses if s == "mismatch")
+                1 for s in statuses if s in UNAPPLIED_PATCH_STATUSES)
+            out["turns with invalid patch format"] += statuses.count("invalid_format")
+            out["turns with truncated replies"] += statuses.count("truncated")
+            out["turns with unmatched source"] += statuses.count("mismatch")
         else:
             out["turns the patch did not apply"] += max(0, len(iterations) - builds)
         out["turns with an empty reply"] += sum(
@@ -258,7 +275,8 @@ def main(argv=None) -> int:
     width = max(len(k) for k in turns) + 2
     for name in ("turns", "turns that reached a build",
                  "turns that returned the code unchanged",
-                 "turns the patch did not apply", "build failures",
+                 "turns the patch did not apply", "turns with invalid patch format",
+                 "turns with truncated replies", "turns with unmatched source", "build failures",
                  "turns with an empty reply"):
         print(f"  {name.ljust(width)}  {turns[name]:>4}")
     print(f"  {'turns that compiled'.ljust(width)}  {compiled:>4}")
@@ -314,9 +332,9 @@ def main(argv=None) -> int:
               "stored replies and prompt before spending another full sweep.")
     elif turns["turns the patch did not apply"] > turns["turns"] * 0.5:
         print("  Over half of all turns never reached a build: the model is "
-              "not echoing the code window back verbatim. Turns are being "
-              "spent on formatting, not repair -- fix the prompt before "
-              "spending more compute.")
+              "returning unapplied edits. Inspect malformed blocks, unmatched "
+              "source and output-limit counters before spending more compute. "
+              "Run check_llm_endpoint.py --repair-format for a v3 preflight.")
     elif buckets.get("broke regression tests"):
         print(f"  {buckets['broke regression tests']} runs fixed the "
               "reproducer in at least one turn and then failed lit. Inspect "

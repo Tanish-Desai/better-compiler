@@ -1,5 +1,9 @@
 # Methodology draft for the active Qwen experiment
 
+> Historical v2 draft. The evaluated snapshot and prospective v3 amendment
+> are now described in `our_paper/main.tex`, with frozen snapshot tables in
+> `our_paper/generated/`. Follow [H100_V3.md](H100_V3.md) for new runs.
+
 Prepared 2026-10-21 from the implementation at repository commit `38b381b`.
 This is a draft of the method, rather than a report of experimental outcomes.
 The source revision and configuration actually running on the H100 must be

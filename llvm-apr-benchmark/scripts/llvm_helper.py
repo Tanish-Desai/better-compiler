@@ -201,7 +201,8 @@ def alive2_check(src: str, tgt: str, additional_args: str):
                     and "0 failed-to-prove transformations" in out
                     and "0 Alive2 errors" in out
                 )
-                return (success, {"src": src, "tgt": tgt, "log": out})
+                return (success, {"src": src, "tgt": tgt, "log": out,
+                                  "additional_args": additional_args})
     except subprocess.CalledProcessError as e:
         return (False, str(e) + "\n" + decode_output(e.output))
 
@@ -331,6 +332,7 @@ def verify_test_group(repro: bool, input, type: str):
                         "args": args,
                         "name": name,
                         "body": body,
+                        "additional_args": subtest.get("additional_args"),
                         "result": res,
                         "log": log,
                     }

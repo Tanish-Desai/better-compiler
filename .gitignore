@@ -7,7 +7,10 @@ results/
 
 # Fresh experiment and diagnostic output. Uploaded historical results remain tracked.
 results-qwen3-v2*/
+results-qwen3-v3*/
+results-devstral*/
 validation-checks/
+run-provenance/
 
 # Reading material, not source. ~28MB of third-party PDFs, kept locally so
 # they don't sit in git history. docs/SLM_SELECTION.md cites every one of them
@@ -20,3 +23,12 @@ compiler_papers.zip
 
 # Local docker compose settings (see .env.h100 for the template).
 .env
+
+# LaTeX intermediates; keep the editable manuscript and reviewed PDF tracked.
+our_paper/*.aux
+our_paper/*.bbl
+our_paper/*.blg
+our_paper/*.log
+our_paper/*.out
+our_paper/*.fls
+our_paper/*.fdb_latexmk

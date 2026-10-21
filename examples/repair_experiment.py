@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""THE ACTUAL EXPERIMENT: try to fix real LLVM bugs with an AI, six ways.
+"""Run controlled feedback conditions for LLVM repair and record each turn.
 
 WHAT THIS SCRIPT DOES
 ---------------------
@@ -8,15 +8,15 @@ For one bug, it runs the standard repair loop::
     1. show the AI the buggy C++ code and a description of the failure
     2. the AI replies with a rewritten version
     3. build LLVM with that patch
-    4. run the bug's test AND the full regression test suite
+    4. run the bug's reproducer AND its listed regression-test directories
     5. fixed?  stop.  not fixed?  feed the new failure back and go to 2
 
 ...up to ``--max-iterations`` times, and records everything that happened.
 
 THE ONE THING THAT VARIES
 -------------------------
-This file is ``llvm-apr-benchmark/examples/baseline.py`` with **exactly one
-line changed**: the line that turns a failure into text for the next prompt.
+This runner adapts ``llvm-apr-benchmark/examples/baseline.py``. Within one
+versioned experiment, only feedback representation varies across conditions.
 
 Everything else is deliberately identical across conditions -- same model, same
 temperature, same prompt wording, same code window, same number of attempts.
@@ -26,8 +26,8 @@ way, we could not claim that a difference in results came from the feedback.
 WHAT COUNTS AS "FIXED"
 ----------------------
 Not "it compiled".  Not even "the bug's own test passes".  A fix counts only if
-``env.check_full()`` passes, which means the patch builds AND fixes the bug AND
-does not break any of LLVM's existing regression tests.  That standard is
+``env.check_full()`` passes, which means the patch builds, passes its listed
+reproducers and passes the selected LLVM regression directories. That standard is
 enforced by the benchmark, not by us.
 
 WHAT YOU NEED BEFORE THIS WILL RUN
@@ -59,10 +59,13 @@ per-iteration rebuild. See the comment in ``main`` for the arithmetic.
 from __future__ import annotations
 
 import argparse
+from functools import lru_cache
 import hashlib
 import json
 import os
+from pathlib import Path
 import re
+import subprocess
 import sys
 import time
 from typing import List, Optional, Tuple
@@ -75,6 +78,8 @@ from ce.benchmark import (  # noqa: E402
 )
 from ce.feedback import CONDITIONS, resolve_condition  # noqa: E402
 from ce.experiment import ExperimentMismatch, prepare_output  # noqa: E402
+from ce.patching import PatchFormatError, apply_edits, extract_single_code  # noqa: E402
+from ce.protocol import load_protocol  # noqa: E402
 
 # The benchmark's helpers read LAB_* at import time, so import them only after
 # argument parsing has had a chance to fail fast on a missing environment.
@@ -94,15 +99,24 @@ def _import_benchmark() -> None:
     llvm_helper, Env = _llvm_helper, _Env
 
 
-FORMAT_REQUIREMENT = """
-Please answer with the code directly. Do not include any additional information in the output.
-Please answer with the complete code snippet (including the unmodified part) that replaces the original code. Do not answer with a diff.
-Your answer must differ from the code you were given. Returning it unchanged is not a valid answer, and neither is a change that only touches comments or formatting.
-"""
+FORMAT_REQUIREMENT = (
+    "\nReturn only the smallest targeted edits in this exact format:\n"
+    "<<<<<<< SEARCH\n"
+    "exact existing lines from the ORIGINAL source excerpt\n"
+    "=======\n"
+    "replacement lines\n"
+    ">>>>>>> REPLACE\n"
+    "You may return multiple non-overlapping blocks. SEARCH must match exactly once\n"
+    "in the original excerpt, including indentation. Include enough unchanged context\n"
+    "to make each SEARCH unique. Every turn edits the ORIGINAL code, not your previous\n"
+    "reply. The excerpt may start or end inside a function; never replace the whole\n"
+    "excerpt with a complete function. Do not return explanations, Markdown fences,\n"
+    "ellipsis placeholders, an unchanged block, or comment-only/format-only edits.\n"
+)
 
 # Increment when windowing, patch handling or validation semantics change.
 # Prompt wording is hashed as well, so editing it cannot reuse old cells.
-HARNESS_VERSION = "repair-v2"
+HARNESS_VERSION = "repair-v3"
 
 
 class BaselineBuildError(RuntimeError):
@@ -128,7 +142,61 @@ SYSTEM_PROMPT = (
 )
 
 
+@lru_cache(maxsize=8)
+def _hash_dataset_records(directory: str, fingerprints: tuple) -> tuple[str, tuple]:
+    """Hash actual selected inputs; stat fingerprints avoid rereading each cell.
+
+    Paths only identify the local cache entry. They do not enter the digest,
+    so moving an unchanged checkout does not change experiment identity.
+    """
+    digest = hashlib.sha256()
+    records = []
+    for bug, _mtime_ns, _size in fingerprints:
+        raw = (Path(directory) / f"{bug}.json").read_bytes().replace(b"\r\n", b"\n")
+        item_hash = hashlib.sha256(raw).hexdigest()
+        digest.update(bug.encode() + b"\0" + item_hash.encode() + b"\0")
+        records.append((bug, item_hash))
+    return digest.hexdigest(), tuple(records)
+
+
+def dataset_identity(args) -> dict | None:
+    selected = getattr(args, "dataset_bug_ids", None)
+    directory = os.environ.get("LAB_DATASET_DIR")
+    if not selected or not directory:
+        # A plan can be shown before sourcing the native environment. Real
+        # generation requires LAB_DATASET_DIR in _import_benchmark().
+        return None
+    directory = str(Path(directory).resolve())
+    fingerprints = []
+    for bug in sorted(set(map(str, selected))):
+        stat = (Path(directory) / f"{bug}.json").stat()
+        fingerprints.append((bug, stat.st_mtime_ns, stat.st_size))
+    digest, records = _hash_dataset_records(directory, tuple(fingerprints))
+    return {"sha256": digest, "records": dict(records)}
+
+
+def completion_token_limit() -> int:
+    try:
+        value = int(os.environ.get("LAB_LLM_MAX_TOKENS", "8192"))
+    except ValueError as error:
+        raise ValueError("LAB_LLM_MAX_TOKENS must be a positive integer") from error
+    if value < 1:
+        raise ValueError("LAB_LLM_MAX_TOKENS must be a positive integer")
+    return value
+
+
 def experiment_config(args) -> dict:
+    sources = ("examples/repair_experiment.py", "ce/benchmark.py", "ce/feedback.py",
+               "ce/patching.py", "ce/oracle.py", "ce/protocol.py", "ce/experiment.py",
+               "ce/reduction.py", "ce/reduce_generic.py",
+               "ce/reduce_iraware.py", "ce/reduce_llvmreduce.py", "ce/_llvmreduce_test.py",
+               "ce/alive.py", "ce/irmodel.py", "ce/structured.py",
+               "llvm-apr-benchmark/scripts/llvm_helper.py", "llvm-apr-benchmark/scripts/lab_env.py")
+    digest = hashlib.sha256()
+    root = os.path.join(_HERE, os.pardir)
+    for source in sources:
+        with open(os.path.join(root, source), "rb") as handle:
+            digest.update(source.encode() + b"\0" + handle.read().replace(b"\r\n", b"\n") + b"\0")
     return {
         "model": os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner"),
         "base_model_cutoff": os.environ.get("LAB_LLM_BASEMODEL_CUTOFF", "2023-12-31Z"),
@@ -138,6 +206,15 @@ def experiment_config(args) -> dict:
         "oracle_strictness": args.strictness,
         "harness_version": HARNESS_VERSION,
         "prompt_hash": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
+        "patch_format": "search-replace-v1",
+        "max_completion_tokens": completion_token_limit(),
+        "harness_code_hash": digest.hexdigest(),
+        "protocol_id": getattr(args, "protocol_id", None),
+        "protocol_sha256": getattr(args, "protocol_sha256", None),
+        "model_repository": os.environ.get("LAB_LLM_MODEL_REPOSITORY"),
+        "model_revision": os.environ.get("LAB_LLM_MODEL_REVISION"),
+        "serving_identity": os.environ.get("LAB_LLM_SERVING_ID"),
+        "dataset_identity": dataset_identity(args),
     }
 
 
@@ -171,6 +248,7 @@ class Model:
     """
 
     def __init__(self) -> None:
+        self.max_tokens = completion_token_limit()
         from openai import OpenAI
 
         self.name = os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner")
@@ -204,6 +282,7 @@ class Model:
                     messages=messages,
                     timeout=300,
                     temperature=self.temperature,
+                    max_tokens=self.max_tokens,
                 )
                 break
             except Exception as e:  # noqa: BLE001 - see _LLM_ATTEMPTS
@@ -228,22 +307,18 @@ class Model:
         stats = {
             "prompt_tokens": getattr(usage, "prompt_tokens", 0) or 0,
             "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
+            "finish_reason": response.choices[0].finish_reason,
+            "response_model": getattr(response, "model", self.name),
         }
         return (response.choices[0].message.content or ""), stats
 
 
 # --------------------------------------------------------------------------
-# Patch handling (kept identical to the benchmark's baseline)
+# Explicit edit handling (v3; historical whole-window replies are not applied)
 # --------------------------------------------------------------------------
 
 def extract_code(reply: str) -> str:
-    if reply.startswith("```"):
-        return reply.strip().removeprefix("```cpp").removeprefix("```").removesuffix("```")
-    for pattern in (r"```cpp([\s\S]+)```", r"```([\s\S]+)```"):
-        matches = re.findall(pattern, reply)
-        if matches:
-            return matches[-1]
-    return reply
+    return extract_single_code(reply)
 
 
 def normalise_code(text: str) -> str:
@@ -260,18 +335,24 @@ def is_no_op(reply: str, original_hunk: str) -> bool:
     minutes spent confirming that unmodified source does not fix the bug.
     That is what 555 of the first sweep's 861 turns did (Blocker 16).
     """
-    return normalise_code(extract_code(reply)) == normalise_code(original_hunk)
+    try:
+        code = (apply_edits(original_hunk, reply) if "<<<<<<< SEARCH" in reply
+                else extract_code(reply))
+    except PatchFormatError:
+        return False
+    return normalise_code(code) == normalise_code(original_hunk)
 
 
 def apply_patch(file: str, original_hunk: str, reply: str) -> bool:
-    """Replace ``original_hunk`` with the model's code. False if it did not match."""
+    """Apply validated edits only inside the uniquely identified source excerpt."""
+    replacement = apply_edits(original_hunk, reply)
     path = os.path.join(llvm_helper.llvm_dir, file)
     with open(path, encoding="utf-8") as f:
         code = f.read()
-    if original_hunk not in code:
+    if code.count(original_hunk) != 1:
         return False
     with open(path, "w", encoding="utf-8") as f:
-        f.write(code.replace(original_hunk, extract_code(reply)))
+        f.write(code.replace(original_hunk, replacement, 1))
     return True
 
 
@@ -326,11 +407,10 @@ def _balance_braces(source: List[str], lo: int, hi: int,
 
 
 def bug_hunk(env, margin: int = 30) -> Tuple[str, str]:
-    """The source window the model is asked to rewrite.
+    """Bounded source context for exact edits; it may contain partial constructs.
 
-    Brace-balanced, so the model receives complete functions rather than an
-    excerpt starting mid-statement. Applied identically under every condition,
-    so it changes the task's difficulty without touching what is being varied.
+    Brace balancing is best effort, not a C++ parser. The edit protocol preserves
+    all text outside explicit SEARCH spans even if the context is incomplete.
     """
     lineno = env.get_hint_line_level_bug_locations()
     bug_file = next(iter(lineno.keys()))
@@ -381,6 +461,10 @@ def repair(bug_id: str, condition: str, args, model: Model,
             "trial": trial,
             "experiment_config": experiment_config(args),
             "build_jobs": args.build_jobs,
+            "source_commit": subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=os.path.join(_HERE, os.pardir),
+                capture_output=True, text=True, timeout=10,
+            ).stdout.strip() or None,
         },
     )
     env.use_knowledge("alive2", env.knowledge_cutoff)
@@ -395,12 +479,6 @@ def repair(bug_id: str, condition: str, args, model: Model,
         return None
 
     file, hunk = bug_hunk(env)
-    prefix = "\n".join(hunk.splitlines()[:5])
-    suffix = "\n".join(hunk.splitlines()[-5:])
-    context_requirement = (
-        f"Please make sure the answer includes the prefix:\n```cpp\n{prefix}\n```\n"
-        f"and the suffix:\n```cpp\n{suffix}\n```\n"
-    )
 
     feedback = normalize_feedback(
         log, cond.name,
@@ -421,7 +499,7 @@ def repair(bug_id: str, condition: str, args, model: Model,
             f"{feedback.text}\n"
             f"Please modify the following code in {file} to fix the bug:\n"
             f"```cpp\n{hunk}\n```\n"
-            + FORMAT_REQUIREMENT + context_requirement
+            + FORMAT_REQUIREMENT
         )},
     ]
 
@@ -435,14 +513,30 @@ def repair(bug_id: str, condition: str, args, model: Model,
             break
         messages.append({"role": "assistant", "content": reply})
 
-        if is_no_op(reply, hunk):
+        format_error = None
+        try:
+            apply_edits(hunk, reply)
+        except PatchFormatError as error:
+            format_error = str(error)
+
+        if llm_stats.get("finish_reason") == "length":
+            patch = "truncated"
+            log = "Your reply hit the output limit and was not applied. Return smaller SEARCH/REPLACE blocks."
+            fixed = False
+            validation = {"stage": "no_patch", "passed": False, "failure_kind": "output_limit"}
+        elif is_no_op(reply, hunk):
             patch = "unchanged"
             log = NO_OP_FEEDBACK
             fixed = False
             validation = {"stage": "no_patch", "passed": False}
+        elif format_error:
+            patch = "invalid_format"
+            log = f"No source was changed: {format_error}\nReturn exact SEARCH/REPLACE blocks against the original excerpt."
+            fixed = False
+            validation = {"stage": "no_patch", "passed": False, "failure_kind": "patch_format"}
         elif not apply_patch(file, hunk, reply):
             patch = "mismatch"
-            log = "The provided code does not match the region to replace; reply with the full hunk."
+            log = "The original source excerpt was not found uniquely; no patch was applied."
             fixed = False
             validation = {"stage": "no_patch", "passed": False}
         else:
@@ -466,6 +560,13 @@ def repair(bug_id: str, condition: str, args, model: Model,
         if fixed:
             break
 
+        if index + 1 == args.max_iterations:
+            # Save the actual last diagnostic without reducing feedback that
+            # no model will consume. This can otherwise cost hundreds of calls.
+            text = log if isinstance(log, str) else json.dumps(log, ensure_ascii=False)
+            messages.append({"role": "user", "content": "Feedback:\n" + text})
+            break
+
         feedback = normalize_feedback(
             log, cond.name,
             bug_type=env.get_bug_type(),
@@ -476,7 +577,7 @@ def repair(bug_id: str, condition: str, args, model: Model,
         messages.append({"role": "user", "content": (
             "Feedback:\n" + feedback.text
             + "\nPlease adjust code according to the feedback."
-            + FORMAT_REQUIREMENT + context_requirement
+            + FORMAT_REQUIREMENT
         )})
 
     if not run.iterations:
@@ -513,12 +614,14 @@ def sample_bug_ids(path: str) -> List[str]:
 
 
 def main(argv=None) -> int:
+    supplied = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("bug_ids", nargs="*", help="issue ids; omit with --all/--sample")
     parser.add_argument("--all", action="store_true", help="every issue in the dataset")
     parser.add_argument("--sample", nargs="?", const="data/experiment_sample.json",
                         help="read bug ids from a sample file "
                              "(default data/experiment_sample.json)")
+    parser.add_argument("--protocol", help="load a frozen prospective schedule and verify its settings")
     parser.add_argument("--condition", nargs="+", default=["iraware-structured"],
                         help=f"one or more of {sorted(CONDITIONS)} or a matrix letter A-F")
     parser.add_argument("--repeat", type=int, default=1, metavar="K",
@@ -539,6 +642,37 @@ def main(argv=None) -> int:
                              "no endpoint, LLVM imports, builds or writes")
     args = parser.parse_args(argv)
 
+    protocol_bugs = None
+    if args.protocol:
+        try:
+            protocol, protocol_sha = load_protocol(args.protocol)
+        except (OSError, ValueError) as error:
+            parser.error(str(error))
+        if args.bug_ids or args.sample or args.all or args.no_promotion:
+            parser.error("--protocol supplies its own bugs and promotion-on schedule")
+        if protocol["harness_version"] != HARNESS_VERSION:
+            parser.error("Protocol harness_version does not match this runner")
+        expected_env = {"LAB_LLM_MODEL": protocol["model"],
+                        "LAB_LLM_TEMP": protocol["temperature"],
+                        "LAB_LLM_MAX_TOKENS": protocol["max_completion_tokens"]}
+        defaults = {"LAB_LLM_MODEL": "deepseek-reasoner", "LAB_LLM_TEMP": "0.8",
+                    "LAB_LLM_MAX_TOKENS": "8192"}
+        for key, expected in expected_env.items():
+            actual = os.environ.get(key, defaults[key])
+            if str(actual) != str(expected):
+                parser.error(f"{key}={actual!r} differs from protocol value {expected!r}")
+        fields = (("--condition", "condition", "conditions"), ("--repeat", "repeat", "repeat"),
+                  ("--max-iterations", "max_iterations", "max_iterations"),
+                  ("--oracle-budget", "oracle_budget", "oracle_budget"),
+                  ("--strictness", "strictness", "oracle_strictness"))
+        for option, attribute, key in fields:
+            if any(value == option or value.startswith(option + "=") for value in supplied):
+                if getattr(args, attribute) != protocol[key]:
+                    parser.error(f"{option} differs from the frozen protocol")
+            setattr(args, attribute, protocol[key])
+        args.protocol_id, args.protocol_sha256 = protocol["id"], protocol_sha
+        protocol_bugs = protocol["bugs"]
+
     conditions = [resolve_condition(c).name for c in args.condition]
     if args.repeat < 1:
         parser.error("--repeat must be at least 1")
@@ -546,7 +680,9 @@ def main(argv=None) -> int:
         parser.error("--max-iterations and --build-jobs must be positive")
     args.oracle_budget = args.oracle_budget or None
 
-    if args.sample:
+    if protocol_bugs is not None:
+        bug_ids = protocol_bugs
+    elif args.sample:
         bug_ids = sample_bug_ids(args.sample)
     elif args.all:
         bug_ids = sorted(
@@ -558,9 +694,10 @@ def main(argv=None) -> int:
     else:
         parser.error("pass bug ids, --sample, or --all")
 
+    args.dataset_bug_ids = tuple(bug_ids)
     try:
         prepare_output(args.out, experiment_config(args), write=False)
-    except ExperimentMismatch as e:
+    except (ExperimentMismatch, OSError, ValueError) as e:
         parser.error(str(e))
     if args.plan:
         total = len(bug_ids) * args.repeat * len(conditions)

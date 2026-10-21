@@ -1,5 +1,10 @@
 # Completing the Qwen study by 28 October 2026
 
+> Superseded on 2026-10-22 by [H100_V3.md](H100_V3.md). Inspection of the
+> uploaded 205-run snapshot confirmed patch-handling and verifier-context
+> faults. Pause v2 at a completed-cell boundary and preserve its records;
+> do not launch the old full sweep from this historical plan.
+
 This plan is dated 21 October 2026. It is based on an operator-provided
 snapshot summary, not on inspection of the current H100 run records. No
 outcome table or positive method claim is finalized by this document.

@@ -101,6 +101,11 @@ def normalize_feedback(
         return Feedback(text=text, condition=resolve_condition(condition).name,
                         metrics={"counterexample": False, "prompt_chars": len(text)})
 
+    # These are verifier arguments, not the opt command in failed["args"].
+    # Old records omit them; an explicit extra_args=() is still an intentional
+    # caller override and must not be replaced with the test's arguments.
+    if "extra_args" not in kwargs and failed and "additional_args" in failed:
+        kwargs["extra_args"] = failed["additional_args"]
     fb = build_feedback_from_check(inner, condition, bug_type=bug_type, **kwargs)
     fb.metrics.setdefault("counterexample", True)
     if failed:
@@ -254,6 +259,11 @@ class RunLog:
             "prompt_tokens_est": total("prompt_tokens_est"),
             "oracle_calls": total("oracle_calls"),
             "reduction_seconds": round(total("seconds"), 3),
+            "feedback_refresh_calls": total("feedback_refresh_calls"),
+            "feedback_refresh_seconds": round(total("feedback_refresh_seconds"), 6),
+            "feedback_refresh_tool_failures": total("feedback_refresh_tool_failures"),
+            "reduction_and_refresh_calls": total("oracle_calls") + total("feedback_refresh_calls"),
+            "reduction_and_refresh_seconds": round(total("seconds") + total("feedback_refresh_seconds"), 6),
             "llm_prompt_tokens": sum(
                 int(i.llm.get("prompt_tokens", 0) or 0) for i in self.iterations
             ),

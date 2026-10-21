@@ -54,7 +54,8 @@ def args():
 
 
 def model():
-    replies = iter(["```cpp\nreturn 1;\n```", "```cpp\nreturn 2;\n```"])
+    replies = iter([f"<<<<<<< SEARCH\nreturn 0;\n=======\nreturn {value};\n>>>>>>> REPLACE"
+                    for value in (1, 2)])
     return SimpleNamespace(name="test", cutoff="2000-01-01", temperature=0.8,
                            chat=lambda messages: (next(replies), {"completion_tokens": 5}))
 
@@ -80,3 +81,38 @@ def test_unpatched_build_failure_never_queries_model(monkeypatch):
     llm.chat = lambda messages: pytest.fail("must not query LLM for infrastructure failure")
     with pytest.raises(RuntimeError, match="unpatched LLVM build failed"):
         rx.repair("111", "baseline", args(), llm)
+
+
+def test_terminal_failure_does_not_compute_unused_feedback(monkeypatch):
+    monkeypatch.setattr(rx, "Env", FakeEnvironment)
+    monkeypatch.setattr(rx, "bug_hunk", lambda env: ("file.cpp", "return 0;"))
+    calls = []
+    original = rx.normalize_feedback
+
+    def counted(*values, **kwargs):
+        calls.append(values)
+        return original(*values, **kwargs)
+
+    monkeypatch.setattr(rx, "normalize_feedback", counted)
+    config = args()
+    config.max_iterations = 1
+    llm = model()
+    llm.chat = lambda messages: ("```cpp\nreturn 1;\n```", {"completion_tokens": 10})
+    result = rx.repair("111", "baseline", config, llm)
+    assert result.iterations[0].patch == "invalid_format"
+    assert len(calls) == 1  # Initial feedback only; no wasted terminal reduction.
+    assert result.certificate["log"]["messages"][-1]["content"].startswith("Feedback:")
+
+
+def test_truncated_reply_cannot_be_applied_even_if_first_block_is_complete(monkeypatch):
+    monkeypatch.setattr(rx, "Env", FakeEnvironment)
+    monkeypatch.setattr(rx, "bug_hunk", lambda env: ("file.cpp", "return 0;"))
+    monkeypatch.setattr(rx, "apply_patch", lambda *args: pytest.fail("truncated output applied"))
+    config = args()
+    config.max_iterations = 1
+    llm = model()
+    reply, stats = llm.chat([])
+    llm.chat = lambda messages: (reply, stats | {"finish_reason": "length"})
+    result = rx.repair("111", "baseline", config, llm)
+    assert result.iterations[0].patch == "truncated"
+    assert result.iterations[0].validation["failure_kind"] == "output_limit"

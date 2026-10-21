@@ -1,131 +1,119 @@
-# Author checklist
+# Author checklist for the interim v2 manuscript
 
-Manuscript: `main.tex` (build: `pdflatex`, `bibtex`, `pdflatex` x2; `IEEEtran` conference class).
-Snapshot: `Tanish-Desai/better-compiler`, branch `feat/counterexample-toolkit`, commit
-`b1d6bfe6236a0da7d7aeb85ae2a03bd2518dadbd`. The remote branch tip was still this commit on 2026-10-06
-(`git ls-remote`), so nothing had advanced. A clone is in `../repo`.
+Updated 2026-10-22. The paper source is `our_paper/main.tex`. Results refer to
+**data snapshot `73f2ba151742c44cf88878b50c027ef7f06293c6`**, not the changing
+working directory. The evaluated runner is `repair-v2`, anchored at `38b381b`.
+The revised `repair-v3` implementation has not yet been evaluated on the H100.
 
-Every `[...]` in red in the PDF is a placeholder. The sections below explain what each one needs.
+## What the paper currently establishes
 
-## 1. Missing results (all outcome content is blank by design)
+- An implemented counterexample-processing layer, with a stated preservation
+  criterion and nine feedback conditions.
+- A reproducible interim snapshot of 205 v2 runs across eight observed bugs.
+- A complete common panel of seven bugs, 189 runs, and 21 runs per condition.
+  All seven are in the first size tier; this is not the completed 24-bug sample.
+- Ten harness-passing runs across three bugs in the entire snapshot; nine
+  passing runs across two bugs in the common panel.
+- No observed improvement from IR-aware reduction in this panel. All four
+  descriptive primary BH-adjusted p-values are 1.0.
+- Concrete response-format and compilation failures requiring a separate
+  harness evaluation. These do not justify changing or hiding v2 outcomes.
 
-- Tables IV-VII and the paragraph after them: paired repair outcomes, pass@3/pass@1, iterations,
-  McNemar counts b/c, differences, p and BH-adjusted p, reducer size/verifier-call measurements,
-  promotion ablation, share of turns with an Alive2 failure, fallback causes, patch-application outcomes.
-- Table II last row: number of bugs analyzed after run-time exclusions.
-- Discussion bullets: nothing can be written until results exist.
-- No `results/` directory exists in the repository (`git ls-tree`: 0 entries). The numbers in the
-  repository docs (28 -> 4 instructions, 183/351/17 oracle calls, etc.) come from one hand-built sample,
-  need `alive-tv`, and were deliberately left out.
+The manuscript does not claim a completed sweep, statistical superiority,
+contamination-free evaluation, or proof that a passing patch is correct.
 
-## 2. Configuration to confirm (not determinable from this branch)
+## Before freezing the final result
 
-| Item | What the sources say |
-|---|---|
-| Model | Code default `deepseek-reasoner` (`examples/repair_experiment.py:118`). `docs/IMPLEMENTATION.md` and `docs/SLM_SELECTION.md` say `Qwen3-Coder-30B-A3B-Instruct`. `docs/PROJECT_STATUS.md` says `Qwen2.5-Coder-14B-Instruct`, but it describes branch `feat/h100-sweep` @`4c07c52`. The manuscript names no model. |
-| Sampling | Temperature default 0.8 (`LAB_LLM_TEMP`). `SLM_SELECTION.md` s8 says "0.8 with top-p 0.95"; the client passes no top-p, no max tokens. |
-| Serving | Quantization, context length, vLLM settings: only in docs for the other model/branch. |
-| Self-declared cutoff | `LAB_LLM_BASEMODEL_CUTOFF` default 2023-12-31 (unverified by the harness). |
-| Benchmark copy | `llvm-apr-benchmark/` is vendored with its `.git` removed; upstream commit not recorded. README there says it moved to `dtcxzyw/llvm-autofix`. |
-| Alive2 / LLVM | Alive2 `f9a4f02f` (Dockerfile). `llvm-reduce` is whatever the per-bug LLVM build at `base_commit` produces, so its version varies by bug. |
-| Preregistration | `docs/ANALYSIS_PLAN.md` (commit `0c4b854`, 2026-09-04) is repository-internal. Check whether the venue wants an external registry. |
-| Authors, affiliations, funding, archival DOI | Placeholders. |
+- [ ] Obtain the exact source commit and a source-diff capture from the H100.
+  A harness label and prompt hash do not pin every relevant implementation file.
+- [ ] Archive the model snapshot revision, quantization invocation, server
+  version and command, effective sampling/output defaults, CUDA/PyTorch
+  versions, native Alive2 commit and binary, compiler, CMake, Ninja, and ccache.
+- [ ] Record CPU count, cgroup memory, H100 variant, and build concurrency.
+  GPU inference and CPU compilation are different resources.
+- [ ] Reconcile all planned bug-condition-trial identities. Treat endpoint
+  interruptions and missing records separately from completed model failures.
+- [ ] Freeze a dated data snapshot before generating final tables. Record its
+  Git SHA and checksums. Preserve v2, development pilots, and v3 separately.
+- [ ] Generate the matched tables only from equally completed trials. Do not
+  compare three-trial success in one condition to a single trial in another.
+- [ ] Record any runtime exclusions and their reasons independent of whether
+  the condition passed. Retain diagnostic results rather than silently dropping
+  compilation failures.
+- [ ] Review every harness-passing candidate for semantic correctness and
+  preservation of useful optimization behavior. Recover the relevant reply
+  for reproducer-only successes; the final dumped patch can be a different turn.
+- [ ] Report the promotion-off ablation as absent unless it is actually run.
+  Do not use an empty table to imply that the evaluation is complete.
 
-## 3. Implementation issues found while reading the code (decide before running the sweep)
+## Revised evaluation: status and amendments
 
-1. **Verifier arguments are dropped in the reduction path.** `repair_experiment.py` never passes
-   `extra_args`; the benchmark's per-test `additional_args` (e.g. `-src-unroll=4 -tgt-unroll=4`) are not in the
-   `alive2_check` result dict. The oracle and the post-reduction re-verification therefore run `alive-tv`
-   without them. Affects 5 of the 24 sample bugs: 126012, 114879, 91369, 180870, 91957. Effect unmeasured
-   (probably a no-op reduction for those bugs, but I could not run `alive-tv`).
-2. **Budget exhaustion discards the whole reduction.** The final `oracle.check` is refused when
-   `calls >= max_calls`, so the code returns the original pair. I confirmed this with a stubbed verifier
-   (budgets 1-3 returned 28 -> 28 instructions; 400/unlimited returned 28 -> 4). Same pattern in
-   `reduce_generic` and `reduce_llvmreduce`.
-3. **`ddmin` deviates from Zeller-Hildebrandt**: on failure it sets granularity to `len(current)` rather than
-   `min(|c|, 2n)` (`ce/reduction.py:162`). The result is still 1-minimal if not stopped; the manuscript says so.
-4. **`plain` and `structured` differ in content, not only layout** (`ce/structured.py`): structured omits the
-   per-value traces that Alive2's report contains and adds a diff, dependency chain and interpretation.
-5. **`raw-plain` is not the benchmark's baseline text.** `render_plain` docstring claims it reproduces the
-   benchmark exactly; `baseline.py` sends `json.dumps(first failed test)` (includes test body, args, log dict).
-6. **The runner is not "baseline.py with exactly one line changed"** (`docs/METHODOLOGY.md` s1; runner
-   docstring). Differences: hint path only, function name omitted from the prompt, fixed message on window
-   mismatch, skip rules, no record when the provider fails before the first reply, `Issue body` line absent.
-7. **Window and prompt predate the Blocker 16 fixes.** This branch has the fixed +/-30-line window (no brace
-   balancing), no no-op detection, and the original format requirement. The other branch's docs report these
-   caused a 64.5% unchanged-reply rate in a discarded sweep. I did not use that number in the paper.
-8. **Ablation direction.** `analyze_significance.py --ablation` tests one-sided "promotion on > promotion off".
-   `docs/ANALYSIS_PLAN.md` frames it as "does disabling change outcomes" and calls a null the good outcome.
-9. **`mean_iterations` averages over all runs including failures** (censored at 4). Define the iterations
-   analysis before running.
-10. **BH is applied over however many primary comparisons have data** (`len(primary)` after skips), not a fixed 4.
-11. **No check that conditions have equal numbers of trials** before pass@k is compared; interrupted cells count
-    as one record.
-12. **Non-Alive2 feedback is not truncated** (`max_log_size` = 1e9): long build logs can exceed model context.
-13. **Oracle timeout**: `Oracle` default is 60 s, but the pipeline passes 120 s.
-14. **Reducer scope**: only the named function is reduced; edits drop comment-only lines attached to block labels.
+V3 is a planned follow-up prompted by this audit. Its implementation changes
+include strict output parsing, atomic SEARCH/REPLACE edits, an explicit
+8,192-token output limit, rejection of length-truncated replies, per-test
+verifier-argument propagation, refresh-class checks, fallback display metrics,
+verified-candidate caching, a reserved final LLVM-reduce validation call, and
+avoiding feedback reduction after the last unused reply.
 
-## 4. Documentation versus code / other discrepancies (not resolved in the manuscript)
+- [ ] Validate v3 on development bug `115575` and known human patches before
+  spending the remaining H100 budget.
+- [ ] Record the protocol amendment, reason, source commit, model configuration,
+  evaluation subset, and planned comparisons before the follow-up starts.
+- [ ] Verify that `data/repair_v3_protocol.json` is committed before any v3
+  outcomes are collected. The Oct22 amendment specifies the original remaining
+  16 medium-/hard-tier bugs, six conditions retaining all four primary
+  comparisons, three trials, and four replies: 288 planned runs.
+- [ ] Keep the original four primary directions visible. The follow-up uses
+  the original remaining two size tiers after data-informed harness debugging;
+  these bugs are not all pristine or unseen. In particular, 115149 had earlier
+  Qwen3 diagnostics and known-patch checks. Describe prospectivity with respect
+  to future v3 outcomes, not first exposure to all bugs. This is not completion
+  of the unchanged September nine-condition protocol, does not support all
+  factorial interactions, and does not guarantee significance.
+- [ ] Distinguish a harness improvement from evidence that counterexample
+  reduction improves repair. The latter requires within-version comparisons.
+- [ ] Apply changes uniformly across the compared conditions and use a fresh
+  output directory. Never relabel v2 records as v3 completions.
 
-- `docs/PROJECT_STATUS.md` is on this branch but describes `feat/h100-sweep` (it is absent from that branch's
-  tree). Blockers 15-16 and the h100 tooling are not in this branch's code or `IMPLEMENTATION.md`.
-- `docs/METHODOLOGY.md` s3 says passes run "to a fixpoint"; the code stops after `max_rounds=4`.
-- `docs/METHODOLOGY.md` s3 / `reduce_iraware.py` docstring say candidates are "valid IR by construction";
-  the code only closes over def-use and branch conditions.
-- `docs/SLM_SELECTION.md` s7: "10 of the 24" sample bugs have 2025+ cutoffs; recounted: **11**.
-- `scripts/power_analysis.py` reproduces the documented table to within 0.01 (e.g. 0.32 vs 0.33).
-- README still shows six-condition tables and "not yet run"; Dockerfile comments mention 295 bugs.
-- Sample has 16 distinct primary component labels, one of which is `unknown` (bug 179613, no component hint).
-- `our-paper/llvm_counterexample_reduction.pdf` (checked as an existing draft, not used as evidence):
-  it says its method content comes from `feat/h100-sweep`; lists a different first primary comparison
-  (`iraware-structured` vs `baseline`; the plan and code have `raw-plain` vs `baseline`); says the prompt
-  includes the issue body (code sends the title only); counts "16 LLVM components" including `unknown`;
-  cites `automated_program_repair.pdf` as "Survey of automated program repair" although it is an ICSME 2025
-  fine-tuning study, and gives it the wrong directory.
-- Counts re-derived: 491 files; 340/142/9; 135 Alive2-checked miscompilations; 103 single-function-fix
-  miscompilations including 3 `lli`-only; 100 eligible; 99 pool; sample matches the committed list.
+## Implementation statements that were corrected
 
-## 5. What I could not verify
+- Feedback is present before the first model reply and on later Alive2-failure
+  turns. Each iteration stores the input feedback consumed by that reply.
+- V2 uses a bounded brace heuristic, not guaranteed whole functions. The old
+  fixed-window range of 66--149 lines is not the v2 window-size result.
+- V2 skips builds for whitespace-normalized unchanged replies. It cannot
+  recognize every comment-only or semantically unchanged edit.
+- Reduction performs at most four rounds, not a guaranteed fixed point.
+  Dependency closure does not by itself guarantee valid LLVM IR.
+- The oracle preserves a failure class in a function, not the same root cause
+  or the original execution. Promotion may produce unreachable examples.
+- The round-trip comparison ignores trailing newline characters. It is not
+  literal byte-for-byte identity, and does not validate edits.
+- Plain rendering is not the original benchmark's exact JSON prompt.
+  Structured feedback changes content as well as layout.
+- The v2 400-call reduction budget excludes the renderer's refresh call and
+  is not a complete repair-run verifier budget.
+- V3 must report physical candidate-oracle and refresh calls separately, plus
+  their feedback-verification total. That total does not include the benchmark's
+  original reproducer checks or lit work.
+- V2 omits per-test verifier arguments in reduction/refresh for five sampled
+  bugs. Its records remain a measurement of that actual implementation.
+- `check_full()` covers listed reproducers and regression directories, not
+  the full LLVM regression suite. Certificate pass flags are sticky across turns.
+- Interim matched tables require all three trials. Existing progress summaries
+  that accept any attempted record must not be used as final pass@3 evidence.
 
-- Anything needing `alive-tv`, `llvm-reduce`, or a built `opt`: 18 integration tests were skipped
-  (45 of 63 tests ran, all passed). Parsing, IR round-trip (1462/1462), sample selection, power script ran.
-- That all 24 bugs have a working build, the 20-hour build claim, and the reproduction logs (gitignored).
-- Reducer behavior on any real witness; Alive2 output format drift across versions.
+## Sources and remaining review
 
-## 6. Literature: reading depth and gaps
+The new Qwen model-card reference and the PAIR-Bench / GRPO preprint metadata
+were checked against their primary pages. The original bibliography is retained;
+this update is not an exhaustive revalidation of every related-work number.
+`EVIDENCE_MAP.md` links implementation and snapshot claims to their sources.
+The initial draft's 45 passed / 18 skipped tests are historical, and do not
+certify the revised source or the native H100 installation.
 
-No papers were attached to the chat; I used the repository's `ref_papers/` and `slm_research_papers/`.
-All 18 PDFs were readable. `agentic_harness.pdf` is byte-identical in both folders (same MD5), so 17 unique
-papers. I read all but the following in depth.
-
-| Paper | Depth | Cited? |
-|---|---|---|
-| Alive2 (PLDI'21) | Sections 1-8 | yes |
-| Csmith (PLDI'11) | abstract, intro, the reduction passage | yes |
-| Delta debugging (TSE 2002) | algorithm, minimality definitions | yes |
-| ReduceFix, PGS, ChatRepair | abstract, method, setup, relevant results | yes |
-| llvm-harness (Zheng et al.) | abstract, intro, setup, expert-review section, McNemar appendix | yes |
-| LLVM-Bench | abstract, intro, results summary | yes |
-| LLM Compiler (Meta) | abstract, intro | yes |
-| RepairAgent, survey (Yang et al.), RepairLLaMA | abstract and intro only | yes, for narrow claims |
-| HEJ-Robust | abstract, intro | yes, one sentence |
-| SLM-as-a-judge | statistics passage only | yes (McNemar + BH use) |
-| How Small is Enough, SLMFix, ICSME'25 fine-tuning study | front matter only | **no** (model-selection material) |
-
-Not in the provided set (bibliographic record checked on the web, papers not read): McNemar 1947,
-Benjamini-Hochberg 1995. The `llvm-reduce` page was fetched and checked (it states the `--test` exit-code
-mechanism and delta passes at several granularities); the LangRef URL is taken from the Alive2 paper.
-Update (proofreading pass): ReduceFix, RepairAgent, RepairLLaMA, SLM-as-a-judge and PGS now cite their
-published versions; DOIs/pages were checked against Crossref (PGS pages against a PMLR search result).
-The ReduceFix figures (89.1%, 53.8%) were read in the arXiv v2 PDF/abstract; the ACM page was not accessible,
-so confirm they are unchanged in the published version.
-The manuscript does not cite HDD/Perses/ddSMT/J-Reduce, C-Reduce or the original Alive paper because none
-was read; add them if the related-work section should cover syntax-aware reducers.
-
-## 7. Venue items
-
-- **AI-use disclosure**: the Acknowledgments contain a placeholder. IEEE venues generally ask for disclosure of
-  AI-generated text; check the specific call.
-- Template: `IEEEtran` conference class unmodified. The manuscript is 9 pages; check the page limit.
-- Anonymity: the repository URL and commit are in the Implementation section; remove for double-blind review.
-- The statistical plan is exploratory-scale (see s6.F of the paper); reviewers may ask for a power justification.
+The PDF needs compilation and visual inspection after all source and generated
+files have been finalized. Check citation resolution, generated table labels,
+long code names, algorithm wrapping, table fit, references, page limit, author
+information, and the venue's disclosure and submission requirements. The current
+source uses the authors and affiliations supplied in the original draft.

@@ -131,6 +131,8 @@ class Oracle:
     rejected: int = field(default=0, init=False)
     tool_failures: int = field(default=0, init=False)
     seconds: float = field(default=0.0, init=False)
+    cache_hits: int = field(default=0, init=False)
+    _accepted_pairs: dict = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.strictness not in STRICTNESS_LEVELS:
@@ -144,6 +146,15 @@ class Oracle:
 
     def check(self, src: str, tgt: str) -> OracleResult:
         """Run alive-tv on a candidate and judge whether it still counts."""
+        # A final check often repeats an already accepted pair. Reuse only
+        # positive evidence under this exact policy and verifier context. In
+        # particular, do not discard the last valid reduction merely because
+        # its repeated check happens after the candidate budget is exhausted.
+        key = (self.target, self.strictness, tuple(self.extra_args), self.alive_tv,
+               self.timeout, src, tgt)
+        if key in self._accepted_pairs:
+            self.cache_hits += 1
+            return self._accepted_pairs[key]
         if self.exhausted:
             return OracleResult(False, "oracle call budget exhausted")
 
@@ -171,7 +182,9 @@ class Oracle:
             return OracleResult(False, "target violation no longer reproduces", run)
 
         self.accepted += 1
-        return OracleResult(True, "violation preserved", run, found)
+        result = OracleResult(True, "violation preserved", run, found)
+        self._accepted_pairs[key] = result
+        return result
 
     __call__ = check
 
@@ -215,6 +228,7 @@ class Oracle:
     def stats(self) -> dict:
         return {
             "oracle_calls": self.calls,
+            "oracle_cache_hits": self.cache_hits,
             "oracle_accepted": self.accepted,
             "oracle_rejected": self.rejected,
             "oracle_tool_failures": self.tool_failures,

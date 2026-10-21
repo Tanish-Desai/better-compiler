@@ -135,7 +135,9 @@ def _reduce_one_side(
         env["CE_LLVMREDUCE_TIMEOUT"] = str(oracle.timeout)
         if oracle.max_calls is not None:
             env["CE_LLVMREDUCE_MAX_CALLS"] = str(
-                max(oracle.max_calls - oracle.calls, 0)
+                # External child checks cannot populate the parent's positive
+                # cache. Reserve one actual call for the final pair check.
+                max(oracle.max_calls - oracle.calls - 1, 0)
             )
 
         try:
@@ -155,7 +157,8 @@ def _reduce_one_side(
                 FileNotFoundError, OSError):
             reduced = text  # llvm-reduce failed/timed out: keep this side as-is
 
-        stats = {"calls": 0, "accepted": 0, "rejected": 0, "seconds": 0.0}
+        stats = {"calls": 0, "accepted": 0, "rejected": 0, "seconds": 0.0,
+                 "tool_failures": 0}
         with open(log_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -165,6 +168,7 @@ def _reduce_one_side(
                 stats["calls"] += 1
                 stats["accepted" if rec.get("ok") else "rejected"] += 1
                 stats["seconds"] += rec.get("seconds", 0.0)
+                stats["tool_failures"] += int(rec.get("tool_failures", 0) or 0)
         return reduced, stats
 
 

@@ -1,0 +1,1633 @@
+{
+  "provenance": {
+    "snapshot_commit": "73f2ba151742c44cf88878b50c027ef7f06293c6",
+    "snapshot_committed_at": "2026-10-21T23:03:06+05:30",
+    "results_directory": "results-qwen3-v2",
+    "manifest_sha256": "5d21ddc46568dbbbc2df4eb3aeae7adf9d9799997607f106fac74ebe8778eee3",
+    "manifest": {
+      "model": "qwen3-coder-30b",
+      "base_model_cutoff": "2023-12-31Z",
+      "temperature": 0.8,
+      "max_iterations": 4,
+      "oracle_budget": 400,
+      "oracle_strictness": "error_class",
+      "harness_version": "repair-v2",
+      "prompt_hash": "22e68d888a0f291309d40d08543bc5bedb343cc548dd2f5d80b8005538d7f2e7"
+    },
+    "sample_sha256": "4b29f7c855bf8c56e62f723edc7ae7ee215a6bc781aee0f1a66d030318d622aa",
+    "runner_sha256": "0a01dbc2fc5eb78037e6c961635c406cafe554616e20a0d9ec96b92298f6fbb3",
+    "generator_sha256": "1f64d7ddd78591ac4963d7ae9901c3d6d9b39b2aa7948221059af274f6602d32",
+    "records": {
+      "results-qwen3-v2/116249.baseline.json": "fb0bbd6d9a32de2d8ef0343b99346f5ab8dcbf1dea7a0fd339e7ea2f9650c0c9",
+      "results-qwen3-v2/116249.baseline.t2.json": "5ff4a1a29d0e653eedc6b84d549618e4f0f63bd32757a7b71b984d3e42faa954",
+      "results-qwen3-v2/116249.baseline.t3.json": "035ea09e8f8ade0bed9d7a0da40b92d9006be0f93641f238a1459c9965fe5875",
+      "results-qwen3-v2/116249.generic-plain.json": "e18e88f255cfdb1b8a72d6b957dc69e67e2d0f9157ae5f02d458226f05db7f80",
+      "results-qwen3-v2/116249.generic-plain.t2.json": "20f09e3d358cae03a295d83bba3d16650841f1269b49c49c1cf7b3541acd08b0",
+      "results-qwen3-v2/116249.generic-plain.t3.json": "252a8a139a4359198109276063e7020a1486801e3d8c3b6fa6c0daa20d0d95be",
+      "results-qwen3-v2/116249.generic-structured.json": "9b20c9d05061e58cb7ed347f856fbecc4539ff4a34d3ee0cbb76ec7cacdb8bd6",
+      "results-qwen3-v2/116249.generic-structured.t2.json": "cab1c376bbf1fba2cd4ec1cf73bd0b82d54bd0456f4419146d182cde0045c330",
+      "results-qwen3-v2/116249.generic-structured.t3.json": "e07c4557d9aa980fa90cd6281f59c3dbe9a0298a033ebfd9d218ccb3843395dd",
+      "results-qwen3-v2/116249.iraware-plain.json": "916c367461daeb2f1acfb821588f324a0a4b7f9a7c7752b3146a3a50666fb1ad",
+      "results-qwen3-v2/116249.iraware-plain.t2.json": "ec2b70362d14e85cf75c0e4065e9affe0aa1f0c2fcd624dd10d8ad523b105414",
+      "results-qwen3-v2/116249.iraware-plain.t3.json": "c55ddf49e977e0b583d5e409d1b4c46c74d76aa37fa1b6fc8719862aed375bce",
+      "results-qwen3-v2/116249.iraware-structured.json": "6859e9ee7ad11d90d8ecaa0083cc1974d5d7631ef87a2eacf999fd933c515c32",
+      "results-qwen3-v2/116249.iraware-structured.t2.json": "d42d33be3e217a326a53cddff477ddc6433b231c40d6fdbea59d0935366a41f4",
+      "results-qwen3-v2/116249.iraware-structured.t3.json": "4138db3587b7f7a35512c1be2765d1089e3f061b24524d9bac666c81b961184a",
+      "results-qwen3-v2/116249.llvmreduce-plain.json": "b3cd8f5f23cac2c9adf78efb3d3a49a41fce38fc2f338353e80f36fa54687388",
+      "results-qwen3-v2/116249.llvmreduce-plain.t2.json": "b96468494160233affd1bbf9e0e05ffe3675c71229f12e4845731f494d3e237d",
+      "results-qwen3-v2/116249.llvmreduce-plain.t3.json": "8910d53777ea544f506d84af3fb34c8021ee7325e8130e8d3e9935faea2c05f0",
+      "results-qwen3-v2/116249.llvmreduce-structured.json": "8650711ded1937db908b78cb06a941c9b3263878ddf125006ff1400f05cb2489",
+      "results-qwen3-v2/116249.llvmreduce-structured.t2.json": "e1477ba75f1a029a940507bd6b49e87ac3ef0b9413b8ac57df4482f0625519f3",
+      "results-qwen3-v2/116249.llvmreduce-structured.t3.json": "ee6c45fa47a76f8d583e9ae7806918a40a77e19799a2f2e486c5be777cb53579",
+      "results-qwen3-v2/116249.raw-plain.json": "5da22561db482b70b949a2eebd2908745f723c170131eff8164af6235c27e6c2",
+      "results-qwen3-v2/116249.raw-plain.t2.json": "decc085099f918ca546a6c665feb9f2f2bc5749fdbcb8e38284613d26c7cba09",
+      "results-qwen3-v2/116249.raw-plain.t3.json": "d1d925c1eff7a3665a8ec091988aac0dcb2234f34741f44bb1147e3bcfa62303",
+      "results-qwen3-v2/116249.raw-structured.json": "48b81d50317c740f38c3095afb27450118730e43803949886b9d4731a823e3be",
+      "results-qwen3-v2/116249.raw-structured.t2.json": "3f3398dd53e43c8761adda021cdc51865a24a5f1539d0a7fed43086b7dbafcfc",
+      "results-qwen3-v2/116249.raw-structured.t3.json": "28804781d4613ae63df4cd71739cc410b4ebb93ae9b1196c2ce2204ae75e2e4b",
+      "results-qwen3-v2/126012.baseline.json": "da382924e06073e2bb09aaceeaf476bab43656023f3f5494c0b49a537364989d",
+      "results-qwen3-v2/126012.baseline.t2.json": "107f38e58b09a1f6c8039c974a62d55441f77ee4e901cfe7449d3cb0ef9321fc",
+      "results-qwen3-v2/126012.generic-plain.json": "6ba95e5113f39aea6475f1f3e73bc2fc371448897cb24af12fd44679a6b642f3",
+      "results-qwen3-v2/126012.generic-plain.t2.json": "ac74f22c8d55bef9db59813e2f5a9974c8398731f8e998f0b0b4f0091d3f9bfe",
+      "results-qwen3-v2/126012.generic-structured.json": "13e5f4e45316e8951acf38907907b0303f97b97ef0b211ddd3b7da2245ea5655",
+      "results-qwen3-v2/126012.generic-structured.t2.json": "ed2ccf9ffadc5c752c517c6b6a805c34392821526934a409ae11faa179bf2b99",
+      "results-qwen3-v2/126012.iraware-plain.json": "e6ad2fa6fcabdf692d2895e7abf7e09bf9384da163c043f5ed666ba976ef4dd5",
+      "results-qwen3-v2/126012.iraware-plain.t2.json": "c91f34294607421049afd75050b296157d5a02eba5ba20ff5487967c04c5fe30",
+      "results-qwen3-v2/126012.iraware-structured.json": "4828ff2ae21e6e7ea6655850e028234fd33907c69aec6d5fe9e36944760def61",
+      "results-qwen3-v2/126012.llvmreduce-plain.json": "fdb45d36a6aa2579f5b6ea6d5115825c59805d6c75dd9bbac1cf79f03d78f7c0",
+      "results-qwen3-v2/126012.llvmreduce-plain.t2.json": "f8e268715f3cff72aa5386bf0762cf241207e57ea7923ba86739fa692f30cbd3",
+      "results-qwen3-v2/126012.llvmreduce-structured.json": "644004c907f206f573b5f719fd2073b79ff06e079d763ce2687117257ff70b30",
+      "results-qwen3-v2/126012.raw-plain.json": "6f535d834be4a673f373826b3531ddbf0c7138eabb9a2ea09b77075c0bb0d514",
+      "results-qwen3-v2/126012.raw-plain.t2.json": "134a48da12cfc26946f6a01551258f84839e961535f67d4ac41ae4e0e0fcee6d",
+      "results-qwen3-v2/126012.raw-structured.json": "057763f6ece2f9c241023b91d0a3d3dcdc7b18d88ad87590e79a2272e14fe381",
+      "results-qwen3-v2/126012.raw-structured.t2.json": "5edfac9bfe07f24e9db6d91164be450d13f324668f4a33219aa6fec7acbab89a",
+      "results-qwen3-v2/126974.baseline.json": "f7915ec4aa88f302e808dc73b5df2809e54674d6e14bafe38335197991e19e36",
+      "results-qwen3-v2/126974.baseline.t2.json": "0bf36f3f80baeba3bfa787cd0c773fd143c28521b36929aabd3a5bff2e73506c",
+      "results-qwen3-v2/126974.baseline.t3.json": "3a693c24a4a37319bf34a3574d61850e8b64dad49169d7dd5b05fb2b7e3f55b7",
+      "results-qwen3-v2/126974.generic-plain.json": "595fb97b8ee46454953364388e89406f03db2d7052b008e62028eb0d1c1d1c92",
+      "results-qwen3-v2/126974.generic-plain.t2.json": "562e0bfe06d9fa4aaee81d35080e9fabb8486527fb1179fa40624b500d912e5b",
+      "results-qwen3-v2/126974.generic-plain.t3.json": "b0b812e963b7019403e38b8e96acbe08e4ea6efd92fc0947c976fe69e41bfa8d",
+      "results-qwen3-v2/126974.generic-structured.json": "bd1393d96c0d74014c4dbc992bf1a7f559bb45da0b2e2cd628b7e028fc7d30ca",
+      "results-qwen3-v2/126974.generic-structured.t2.json": "da8d1b46679cad06fddaa19e2c2e6575d7db8139ac92373370a6e3a09024a217",
+      "results-qwen3-v2/126974.generic-structured.t3.json": "51f2822717fa49403acda62ca46a42a359d7bc363ae103bcb3f76a5d38153c82",
+      "results-qwen3-v2/126974.iraware-plain.json": "7b28ac8603989fce236736a2af74036bcd50e0279426e063537370ba268982b1",
+      "results-qwen3-v2/126974.iraware-plain.t2.json": "9ec6a74bb10c4b13fda4d72c0555fe5a9127722d2a792d08b851c68da9068b7b",
+      "results-qwen3-v2/126974.iraware-plain.t3.json": "6318a0f273846bf74048c2ef1191be069ca75a46ad2e2a1848289cee7c2a0887",
+      "results-qwen3-v2/126974.iraware-structured.json": "916b121272e102e06c4b417902d66e9a71fdc4bdff297523bb144ed12d385d94",
+      "results-qwen3-v2/126974.iraware-structured.t2.json": "70e0971b797107f413c922b51ef08eb147969c4dfb158b702166c290df961b06",
+      "results-qwen3-v2/126974.iraware-structured.t3.json": "466f9f9e32fa434bfa2c31b57de939458a4686954c64859fa8b690f5d76617bd",
+      "results-qwen3-v2/126974.llvmreduce-plain.json": "fe5cafab62aeff1aca81dea7eb3ee55edf29c5f1763fe5f36f669a6ad64034df",
+      "results-qwen3-v2/126974.llvmreduce-plain.t2.json": "c97354e1e959791cac7cdce6fa88c0e5af5b2ea30c7a274e5659b035b0daba73",
+      "results-qwen3-v2/126974.llvmreduce-plain.t3.json": "21188590cd85346ba529781fc80a0f66d89956c8de3c7702529682a013a86db3",
+      "results-qwen3-v2/126974.llvmreduce-structured.json": "29e72ca9c52b10e26b02a4b2d23c7de7924f4d6569efefe2085c31efa376fed9",
+      "results-qwen3-v2/126974.llvmreduce-structured.t2.json": "977ce00629f3293b95bc3f8aef7060ae1e3ae744cf4b477ed36d4452fa6fbb40",
+      "results-qwen3-v2/126974.llvmreduce-structured.t3.json": "f9b3813e02b14a2f42d0741345f5ff99ce53a814bd70d9e7d7dc0bec6cc4669e",
+      "results-qwen3-v2/126974.raw-plain.json": "e26f8a05ceedabd13d60518e2105b45241b08f3476cd4394e9148fa6b3f148d2",
+      "results-qwen3-v2/126974.raw-plain.t2.json": "af487cb69c5ce07cde2fd78857bb619d3d7ab1237d6d1a04a95361998cf7b980",
+      "results-qwen3-v2/126974.raw-plain.t3.json": "137fd49609418144b1a2dca66394026714236d496067e452dfe646fea6e34ce1",
+      "results-qwen3-v2/126974.raw-structured.json": "e66610129c2fbfb55c9c7ab386be646ae6c33e94d24d75b179f04db031ae52b8",
+      "results-qwen3-v2/126974.raw-structured.t2.json": "86a4c176b848e569a947bfb2df19c3ce5e9e132e8cfd78bccd5a1b438fe4ac4a",
+      "results-qwen3-v2/126974.raw-structured.t3.json": "ec02783720496d6c17852ca595f204e2b3f411af066c31a5302e7cc75538e74e",
+      "results-qwen3-v2/135182.baseline.json": "3f0825ba9d7f05e279a2197897118c243806ddb93668cc51899b87dd66906cd3",
+      "results-qwen3-v2/135182.baseline.t2.json": "6a50f3a755106c16489d95a1197ab084a7f3c39a0abb43ed2e70214b50bbd84e",
+      "results-qwen3-v2/135182.baseline.t3.json": "25c99af22eeb089691f08d8090c5bbc62afa14cdf6855bf046d4344dd309ea11",
+      "results-qwen3-v2/135182.generic-plain.json": "d17c0d3d6165772c0578950196f1d693b2f7d604920beed94ed5acd9105dbdb7",
+      "results-qwen3-v2/135182.generic-plain.t2.json": "99cd31703fd619c0b714fd1c2da1bed2608cc820c230355f29cd0e97bc78997c",
+      "results-qwen3-v2/135182.generic-plain.t3.json": "234d1beb72698fcc40f4a9446a24dfe1038e9f0e5ea70627e18c2dd527575483",
+      "results-qwen3-v2/135182.generic-structured.json": "d32b37430f8c72d68d8a7f7caebafb90f6d663ec93b7b17fd1f92a6f22d8091c",
+      "results-qwen3-v2/135182.generic-structured.t2.json": "ea6164687f22cb97736d098e40375347d252739773022a1f25e3601775156a90",
+      "results-qwen3-v2/135182.generic-structured.t3.json": "324f89708050457f29546e81dcc9179fa855ba6f50fd3072500a901051d13b8b",
+      "results-qwen3-v2/135182.iraware-plain.json": "9fa143a016ea9a0826a706e293b45581bd2b5eb1883f96afbb6bc8f1a810289e",
+      "results-qwen3-v2/135182.iraware-plain.t2.json": "0cc8ea089fa731f00019f41d6b726ec8a927e01bddc65a3bd4b382a3b600c368",
+      "results-qwen3-v2/135182.iraware-plain.t3.json": "a19e692dd093f437b91196e3b1fdb8ed4b92e8f9273f640c404587fb1785e9f3",
+      "results-qwen3-v2/135182.iraware-structured.json": "672fd7142b632cfee3e9aed9f32e04f02c59ba54260148b426089442fc96e240",
+      "results-qwen3-v2/135182.iraware-structured.t2.json": "80ee1199db0afead9096ae389965cf7003d614c81d8b5a97b77f4c65f68b9766",
+      "results-qwen3-v2/135182.iraware-structured.t3.json": "2e0d99d5c711cd3a61a08da02943979953b15e44720f291eb85d47a3b7995f6d",
+      "results-qwen3-v2/135182.llvmreduce-plain.json": "6d4da4510aabb6b88e47b966906e804e24f1c8bf045340ff9831b7b53b26ae5b",
+      "results-qwen3-v2/135182.llvmreduce-plain.t2.json": "00a2fb0ea0b1f1b7288b61ce8ee4267222249dad9cf4e30e8992dccf81f1c28d",
+      "results-qwen3-v2/135182.llvmreduce-plain.t3.json": "0f6887fe1f5854b38bf81eed043613cb0838430ee14fc156fe42c308364141f9",
+      "results-qwen3-v2/135182.llvmreduce-structured.json": "e452e989ba8885434297fb68909e71e914bdb26a99499670e8c328458ab222da",
+      "results-qwen3-v2/135182.llvmreduce-structured.t2.json": "45754626cb07bd52055904036b6b3b598761778d1f56c96afcb92d710e25f780",
+      "results-qwen3-v2/135182.llvmreduce-structured.t3.json": "b5fee84a8505882e41eec8eec5f54fd441adbf10ab0a5d3c1c590fee6a07b8dc",
+      "results-qwen3-v2/135182.raw-plain.json": "26eddd607c5acf1a6212a407f4d11f421a63d93a786bb9695b8f500e8aefed54",
+      "results-qwen3-v2/135182.raw-plain.t2.json": "c31e97335271a4a00ddaddbf0a0d5366d23fb0890d36f793bf27ded6634b7ac2",
+      "results-qwen3-v2/135182.raw-plain.t3.json": "8ab2efebfd2c4604110355d5aa2f218f24d75d0a801127ac9ea041676d420b3a",
+      "results-qwen3-v2/135182.raw-structured.json": "67cc466780363fd93a7c26d529279b4d02b390b418e60b1fdb5a4dae19955f88",
+      "results-qwen3-v2/135182.raw-structured.t2.json": "bd519c484c710a0fd63901a015b9a0ed431f34a3f91eddd59913f57dacac4888",
+      "results-qwen3-v2/135182.raw-structured.t3.json": "3c152ed215de7d2faa385d52e0d9ae9a029d5dca570a8636dc6593a517482f70",
+      "results-qwen3-v2/143123.baseline.json": "d22ccf7075417ffff3c05cc730a64cccb1c2a9e00a93bfa3397d64cbbd1caa40",
+      "results-qwen3-v2/143123.baseline.t2.json": "4170174fb2becc7295358ca7cd198e3fa235c389d1d0337d5e26ebaed3851c45",
+      "results-qwen3-v2/143123.baseline.t3.json": "f2251893b3cc71dedf43c5cfd5713f2ae5fa3982b04cb40303523c34d653e2a0",
+      "results-qwen3-v2/143123.generic-plain.json": "1eb246a08925be3183e64a8beadd12185f68804273e0617e3292f485fc85d7d4",
+      "results-qwen3-v2/143123.generic-plain.t2.json": "d3df8cac4797297572aa4b268abf9d815f8db4d85574458554285a6007756d1f",
+      "results-qwen3-v2/143123.generic-plain.t3.json": "21c935d41edfaedb031a0987a13e69f11841bcfe1986faf64d15c7ef600bf57e",
+      "results-qwen3-v2/143123.generic-structured.json": "265baae6d09b1d3fc3e27b4e67316dcd0f8dc27828e8694a14a3664a03b8a303",
+      "results-qwen3-v2/143123.generic-structured.t2.json": "0eae025da520a98b0fb6b427de663d8c73b1cae9c9dc803affecdb5ba4e97794",
+      "results-qwen3-v2/143123.generic-structured.t3.json": "ef33b7383537f19029bc6108e70491fc006c6f1af26f414742a9a83ae8d6b1ef",
+      "results-qwen3-v2/143123.iraware-plain.json": "d52e955865d5d9040d4125b731491aa113549cfd6f7ad8341e60d9142730730d",
+      "results-qwen3-v2/143123.iraware-plain.t2.json": "fbebc2c5a4236bda88175e240aa8004456d5cc75d770682f12831fc2cb6fea7c",
+      "results-qwen3-v2/143123.iraware-plain.t3.json": "0f63583fdc5fc84dcd00297841821edd35d2064baa036863dca51391fb6de274",
+      "results-qwen3-v2/143123.iraware-structured.json": "97f8ad16688fa361edb7dbec2afcff8a463663f4d956b49471e1d0c2e7a9305a",
+      "results-qwen3-v2/143123.iraware-structured.t2.json": "36cc57519ca4b4f4f7c2b24135b6fbd8c573cdb71c261265eb105eace9d2655c",
+      "results-qwen3-v2/143123.iraware-structured.t3.json": "e19e95adda8568caa01782c8802c17d09b5d27066ad8f960644178517a176626",
+      "results-qwen3-v2/143123.llvmreduce-plain.json": "508877ee9748d1e6d7ccf7d4aa60042c8b77a9be88c3b07d5f70ea58538a8040",
+      "results-qwen3-v2/143123.llvmreduce-plain.t2.json": "3652fe301aaaaac7ff01f66bfb8a07f230d9b3f863458ea4da0484daa95380bf",
+      "results-qwen3-v2/143123.llvmreduce-plain.t3.json": "0808a07512f6994b73a8d7ee4d010dcbc18dd893637c17e4878a9f6948ed74f2",
+      "results-qwen3-v2/143123.llvmreduce-structured.json": "f09b10790459dbb1ddfcd4894dcf5b7815b9d93ec3821b1540f8ecf97633c157",
+      "results-qwen3-v2/143123.llvmreduce-structured.t2.json": "7f25f0ae4b3791a57eaf56e4348426e5dbc4265b6585e17f8112da708d8a9815",
+      "results-qwen3-v2/143123.llvmreduce-structured.t3.json": "1e47d33c096b9ed83fdeb5a101daa5f42dde81eefaa387ff9b7065ac718645ed",
+      "results-qwen3-v2/143123.raw-plain.json": "b7d8ab1efcb06cf086ae9d25f80f8076763059cb9b60e61481ad50db3e10798d",
+      "results-qwen3-v2/143123.raw-plain.t2.json": "e8b877748dbfbbf312f5f93edae46546e7247b3129531963f362569d93f7c69e",
+      "results-qwen3-v2/143123.raw-plain.t3.json": "64196c07228259254485d4f3db4e025bc0ef3ccc7b4da58868ca666a135ff24c",
+      "results-qwen3-v2/143123.raw-structured.json": "a43124cab32cbde657af9c5fea652008dafbffc05dbc85c020ce1a68f3b28cb4",
+      "results-qwen3-v2/143123.raw-structured.t2.json": "d39df758a15a13da2d1a2694688d78a51a8e27abf37d115f5f9e7d98ca4756e2",
+      "results-qwen3-v2/143123.raw-structured.t3.json": "fedb12a7ba967dfaa4f6a5714f041146289389cc1bdb43c95e1bb4c8a770d3ca",
+      "results-qwen3-v2/154116.baseline.json": "985592453bd251d30eafee8b88421236253e25b30d107dcd4b7bd67c34a8f4f9",
+      "results-qwen3-v2/154116.baseline.t2.json": "415361bd8211bf27c9197aad2a2f761d470160fe29dd849b9c4ca5012f2c5a26",
+      "results-qwen3-v2/154116.baseline.t3.json": "1213fbdecee782bae5de1987a0eafe43afd16dcca9a8b38221c5eeecc13a9ce6",
+      "results-qwen3-v2/154116.generic-plain.json": "c82164c5d5727c2b535403a58c69c1cbf6e433db29dce93542be4e3b03425c45",
+      "results-qwen3-v2/154116.generic-plain.t2.json": "9c2972221d2267bc3bad8c95ae4cd42e5bce7590eb2d643279a6c36f685db55f",
+      "results-qwen3-v2/154116.generic-plain.t3.json": "6729a8e32e2d0f5413da7a07662b3b3d6c6e7f7c010725b1bda7a7df9e790089",
+      "results-qwen3-v2/154116.generic-structured.json": "c26fa54cbfe8c2d3e3df220764a0cfee774712c866a6ed2d7f17e3054dc6a78f",
+      "results-qwen3-v2/154116.generic-structured.t2.json": "759443fa574e86c8ffb77dadd520363736a1effc0f6c1eff02e4fdba59b714dd",
+      "results-qwen3-v2/154116.generic-structured.t3.json": "e7512ad28501729adaa4db1d4552cfaae63b52f1bc1a4f2854aefc6b0ff1f8ac",
+      "results-qwen3-v2/154116.iraware-plain.json": "30a03f041fd25e0c718963750e882da0d9dc5bc5ed62f68ada58f49bac741f46",
+      "results-qwen3-v2/154116.iraware-plain.t2.json": "37c8f1e7ea560d1f83031e955aef70273e3d0811eff90b4101c5e1895f245496",
+      "results-qwen3-v2/154116.iraware-plain.t3.json": "170308daeff39b4c830f57324735acb5adc57025bb129a99416250b2bad0768e",
+      "results-qwen3-v2/154116.iraware-structured.json": "fcf6c9834f98a59e36beec9ebdefbf4b746fb1d6c63ab9ccd943c91ba85d2439",
+      "results-qwen3-v2/154116.iraware-structured.t2.json": "d3bb65d8604d95850f451d845aed2be75e38db25108be21bf6f14d33c67d7ed3",
+      "results-qwen3-v2/154116.iraware-structured.t3.json": "79d55e58f699c39755b892d140ecf78f87a1731135250f9274341e66819a1160",
+      "results-qwen3-v2/154116.llvmreduce-plain.json": "1fb555fa69fa674860863773ec533ee045b47c2e32e0d9d66896934b65b1136a",
+      "results-qwen3-v2/154116.llvmreduce-plain.t2.json": "c0d4086441be07b99eee48b1a172e12e367314535daf031fc1c93709a4643cd6",
+      "results-qwen3-v2/154116.llvmreduce-plain.t3.json": "894f460275a8f3c956bad5104106d98c3f9fb05cb9419c06601783c1732b59e1",
+      "results-qwen3-v2/154116.llvmreduce-structured.json": "a2808c3973f40e6917bde31f14c751cc12fae4742d709bdb869fccbdac6ded29",
+      "results-qwen3-v2/154116.llvmreduce-structured.t2.json": "484437853160f19c852638c2e12978990264870463b0c6076ad45e93819f404e",
+      "results-qwen3-v2/154116.llvmreduce-structured.t3.json": "6c01b82b0c5519acf1d7c9cbc4d98c47cab550875beb16e30a6cf1f019663d4e",
+      "results-qwen3-v2/154116.raw-plain.json": "26fe47fd58f72e91443d0a397e5aae6fead8f2f634c38edfbe8e94f86389ef0e",
+      "results-qwen3-v2/154116.raw-plain.t2.json": "810d4b76384cf6cc5da88f4c2efadec031f825438223cb4486428bc02d9a3e39",
+      "results-qwen3-v2/154116.raw-plain.t3.json": "6e061f45b40a9f39815586dc982a9844b969b85e93798c4017e66b1a36f3c976",
+      "results-qwen3-v2/154116.raw-structured.json": "0b707be95e005311b77eb3c8b233b65c9dd79169d75cf1e4e12975ff380f02db",
+      "results-qwen3-v2/154116.raw-structured.t2.json": "f136aa4e73a6d8822b87208d581d8358d775eedc35d807f242200d33d28cc0f4",
+      "results-qwen3-v2/154116.raw-structured.t3.json": "fe6a199339a6b10538f3b6bec29c1ec458688ce7fcc4f135f1d16c37fcdd05b2",
+      "results-qwen3-v2/165878.baseline.json": "f977be55d450936d65aacf5768bb670c6303e95f08509e8297bec956cf8e58ac",
+      "results-qwen3-v2/165878.baseline.t2.json": "692d869cb1d343e0895d764a6a77bdf35c40d3d7d2ee4d87851de186d222548c",
+      "results-qwen3-v2/165878.baseline.t3.json": "8ba5c00434dfea80a120188d1a4c8962f610f0013d880c72c97dcabab5da77fc",
+      "results-qwen3-v2/165878.generic-plain.json": "566d616b7109689f56cd72a414cc8bc18c9381b9dfe143d90cb288a92bacfc76",
+      "results-qwen3-v2/165878.generic-plain.t2.json": "862e6880e758b0dc2172697951f3132bac40e0b9cdda3b7524368c433eb8e003",
+      "results-qwen3-v2/165878.generic-plain.t3.json": "98e59047141182e66439e17db64b3518845968271335185367425e0f9302f415",
+      "results-qwen3-v2/165878.generic-structured.json": "443b2fd9283cc90ac6b7423bd8ee947c2b6e0430b2488e3fd5ba4bdd32a783f4",
+      "results-qwen3-v2/165878.generic-structured.t2.json": "8f5d966ffea9347d93fc9497e7a6ba3a1b3dc7d98f00e395a163655c98945686",
+      "results-qwen3-v2/165878.generic-structured.t3.json": "d8329ba52116c1dd9abbd8de078ef790395c1191b0f31c55a1a9cab7a61fe98c",
+      "results-qwen3-v2/165878.iraware-plain.json": "436efa2cf448a688447972c9297b64054ebbd041cee3f68b3ba2e1edbce3c47d",
+      "results-qwen3-v2/165878.iraware-plain.t2.json": "bc1705909e333df485d93c300ecdeb2a1002d8d9a1a233d6483326ec78b2e67b",
+      "results-qwen3-v2/165878.iraware-plain.t3.json": "33929a2f86d656851de2f99e5862a67410d6357239f16d62a11628a007b6cb23",
+      "results-qwen3-v2/165878.iraware-structured.json": "b784c2f765699ef0c6c283bb48de4b978c30b8ace508b6b454a8a2e6418ba8a9",
+      "results-qwen3-v2/165878.iraware-structured.t2.json": "43819e1ba09f6982a10816697a3df24a880afbc10bcf7b4b550bcd785cec930a",
+      "results-qwen3-v2/165878.iraware-structured.t3.json": "1219dcbe89cddd99f61e65369f3265a9c09e4723b8eed8564f7cc54b0cf0df89",
+      "results-qwen3-v2/165878.llvmreduce-plain.json": "173409b3005f59fb7e5a623d80f751de2c42ca74225689ae38d2d3efb041bad2",
+      "results-qwen3-v2/165878.llvmreduce-plain.t2.json": "194557d1b8cfbd02c66ea7b0c72018afd6c163086309f5fa5eb3219aec610e4a",
+      "results-qwen3-v2/165878.llvmreduce-plain.t3.json": "3b0a31a503a1acc3daa967d037292976527153f24bf6f00ebe78b6191f281906",
+      "results-qwen3-v2/165878.llvmreduce-structured.json": "a2f2e5dad0c0b95f583ed254b637ca424b15bfe11d5399950c7220645a7c4d3a",
+      "results-qwen3-v2/165878.llvmreduce-structured.t2.json": "913dd73a67cbf9b8efe07151d2ce53c9effba59653c05607126f84fb503a9ec4",
+      "results-qwen3-v2/165878.llvmreduce-structured.t3.json": "4062981f97e09559b5731232d37e258f7ff8bb110219ee82a9efa10c70190652",
+      "results-qwen3-v2/165878.raw-plain.json": "adfbcb10683f21826d497421b5cd2918acb806b4887b9076dc9d1bec4743755b",
+      "results-qwen3-v2/165878.raw-plain.t2.json": "400a0f4007fa8a95955a15ad2e3f0a93cd2237438de961caedf72d916d7be38c",
+      "results-qwen3-v2/165878.raw-plain.t3.json": "6175a1c2db135bd151c471b1c04310182d862863a100225f80041ae72ce38267",
+      "results-qwen3-v2/165878.raw-structured.json": "f43d6694fb00e1e572b26208b3ddea44645d99f8d913b6f7a0a7a4a51c9b586f",
+      "results-qwen3-v2/165878.raw-structured.t2.json": "4891beacd7777eae417ff93be099690a4a6ed903c568a7da32970c4320f16c54",
+      "results-qwen3-v2/165878.raw-structured.t3.json": "60ec7819da64b57b94b89a5f53d690a2635f30394e75fffe4f195a0c9247dbb5",
+      "results-qwen3-v2/89390.baseline.json": "fb35461161ab57dd0c4b22c45c760ff18281fdb23c74ad3845ec41fcd07d4d62",
+      "results-qwen3-v2/89390.baseline.t2.json": "62944c5ad4a581547285970a31e6f85c8e0a6533b16856eb123bb534e8422305",
+      "results-qwen3-v2/89390.baseline.t3.json": "fab0c494eaf9744588bbf4f3da9966e986d57e8d0f2bdbbae7713d82635c9145",
+      "results-qwen3-v2/89390.generic-plain.json": "60ea01bbb82db69cd40502189c403d881bc47b3be839c0697f12c68e181b8b2c",
+      "results-qwen3-v2/89390.generic-plain.t2.json": "9a187456b251350b0af65533b42dfa50038d6fb4ddf38b6a1ee7541671fedbe3",
+      "results-qwen3-v2/89390.generic-plain.t3.json": "201cef20c6b4d8cb94d07500333fdd0a82f96ca876be639bcd6ed222f350315a",
+      "results-qwen3-v2/89390.generic-structured.json": "97bffe94708b10f8afcfb96af42d61ee00e92798b88515e6267d85603a2d3641",
+      "results-qwen3-v2/89390.generic-structured.t2.json": "c5ad5458d2a32a9e627cfb142ab3b702f1e35b8635bac1ded4923f4533cc55a0",
+      "results-qwen3-v2/89390.generic-structured.t3.json": "93f96ad1956ca574e0429c735f71870295ddf7c0b6d44fb227ff02fc6a6df218",
+      "results-qwen3-v2/89390.iraware-plain.json": "d7c5816e9bf2c9b29624dd444e9e8c6744d77e56a3a05343cdf40dcb44ebc777",
+      "results-qwen3-v2/89390.iraware-plain.t2.json": "57d9b6a23380a5cf97c1ddb121e0d085269489555ca4c53d7034aa8a20246af4",
+      "results-qwen3-v2/89390.iraware-plain.t3.json": "0e443dd9142a862673d584faefbdee4f7c2d77484509ab6789c46bb328edbb75",
+      "results-qwen3-v2/89390.iraware-structured.json": "75cebd2b65b737286dfb1affc479ad4bb3775b3480a6c4dc6e4bc1b37c5a2e41",
+      "results-qwen3-v2/89390.iraware-structured.t2.json": "f23d7921f5ef5ea658f98594e42f18efadeed0e0d0f2ce326229f3680f7a8e58",
+      "results-qwen3-v2/89390.iraware-structured.t3.json": "4bfc8939ad034c2ab3725678905ee1be0da184075107e3b6211d7b8fb073a79b",
+      "results-qwen3-v2/89390.llvmreduce-plain.json": "0d1cebfa0fc4f267a800822d4b17c2aea5966cf32491895a1b0e232e6fc1a88b",
+      "results-qwen3-v2/89390.llvmreduce-plain.t2.json": "c8ac460d786ae8c61dbbcc05431179d3a04a5011408404cd014ac38afe87094d",
+      "results-qwen3-v2/89390.llvmreduce-plain.t3.json": "e413bc45311b09ca2638a8460cccffc15f58947e47f0c100d13dd95f18865451",
+      "results-qwen3-v2/89390.llvmreduce-structured.json": "5f541398e9ff735f1aa41fa81072fd6ea86275f03aed60bbb5e43629762489e3",
+      "results-qwen3-v2/89390.llvmreduce-structured.t2.json": "aabe7333b33a7be09cc8d6e87e4204df9ec5da1ce40909a90fb1e8472485f417",
+      "results-qwen3-v2/89390.llvmreduce-structured.t3.json": "b27de0060ba4ad87cd8fb851c3f10e4848f18844effd18d812b0a089eeb055de",
+      "results-qwen3-v2/89390.raw-plain.json": "17c860981d8dfc28a24daf76235fe49f7674573f32c6f86b16d544d591a700a0",
+      "results-qwen3-v2/89390.raw-plain.t2.json": "58b629f61805e376b3e8083ec70226a0f098a04c104988e80ce2fb30461b8de7",
+      "results-qwen3-v2/89390.raw-plain.t3.json": "64767c0e90bd617a62104bcc44db8c6826d4cdf5ba7ef758549fd967fb25d43a",
+      "results-qwen3-v2/89390.raw-structured.json": "06f976c24e3d4d5a5eb75612e6ad0febf680fa539ef536204e258e11ec79bcbb",
+      "results-qwen3-v2/89390.raw-structured.t2.json": "670c74b7554caeef1f02a7af90fc7d4d140732dbc6062d76224888469b1c36c0",
+      "results-qwen3-v2/89390.raw-structured.t3.json": "bab41468c22a9119d20946c1e71cf5cc9948546a870a28af2a7421273e0eb7f7"
+    }
+  },
+  "status": "Incomplete diagnostic v2 snapshot; known parser/window confounds; not confirmatory evidence of method effectiveness.",
+  "all_records": 205,
+  "observed_bugs": [
+    "89390",
+    "165878",
+    "135182",
+    "126974",
+    "154116",
+    "116249",
+    "143123",
+    "126012"
+  ],
+  "all_fixed_records": 10,
+  "all_fixed_bugs": [
+    "126012",
+    "135182",
+    "89390"
+  ],
+  "matched_records": 189,
+  "matched_bugs": [
+    "89390",
+    "165878",
+    "135182",
+    "126974",
+    "154116",
+    "116249",
+    "143123"
+  ],
+  "matched_fixed_records": 9,
+  "matched_fixed_bugs": [
+    "135182",
+    "89390"
+  ],
+  "coverage": {
+    "repeat_count": 3,
+    "conditions": [
+      "baseline",
+      "raw-plain",
+      "raw-structured",
+      "generic-plain",
+      "generic-structured",
+      "llvmreduce-plain",
+      "llvmreduce-structured",
+      "iraware-plain",
+      "iraware-structured"
+    ],
+    "promotion": true,
+    "bugs_seen": [
+      "116249",
+      "126012",
+      "126974",
+      "135182",
+      "143123",
+      "154116",
+      "165878",
+      "89390"
+    ],
+    "complete_bugs": [
+      "116249",
+      "126974",
+      "135182",
+      "143123",
+      "154116",
+      "165878",
+      "89390"
+    ],
+    "excluded_bugs": {
+      "126012": [
+        {
+          "condition": "baseline",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "raw-plain",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "raw-structured",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "generic-plain",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "generic-structured",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "llvmreduce-plain",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "llvmreduce-structured",
+          "trial": 2,
+          "reason": "missing"
+        },
+        {
+          "condition": "llvmreduce-structured",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "iraware-plain",
+          "trial": 3,
+          "reason": "missing"
+        },
+        {
+          "condition": "iraware-structured",
+          "trial": 2,
+          "reason": "missing"
+        },
+        {
+          "condition": "iraware-structured",
+          "trial": 3,
+          "reason": "missing"
+        }
+      ]
+    },
+    "ignored_out_of_budget_records": 0,
+    "note": "Partial snapshots are descriptive; fixed-horizon inference is for the final planned sample."
+  },
+  "per_condition": {
+    "baseline": {
+      "all_records": 23,
+      "all_fixed_records": 0,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 0,
+      "matched_fixed_bugs": []
+    },
+    "raw-plain": {
+      "all_records": 23,
+      "all_fixed_records": 0,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 0,
+      "matched_fixed_bugs": []
+    },
+    "raw-structured": {
+      "all_records": 23,
+      "all_fixed_records": 4,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 4,
+      "matched_fixed_bugs": [
+        "135182",
+        "89390"
+      ]
+    },
+    "generic-plain": {
+      "all_records": 23,
+      "all_fixed_records": 2,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 1,
+      "matched_fixed_bugs": [
+        "135182"
+      ]
+    },
+    "generic-structured": {
+      "all_records": 23,
+      "all_fixed_records": 0,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 0,
+      "matched_fixed_bugs": []
+    },
+    "llvmreduce-plain": {
+      "all_records": 23,
+      "all_fixed_records": 2,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 2,
+      "matched_fixed_bugs": [
+        "89390"
+      ]
+    },
+    "llvmreduce-structured": {
+      "all_records": 22,
+      "all_fixed_records": 1,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 1,
+      "matched_fixed_bugs": [
+        "89390"
+      ]
+    },
+    "iraware-plain": {
+      "all_records": 23,
+      "all_fixed_records": 1,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 1,
+      "matched_fixed_bugs": [
+        "89390"
+      ]
+    },
+    "iraware-structured": {
+      "all_records": 22,
+      "all_fixed_records": 0,
+      "matched_records": 21,
+      "matched_bugs": 7,
+      "matched_fixed_records": 0,
+      "matched_fixed_bugs": []
+    }
+  },
+  "primary_comparisons_descriptive": [
+    {
+      "better": "iraware-plain",
+      "worse": "generic-plain",
+      "question": "RQ: does IR-aware reduction beat generic text reduction?",
+      "n": 7,
+      "both": 0,
+      "only_better": 1,
+      "only_worse": 1,
+      "neither": 5,
+      "p_one_sided": 0.75,
+      "p_two_sided": 1.0,
+      "p_bh": 1.0
+    },
+    {
+      "better": "iraware-plain",
+      "worse": "llvmreduce-plain",
+      "question": "Blocker 5: is it counterexample-awareness, or just IR-validity?",
+      "n": 7,
+      "both": 1,
+      "only_better": 0,
+      "only_worse": 0,
+      "neither": 6,
+      "p_one_sided": 1.0,
+      "p_two_sided": 1.0,
+      "p_bh": 1.0
+    },
+    {
+      "better": "iraware-structured",
+      "worse": "iraware-plain",
+      "question": "RQ: does structured layout add anything on top of reduction?",
+      "n": 7,
+      "both": 0,
+      "only_better": 0,
+      "only_worse": 1,
+      "neither": 6,
+      "p_one_sided": 1.0,
+      "p_two_sided": 1.0,
+      "p_bh": 1.0
+    },
+    {
+      "better": "raw-plain",
+      "worse": "baseline",
+      "question": "sanity anchor: does the counterexample help at all?",
+      "n": 7,
+      "both": 0,
+      "only_better": 0,
+      "only_worse": 0,
+      "neither": 7,
+      "p_one_sided": 1.0,
+      "p_two_sided": 1.0,
+      "p_bh": 1.0
+    }
+  ],
+  "stages": {
+    "build": 467,
+    "no_patch": 87,
+    "reproducer": 205,
+    "fixed": 10,
+    "regression": 41
+  },
+  "feedback_routing": {
+    "initial_turns": 205,
+    "initial_alive2_routed": 205,
+    "initial_witness_eligible": 182,
+    "subsequent_turns": 605,
+    "subsequent_alive2_routed": 138,
+    "subsequent_witness_eligible": 125
+  },
+  "by_bug": {
+    "89390": {
+      "records": 27,
+      "turns": 99,
+      "stages": {
+        "reproducer": 25,
+        "build": 17,
+        "regression": 33,
+        "no_patch": 17,
+        "fixed": 7
+      },
+      "first_build_errors": [
+        {
+          "signature": "error: ISO C++ forbids comparison between pointer and integer [-fpermissive]",
+          "turns": 8
+        },
+        {
+          "signature": "error: ‘PoisonMaskValue’ was not declared in this scope",
+          "turns": 4
+        },
+        {
+          "signature": "error: ‘class llvm::VectorType’ has no member named ‘getNumElements’; did you mean ‘getArrayNumElements’?",
+          "turns": 2
+        },
+        {
+          "signature": "undefined reference to `(anonymous namespace)::VectorCombine::scalarizeLoadExtract(llvm::Instruction&)'",
+          "turns": 2
+        },
+        {
+          "signature": "error: void value not ignored as it ought to be",
+          "turns": 1
+        }
+      ],
+      "fence_contaminated_proposals": 0,
+      "fence_build_failures": 0,
+      "undefined_reference_build_failures": 2,
+      "missing_member_build_failures": 2,
+      "passing_files": [
+        "results-qwen3-v2/89390.iraware-plain.t2.json",
+        "results-qwen3-v2/89390.llvmreduce-plain.json",
+        "results-qwen3-v2/89390.llvmreduce-plain.t2.json",
+        "results-qwen3-v2/89390.llvmreduce-structured.t2.json",
+        "results-qwen3-v2/89390.raw-structured.json",
+        "results-qwen3-v2/89390.raw-structured.t2.json",
+        "results-qwen3-v2/89390.raw-structured.t3.json"
+      ],
+      "window_lines": 147,
+      "window_first_line": "bool VectorCombine::scalarizeLoadExtract(Instruction &I) {",
+      "window_last_line": "}",
+      "window_braces": {
+        "net": 0,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.3469387755102041,
+        "median": 1.054421768707483,
+        "max": 1.2653061224489797
+      }
+    },
+    "165878": {
+      "records": 27,
+      "turns": 108,
+      "stages": {
+        "build": 15,
+        "reproducer": 92,
+        "no_patch": 1
+      },
+      "first_build_errors": [
+        {
+          "signature": "error: expected identifier before ‘case’",
+          "turns": 11
+        },
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 4
+        }
+      ],
+      "fence_contaminated_proposals": 4,
+      "fence_build_failures": 4,
+      "undefined_reference_build_failures": 0,
+      "missing_member_build_failures": 0,
+      "passing_files": [],
+      "window_lines": 247,
+      "window_first_line": "          function_ref<bool(unsigned, unsigned)> Checker = {}) {",
+      "window_last_line": "  }",
+      "window_braces": {
+        "net": 0,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.08906882591093117,
+        "median": 1.0242914979757085,
+        "max": 1.1012145748987854
+      }
+    },
+    "135182": {
+      "records": 27,
+      "turns": 107,
+      "stages": {
+        "build": 50,
+        "reproducer": 38,
+        "no_patch": 17,
+        "fixed": 2
+      },
+      "first_build_errors": [
+        {
+          "signature": "error: expected ‘;’ before ‘)’ token",
+          "turns": 25
+        },
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 13
+        },
+        {
+          "signature": "error: ‘NarrowBO’ was not declared in this scope; did you mean ‘NarrowDef’?",
+          "turns": 9
+        },
+        {
+          "signature": "error: ‘class llvm::ScalarEvolution’ has no member named ‘setSCEV’; did you mean ‘getSCEV’?",
+          "turns": 1
+        },
+        {
+          "signature": "error: lvalue required as unary ‘&’ operand",
+          "turns": 1
+        },
+        {
+          "signature": "error: ‘class llvm::Loop’ has no member named ‘getLatch’",
+          "turns": 1
+        }
+      ],
+      "fence_contaminated_proposals": 13,
+      "fence_build_failures": 13,
+      "undefined_reference_build_failures": 0,
+      "missing_member_build_failures": 2,
+      "passing_files": [
+        "results-qwen3-v2/135182.generic-plain.json",
+        "results-qwen3-v2/135182.raw-structured.json"
+      ],
+      "window_lines": 89,
+      "window_first_line": "  for (Use &U : NarrowUse->uses()) {",
+      "window_last_line": "  auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,",
+      "window_braces": {
+        "net": 0,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.3707865168539326,
+        "median": 1.0898876404494382,
+        "max": 1.6179775280898876
+      }
+    },
+    "126974": {
+      "records": 27,
+      "turns": 108,
+      "stages": {
+        "build": 100,
+        "reproducer": 2,
+        "no_patch": 4,
+        "regression": 2
+      },
+      "first_build_errors": [
+        {
+          "signature": "error: ‘NewPred’ was not declared in this scope",
+          "turns": 55
+        },
+        {
+          "signature": "error: ‘class llvm::StringRef’ has no member named ‘startswith’; did you mean ‘starts_with’?",
+          "turns": 15
+        },
+        {
+          "signature": "error: ‘ICMP_SAMESIGN’ is not a member of ‘llvm::ICmpInst’",
+          "turns": 9
+        },
+        {
+          "signature": "error: ‘NewPred’ was not declared in this scope; did you mean ‘Pred’?",
+          "turns": 7
+        },
+        {
+          "signature": "error: ‘ICMP_SAMESSIGN’ is not a member of ‘llvm::ICmpInst’",
+          "turns": 6
+        },
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 4
+        },
+        {
+          "signature": "error: ‘ICMP_SAMESSIGN_ULT’ is not a member of ‘llvm::ICmpInst’",
+          "turns": 2
+        },
+        {
+          "signature": "error: ‘ICMP_SAME_SIGN’ is not a member of ‘llvm::ICmpInst’",
+          "turns": 1
+        },
+        {
+          "signature": "error: ‘ICmp_SGT’ is not a member of ‘llvm::ICmpInst’",
+          "turns": 1
+        }
+      ],
+      "fence_contaminated_proposals": 4,
+      "fence_build_failures": 4,
+      "undefined_reference_build_failures": 0,
+      "missing_member_build_failures": 34,
+      "passing_files": [],
+      "window_lines": 266,
+      "window_first_line": "",
+      "window_last_line": "    ICmpInst::Predicate NewPred = MinMax->getPredicate();",
+      "window_braces": {
+        "net": 2,
+        "minimum": -1,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.07518796992481203,
+        "median": 0.7875939849624061,
+        "max": 1.0827067669172932
+      }
+    },
+    "154116": {
+      "records": 27,
+      "turns": 108,
+      "stages": {
+        "reproducer": 3,
+        "no_patch": 2,
+        "build": 103
+      },
+      "first_build_errors": [
+        {
+          "signature": "undefined reference to `(anonymous namespace)::ConstantOffsetExtractor::rebuildWithoutConstOffset()'",
+          "turns": 94
+        },
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 9
+        }
+      ],
+      "fence_contaminated_proposals": 9,
+      "fence_build_failures": 9,
+      "undefined_reference_build_failures": 94,
+      "missing_member_build_failures": 0,
+      "passing_files": [],
+      "window_lines": 115,
+      "window_first_line": "                                    bool ZeroExtended, bool NonNegative) {",
+      "window_last_line": "}",
+      "window_braces": {
+        "net": 0,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.4,
+        "median": 0.4565217391304348,
+        "max": 1.3043478260869565
+      }
+    },
+    "116249": {
+      "records": 27,
+      "turns": 108,
+      "stages": {
+        "build": 108
+      },
+      "first_build_errors": [
+        {
+          "signature": "error: ‘MaxBECount’ does not name a type",
+          "turns": 79
+        },
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 9
+        },
+        {
+          "signature": "error: ‘class llvm::ICmpInst’ has no member named ‘hasAttribute’",
+          "turns": 9
+        },
+        {
+          "signature": "error: ‘class llvm::ICmpInst’ has no member named ‘setHasSameSign’; did you mean ‘setSameSign’?",
+          "turns": 4
+        },
+        {
+          "signature": "error: ‘class llvm::ICmpInst’ has no member named ‘hasSamesign’; did you mean ‘hasSameSign’?",
+          "turns": 2
+        },
+        {
+          "signature": "error: ‘class llvm::ConstantRange’ has no member named ‘isEmpty’",
+          "turns": 2
+        },
+        {
+          "signature": "error: ‘optimizeLoopExitWithKnownExitCount’ was not declared in this scope; did you mean ‘optimizeLoopExitWithUnknownExitCount’?",
+          "turns": 1
+        },
+        {
+          "signature": "error: ‘class llvm::Type’ has no member named ‘getBitWidth’",
+          "turns": 1
+        },
+        {
+          "signature": "error: cannot convert ‘llvm::Type*’ to ‘const llvm::SCEV*’ in initialization",
+          "turns": 1
+        }
+      ],
+      "fence_contaminated_proposals": 9,
+      "fence_build_failures": 9,
+      "undefined_reference_build_failures": 0,
+      "missing_member_build_failures": 19,
+      "passing_files": [],
+      "window_lines": 266,
+      "window_first_line": "bool IndVarSimplify::canonicalizeExitCondition(Loop *L) {",
+      "window_last_line": "    assert(ExactExitCount->getType()->isIntegerTy() &&",
+      "window_braces": {
+        "net": 2,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.5037593984962406,
+        "median": 0.518796992481203,
+        "max": 1.281954887218045
+      }
+    },
+    "143123": {
+      "records": 27,
+      "turns": 108,
+      "stages": {
+        "no_patch": 34,
+        "build": 32,
+        "reproducer": 36,
+        "regression": 6
+      },
+      "first_build_errors": [
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 18
+        },
+        {
+          "signature": "error: ‘class llvm::FastMathFlags’ has no member named ‘noNaN’; did you mean ‘noNaNs’?",
+          "turns": 5
+        },
+        {
+          "signature": "error: ‘class llvm::FastMathFlags’ has no member named ‘nnan’",
+          "turns": 3
+        },
+        {
+          "signature": "error: ‘getInvertedPredicate’ is not a member of ‘llvm::CmpInst’",
+          "turns": 1
+        },
+        {
+          "signature": "error: ‘LHSSafe’ was not declared in this scope",
+          "turns": 1
+        },
+        {
+          "signature": "error: ‘HasNNAN’ was not declared in this scope",
+          "turns": 1
+        },
+        {
+          "signature": "error: expected primary-expression before ‘)’ token",
+          "turns": 1
+        },
+        {
+          "signature": "error: a function-definition is not allowed here before ‘{’ token",
+          "turns": 1
+        },
+        {
+          "signature": "error: break statement not within loop or switch",
+          "turns": 1
+        }
+      ],
+      "fence_contaminated_proposals": 18,
+      "fence_build_failures": 18,
+      "undefined_reference_build_failures": 0,
+      "missing_member_build_failures": 11,
+      "passing_files": [],
+      "window_lines": 69,
+      "window_first_line": "  //  (0.0 <= -0.0) ? 0.0 : -0.0 // Returns 0.0",
+      "window_last_line": "  }",
+      "window_braces": {
+        "net": 0,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.34782608695652173,
+        "median": 1.1014492753623188,
+        "max": 6.420289855072464
+      }
+    },
+    "126012": {
+      "records": 16,
+      "turns": 64,
+      "stages": {
+        "build": 42,
+        "no_patch": 12,
+        "reproducer": 9,
+        "fixed": 1
+      },
+      "first_build_errors": [
+        {
+          "signature": "undefined reference to `llvm::ScalarEvolution::isImpliedCondOperandsViaShift(llvm::CmpPredicate, llvm::SCEV const*, llvm::SCEV const*, llvm::SCEV const*, llvm::SCEV const*)'",
+          "turns": 28
+        },
+        {
+          "signature": "error: stray ‘`’ in program",
+          "turns": 14
+        }
+      ],
+      "fence_contaminated_proposals": 14,
+      "fence_build_failures": 14,
+      "undefined_reference_build_failures": 28,
+      "missing_member_build_failures": 0,
+      "passing_files": [
+        "results-qwen3-v2/126012.generic-plain.json"
+      ],
+      "window_lines": 152,
+      "window_first_line": "                                        const SCEV *FoundRHS, unsigned Depth) {",
+      "window_last_line": "}",
+      "window_braces": {
+        "net": 0,
+        "minimum": 0,
+        "caveat": "Lexical heuristic only; balanced braces do not imply a complete C++ declaration or function."
+      },
+      "reply_window_line_ratio": {
+        "min": 0.7302631578947368,
+        "median": 1.0032894736842106,
+        "max": 1.269736842105263
+      }
+    }
+  },
+  "initial_reductions_first_trial_plain": {
+    "116249": {
+      "generic": {
+        "original_instructions": 21,
+        "shown_instructions": 21,
+        "original_chars": 1918,
+        "shown_chars": 1918,
+        "oracle_calls": 400,
+        "oracle_tool_failures": 271,
+        "passes_applied": [],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 21,
+        "shown_instructions": 18,
+        "original_chars": 1918,
+        "shown_chars": 1797,
+        "oracle_calls": 8,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "fold-branches",
+          "simplify-cfg",
+          "slice",
+          "promote-operands",
+          "strip-flags"
+        ],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 21,
+        "shown_instructions": 2,
+        "original_chars": 1918,
+        "shown_chars": 481,
+        "oracle_calls": 266,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "error": null
+      }
+    },
+    "126012": {
+      "generic": {
+        "original_instructions": 27,
+        "shown_instructions": 27,
+        "original_chars": 1827,
+        "shown_chars": 1827,
+        "oracle_calls": 109,
+        "oracle_tool_failures": 82,
+        "passes_applied": [],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 27,
+        "shown_instructions": 27,
+        "original_chars": 1827,
+        "shown_chars": 1827,
+        "oracle_calls": 30,
+        "oracle_tool_failures": 1,
+        "passes_applied": [],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 27,
+        "shown_instructions": 27,
+        "original_chars": 1827,
+        "shown_chars": 1827,
+        "oracle_calls": 3,
+        "oracle_tool_failures": 0,
+        "passes_applied": [],
+        "error": null
+      }
+    },
+    "126974": {
+      "generic": {
+        "original_instructions": 10,
+        "shown_instructions": 10,
+        "original_chars": 1105,
+        "shown_chars": 1105,
+        "oracle_calls": 400,
+        "oracle_tool_failures": 261,
+        "passes_applied": [],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 10,
+        "shown_instructions": 4,
+        "original_chars": 1105,
+        "shown_chars": 653,
+        "oracle_calls": 6,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "fold-branches",
+          "prune-blocks",
+          "simplify-cfg",
+          "promote-operands",
+          "drop-params"
+        ],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 10,
+        "shown_instructions": 10,
+        "original_chars": 1105,
+        "shown_chars": 1105,
+        "oracle_calls": 400,
+        "oracle_tool_failures": 0,
+        "passes_applied": [],
+        "error": null
+      }
+    },
+    "135182": {
+      "generic": {
+        "original_instructions": 10,
+        "shown_instructions": 10,
+        "original_chars": 958,
+        "shown_chars": 958,
+        "oracle_calls": 400,
+        "oracle_tool_failures": 332,
+        "passes_applied": [],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 10,
+        "shown_instructions": 10,
+        "original_chars": 958,
+        "shown_chars": 958,
+        "oracle_calls": 1,
+        "oracle_tool_failures": 1,
+        "passes_applied": [],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 10,
+        "shown_instructions": 2,
+        "original_chars": 958,
+        "shown_chars": 298,
+        "oracle_calls": 194,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "error": null
+      }
+    },
+    "143123": {
+      "generic": {
+        "original_instructions": 6,
+        "shown_instructions": 6,
+        "original_chars": 407,
+        "shown_chars": 355,
+        "oracle_calls": 81,
+        "oracle_tool_failures": 69,
+        "passes_applied": [
+          "ddmin-lines"
+        ],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 6,
+        "shown_instructions": 6,
+        "original_chars": 407,
+        "shown_chars": 403,
+        "oracle_calls": 3,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "strip-flags"
+        ],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 6,
+        "shown_instructions": 4,
+        "original_chars": 407,
+        "shown_chars": 255,
+        "oracle_calls": 293,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "error": null
+      }
+    },
+    "154116": {
+      "generic": {
+        "original_instructions": 8,
+        "shown_instructions": 8,
+        "original_chars": 711,
+        "shown_chars": 455,
+        "oracle_calls": 154,
+        "oracle_tool_failures": 133,
+        "passes_applied": [
+          "ddmin-lines"
+        ],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 8,
+        "shown_instructions": 8,
+        "original_chars": 711,
+        "shown_chars": 707,
+        "oracle_calls": 4,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "strip-flags"
+        ],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 8,
+        "shown_instructions": 5,
+        "original_chars": 711,
+        "shown_chars": 530,
+        "oracle_calls": 264,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "error": null
+      }
+    },
+    "165878": {
+      "generic": {
+        "original_instructions": 19,
+        "shown_instructions": 19,
+        "original_chars": 1351,
+        "shown_chars": 1351,
+        "oracle_calls": 400,
+        "oracle_tool_failures": 350,
+        "passes_applied": [],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 19,
+        "shown_instructions": 19,
+        "original_chars": 1351,
+        "shown_chars": 1349,
+        "oracle_calls": 13,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "slice",
+          "slice",
+          "slice",
+          "slice"
+        ],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 19,
+        "shown_instructions": 3,
+        "original_chars": 1351,
+        "shown_chars": 585,
+        "oracle_calls": 251,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "error": null
+      }
+    },
+    "89390": {
+      "generic": {
+        "original_instructions": 8,
+        "shown_instructions": 8,
+        "original_chars": 1004,
+        "shown_chars": 701,
+        "oracle_calls": 193,
+        "oracle_tool_failures": 163,
+        "passes_applied": [
+          "ddmin-lines"
+        ],
+        "error": null
+      },
+      "iraware": {
+        "original_instructions": 8,
+        "shown_instructions": 8,
+        "original_chars": 1004,
+        "shown_chars": 1004,
+        "oracle_calls": 0,
+        "oracle_tool_failures": 0,
+        "passes_applied": [],
+        "error": null
+      },
+      "llvmreduce": {
+        "original_instructions": 8,
+        "shown_instructions": 3,
+        "original_chars": 1004,
+        "shown_chars": 557,
+        "oracle_calls": 217,
+        "oracle_tool_failures": 0,
+        "passes_applied": [
+          "llvm-reduce-src",
+          "llvm-reduce-tgt"
+        ],
+        "error": null
+      }
+    }
+  },
+  "identical_initial_prompt_groups_trial_one": {
+    "116249": [
+      {
+        "prompt_sha256": "9162b7f565e1d763b59b4b6967bad31d946b9f687cbb73ef6be44394def31db2",
+        "conditions": [
+          "generic-plain",
+          "raw-plain"
+        ]
+      },
+      {
+        "prompt_sha256": "9fdc6510dc23ef5b9d615e7ea1ec6a3f699969441cabcb149b0398e059b6a1a9",
+        "conditions": [
+          "generic-structured",
+          "raw-structured"
+        ]
+      }
+    ],
+    "126012": [
+      {
+        "prompt_sha256": "a3989e56f538f51184a2f2955ab2395bde0e7f06f2a04a247b107066bb37f168",
+        "conditions": [
+          "generic-plain",
+          "iraware-plain",
+          "llvmreduce-plain",
+          "raw-plain"
+        ]
+      },
+      {
+        "prompt_sha256": "165fa0436f35e7d4f6db4752f5a1e3239a7705a22e9c51304705fb07e419341e",
+        "conditions": [
+          "generic-structured",
+          "iraware-structured",
+          "llvmreduce-structured",
+          "raw-structured"
+        ]
+      }
+    ],
+    "126974": [
+      {
+        "prompt_sha256": "b215fbae5be18acda409e7c378e8312d9f7887b14a9119de7f7bfff617e03e32",
+        "conditions": [
+          "generic-plain",
+          "llvmreduce-plain",
+          "raw-plain"
+        ]
+      },
+      {
+        "prompt_sha256": "f09e380f7b7a12d1e648811703311ab7d01af2af5dae18cd5dae62efca9e9239",
+        "conditions": [
+          "generic-structured",
+          "llvmreduce-structured",
+          "raw-structured"
+        ]
+      }
+    ],
+    "135182": [
+      {
+        "prompt_sha256": "e5825e6213b1ad6a94504e576b5fa84cc71b18f340541d1375d5f0cc2cc52679",
+        "conditions": [
+          "generic-plain",
+          "iraware-plain",
+          "raw-plain"
+        ]
+      },
+      {
+        "prompt_sha256": "6f83bb62a89dbd81c66b24c46a8347cffa74c1ce5aeebc34cdaf6464324e2743",
+        "conditions": [
+          "generic-structured",
+          "iraware-structured",
+          "raw-structured"
+        ]
+      }
+    ],
+    "143123": [],
+    "154116": [],
+    "165878": [
+      {
+        "prompt_sha256": "dbce0389309eb766f22f778890127061f345d49abb9e20cc995fa1c461753784",
+        "conditions": [
+          "generic-plain",
+          "raw-plain"
+        ]
+      },
+      {
+        "prompt_sha256": "85f15423c53337a55faca3dce8f8bb1f2b28f1665c861d6a76106e7c143b94a7",
+        "conditions": [
+          "generic-structured",
+          "raw-structured"
+        ]
+      }
+    ],
+    "89390": [
+      {
+        "prompt_sha256": "40d1fe28b7fe1d659d82cbfdf8bbe8c63b7494b252e5c06f9b8a345a12b7cfae",
+        "conditions": [
+          "iraware-plain",
+          "raw-plain"
+        ]
+      },
+      {
+        "prompt_sha256": "cc5e35c0b0b4efe83af6c903f31bff7df452e6a4747755f9a4ee6a50e0ad3f3b",
+        "conditions": [
+          "iraware-structured",
+          "raw-structured"
+        ]
+      }
+    ]
+  },
+  "top_build_errors": [
+    {
+      "signature": "undefined reference to `(anonymous namespace)::ConstantOffsetExtractor::rebuildWithoutConstOffset()'",
+      "turns": 94
+    },
+    {
+      "signature": "error: ‘MaxBECount’ does not name a type",
+      "turns": 79
+    },
+    {
+      "signature": "error: stray ‘`’ in program",
+      "turns": 71
+    },
+    {
+      "signature": "error: ‘NewPred’ was not declared in this scope",
+      "turns": 55
+    },
+    {
+      "signature": "undefined reference to `llvm::ScalarEvolution::isImpliedCondOperandsViaShift(llvm::CmpPredicate, llvm::SCEV const*, llvm::SCEV const*, llvm::SCEV const*, llvm::SCEV const*)'",
+      "turns": 28
+    },
+    {
+      "signature": "error: expected ‘;’ before ‘)’ token",
+      "turns": 25
+    },
+    {
+      "signature": "error: ‘class llvm::StringRef’ has no member named ‘startswith’; did you mean ‘starts_with’?",
+      "turns": 15
+    },
+    {
+      "signature": "error: expected identifier before ‘case’",
+      "turns": 11
+    },
+    {
+      "signature": "error: ‘class llvm::ICmpInst’ has no member named ‘hasAttribute’",
+      "turns": 9
+    },
+    {
+      "signature": "error: ‘ICMP_SAMESIGN’ is not a member of ‘llvm::ICmpInst’",
+      "turns": 9
+    },
+    {
+      "signature": "error: ‘NarrowBO’ was not declared in this scope; did you mean ‘NarrowDef’?",
+      "turns": 9
+    },
+    {
+      "signature": "error: ISO C++ forbids comparison between pointer and integer [-fpermissive]",
+      "turns": 8
+    },
+    {
+      "signature": "error: ‘NewPred’ was not declared in this scope; did you mean ‘Pred’?",
+      "turns": 7
+    },
+    {
+      "signature": "error: ‘ICMP_SAMESSIGN’ is not a member of ‘llvm::ICmpInst’",
+      "turns": 6
+    },
+    {
+      "signature": "error: ‘class llvm::FastMathFlags’ has no member named ‘noNaN’; did you mean ‘noNaNs’?",
+      "turns": 5
+    },
+    {
+      "signature": "error: ‘class llvm::ICmpInst’ has no member named ‘setHasSameSign’; did you mean ‘setSameSign’?",
+      "turns": 4
+    },
+    {
+      "signature": "error: ‘PoisonMaskValue’ was not declared in this scope",
+      "turns": 4
+    },
+    {
+      "signature": "error: ‘class llvm::FastMathFlags’ has no member named ‘nnan’",
+      "turns": 3
+    },
+    {
+      "signature": "error: ‘class llvm::ICmpInst’ has no member named ‘hasSamesign’; did you mean ‘hasSameSign’?",
+      "turns": 2
+    },
+    {
+      "signature": "error: ‘class llvm::ConstantRange’ has no member named ‘isEmpty’",
+      "turns": 2
+    },
+    {
+      "signature": "error: ‘ICMP_SAMESSIGN_ULT’ is not a member of ‘llvm::ICmpInst’",
+      "turns": 2
+    },
+    {
+      "signature": "error: ‘class llvm::VectorType’ has no member named ‘getNumElements’; did you mean ‘getArrayNumElements’?",
+      "turns": 2
+    },
+    {
+      "signature": "undefined reference to `(anonymous namespace)::VectorCombine::scalarizeLoadExtract(llvm::Instruction&)'",
+      "turns": 2
+    },
+    {
+      "signature": "error: ‘optimizeLoopExitWithKnownExitCount’ was not declared in this scope; did you mean ‘optimizeLoopExitWithUnknownExitCount’?",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘class llvm::Type’ has no member named ‘getBitWidth’",
+      "turns": 1
+    },
+    {
+      "signature": "error: cannot convert ‘llvm::Type*’ to ‘const llvm::SCEV*’ in initialization",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘ICMP_SAME_SIGN’ is not a member of ‘llvm::ICmpInst’",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘ICmp_SGT’ is not a member of ‘llvm::ICmpInst’",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘class llvm::ScalarEvolution’ has no member named ‘setSCEV’; did you mean ‘getSCEV’?",
+      "turns": 1
+    },
+    {
+      "signature": "error: lvalue required as unary ‘&’ operand",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘class llvm::Loop’ has no member named ‘getLatch’",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘getInvertedPredicate’ is not a member of ‘llvm::CmpInst’",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘LHSSafe’ was not declared in this scope",
+      "turns": 1
+    },
+    {
+      "signature": "error: ‘HasNNAN’ was not declared in this scope",
+      "turns": 1
+    },
+    {
+      "signature": "error: expected primary-expression before ‘)’ token",
+      "turns": 1
+    },
+    {
+      "signature": "error: a function-definition is not allowed here before ‘{’ token",
+      "turns": 1
+    },
+    {
+      "signature": "error: break statement not within loop or switch",
+      "turns": 1
+    },
+    {
+      "signature": "error: void value not ignored as it ought to be",
+      "turns": 1
+    }
+  ],
+  "passing_patches_for_offline_review": [
+    {
+      "file": "results-qwen3-v2/126012.generic-plain.json",
+      "bug": "126012",
+      "condition": "generic-plain",
+      "trial": 1,
+      "matched_panel": false,
+      "patch_sha256": "25dcaa4bb3744959b5c6b9243c020bbff8a9f491457c54182b62b21d717d806b",
+      "reference_patch_sha256": "8c446f7500ff95601fe359ccd4aed7b6f101cf3ff03b61c16aa5a7050ee8c626",
+      "patch": "diff --git a/llvm/lib/Analysis/ScalarEvolution.cpp b/llvm/lib/Analysis/ScalarEvolution.cpp\nindex f89887118d8d..a6f52300171d 100644\n--- a/llvm/lib/Analysis/ScalarEvolution.cpp\n+++ b/llvm/lib/Analysis/ScalarEvolution.cpp\n@@ -12296,6 +12296,7 @@ bool ScalarEvolution::isImpliedCondOperandsViaNoOverflow(CmpPredicate Pred,\n \n bool ScalarEvolution::isImpliedViaMerge(CmpPredicate Pred, const SCEV *LHS,\n                                         const SCEV *RHS, const SCEV *FoundLHS,\n+\n                                         const SCEV *FoundRHS, unsigned Depth) {\n   const PHINode *LPhi = nullptr, *RPhi = nullptr;\n \n@@ -12351,6 +12352,10 @@ bool ScalarEvolution::isImpliedViaMerge(CmpPredicate Pred, const SCEV *LHS,\n   const SCEVAddRecExpr *RAR = dyn_cast<SCEVAddRecExpr>(RHS);\n \n   auto ProvedEasily = [&](const SCEV *S1, const SCEV *S2) {\n+    // Be more conservative - don't recurse into the same function to avoid\n+    // infinite loops or incorrect reasoning\n+    if (S1 == FoundLHS && S2 == FoundRHS)\n+      return isKnownViaNonRecursiveReasoning(Pred, S1, S2);\n     return isKnownViaNonRecursiveReasoning(Pred, S1, S2) ||\n            isImpliedCondOperandsViaRanges(Pred, S1, S2, Pred, FoundLHS, FoundRHS) ||\n            isImpliedViaOperations(Pred, S1, S2, FoundLHS, FoundRHS, Depth);\n@@ -12361,6 +12366,7 @@ bool ScalarEvolution::isImpliedViaMerge(CmpPredicate Pred, const SCEV *LHS,\n     // If we compare two Phis from the same block, and for each entry block\n     // the predicate is true for incoming values from this block, then the\n     // predicate is also true for the Phis.\n+    // However, be much more conservative in complex cases with interdependent phis\n     for (const BasicBlock *IncBB : predecessors(LBB)) {\n       const SCEV *L = getSCEV(LPhi->getIncomingValueForBlock(IncBB));\n       const SCEV *R = getSCEV(RPhi->getIncomingValueForBlock(IncBB));\n@@ -12449,6 +12455,7 @@ bool ScalarEvolution::isImpliedCondOperandsViaShift(CmpPredicate Pred,\n   return false;\n }\n \n+\n bool ScalarEvolution::isImpliedCondOperands(CmpPredicate Pred, const SCEV *LHS,\n                                             const SCEV *RHS,\n                                             const SCEV *FoundLHS,\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/135182.generic-plain.json",
+      "bug": "135182",
+      "condition": "generic-plain",
+      "trial": 1,
+      "matched_panel": true,
+      "patch_sha256": "36b71884e6b026a2cbfcb2e7cd265c67baab74151f4d2877b5e75114e89ba434",
+      "reference_patch_sha256": "928aec5ab342879cd2756eee33c2bb2edf0acc4846a94be1c133176252450cdd",
+      "patch": "diff --git a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\nindex 7b9c5c77cbe9..e5cdddd84465 100644\n--- a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n+++ b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n@@ -1687,6 +1687,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   SmallVector<Instruction *, 4> ExtUsers;\n   SmallVector<PHINode *, 4> LCSSAPhiUsers;\n   SmallVector<ICmpInst *, 4> ICmpUsers;\n+\n   for (Use &U : NarrowUse->uses()) {\n     Instruction *User = cast<Instruction>(U.getUser());\n     if (User == NarrowDef)\n@@ -1760,6 +1761,23 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n     return false;\n \n+  // The critical fix: we need to validate that when we're dealing with\n+  // operations that could change semantics due to sign/zero extension,\n+  // we must ensure the transformation preserves the exact behavior.\n+  // Specifically, for operations like add %indvar, %indvar, we need to be\n+  // careful about the fact that we're computing the same value twice.\n+  if (auto *BO = dyn_cast<BinaryOperator>(NarrowUse)) {\n+    if (BO->getOpcode() == Instruction::Add && \n+        BO->getOperand(0) == BO->getOperand(1) &&\n+        BO->getOperand(0) == NarrowDef) {\n+      // This is a case of \"add %indvar, %indvar\" - we must be very careful\n+      // about the loop semantics. Don't transform if this would change\n+      // the computed result due to overflow or sign extension differences.\n+      // This is a known problematic pattern that causes miscompilation.\n+      return false;\n+    }\n+  }\n+\n   LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n \n   // Generating a widening use instruction.\n@@ -1776,6 +1794,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n \n   auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n   auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n+\n                                         NarrowBO->getName());\n   IRBuilder<> Builder(NarrowUse);\n   Builder.Insert(WideBO);\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/135182.raw-structured.json",
+      "bug": "135182",
+      "condition": "raw-structured",
+      "trial": 1,
+      "matched_panel": true,
+      "patch_sha256": "29476ef39b31202a294beb6afbbc4e4de269d7c5a9b4b8e5502e2dc5ed401c01",
+      "reference_patch_sha256": "928aec5ab342879cd2756eee33c2bb2edf0acc4846a94be1c133176252450cdd",
+      "patch": "diff --git a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\nindex 7b9c5c77cbe9..5c6afec92e07 100644\n--- a/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n+++ b/llvm/lib/Transforms/Utils/SimplifyIndVar.cpp\n@@ -1687,6 +1687,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   SmallVector<Instruction *, 4> ExtUsers;\n   SmallVector<PHINode *, 4> LCSSAPhiUsers;\n   SmallVector<ICmpInst *, 4> ICmpUsers;\n+\n   for (Use &U : NarrowUse->uses()) {\n     Instruction *User = cast<Instruction>(U.getUser());\n     if (User == NarrowDef)\n@@ -1760,6 +1761,31 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n   if (!AddRecOp1 || AddRecOp1->getLoop() != L)\n     return false;\n \n+  // The core issue: when NarrowUse is the add instruction that operates on\n+  // the induction variable, and we're in a loop with a false condition,\n+  // we must be very careful not to transform the computation in a way that\n+  // changes its semantics. The bug occurs when the computation %add = add i16 %indvar, %indvar\n+  // gets incorrectly widened.\n+  //\n+  // The specific case is: we have a phi node that feeds into an add operation,\n+  // but the add operation itself is not suitable for widening because:\n+  // 1. It's computing a specific value that depends on the precise loop iteration\n+  // 2. The loop condition is false, so we execute once and exit\n+  // 3. The computation should preserve the exact semantics of the original\n+  if (auto *BO = dyn_cast<BinaryOperator>(NarrowUse)) {\n+    if (BO->getOpcode() == Instruction::Add) {\n+      // Check if this is an addition of the induction variable with itself\n+      // This is a very specific case that should not be widened\n+      if (NarrowUse->getOperand(0) == NarrowDef && \n+          NarrowUse->getOperand(1) == NarrowDef) {\n+        // This is a computation like %add = add i16 %indvar, %indvar\n+        // which doubles the induction variable. Widening this would change\n+        // the semantics incorrectly in some cases.\n+        return false;\n+      }\n+    }\n+  }\n+\n   LLVM_DEBUG(dbgs() << \"Cloning arithmetic IVUser: \" << *NarrowUse << \"\\n\");\n \n   // Generating a widening use instruction.\n@@ -1776,6 +1802,7 @@ bool WidenIV::widenWithVariantUse(WidenIV::NarrowIVDefUse DU) {\n \n   auto *NarrowBO = cast<BinaryOperator>(NarrowUse);\n   auto *WideBO = BinaryOperator::Create(NarrowBO->getOpcode(), LHS, RHS,\n+\n                                         NarrowBO->getName());\n   IRBuilder<> Builder(NarrowUse);\n   Builder.Insert(WideBO);\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.iraware-plain.t2.json",
+      "bug": "89390",
+      "condition": "iraware-plain",
+      "trial": 2,
+      "matched_panel": true,
+      "patch_sha256": "be40468c197654f5f72aae7396e74c0087245e33a35ad88c5804c1bbe3ddb0fe",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..e842cb34d0c3 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1422,6 +1423,17 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n     std::swap(X, Y);\n \n+  // For srem operations, check if the transformation could lead to\n+  // undefined behavior when there are poison values in the mask\n+  if (Opcode == Instruction::SRem) {\n+    // If any mask element is poison, don't transform to avoid srem by poison\n+    for (int M : Mask) {\n+      if (M == -1) {\n+        return false;\n+      }\n+    }\n+  }\n+\n   Value *Shuf0, *Shuf1;\n   if (X == Z) {\n     // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n@@ -1447,6 +1459,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.llvmreduce-plain.json",
+      "bug": "89390",
+      "condition": "llvmreduce-plain",
+      "trial": 1,
+      "matched_panel": true,
+      "patch_sha256": "4f7a6b0696e5da5403541580f03845a4c94da75c0c7c100c5f76d8ec9edee01e",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..4b4990ad8caf 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1416,9 +1417,35 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   if (ShufCost > BinopCost)\n     return false;\n \n-  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n+  // Check if the operands might introduce undefined behavior when shuffled.\n+  // Specifically, avoid transformations that could lead to poison values\n+  // causing undefined behavior in the resulting operation.\n   Value *X = B0->getOperand(0), *Y = B0->getOperand(1);\n   Value *Z = B1->getOperand(0), *W = B1->getOperand(1);\n+  \n+  // For operations that can produce poison/UB (like srem with zero),\n+  // we need to be more careful about the transformation.\n+  if (Opcode == Instruction::SDiv || Opcode == Instruction::UDiv ||\n+      Opcode == Instruction::SRem || Opcode == Instruction::URem) {\n+    // Check if any operand is poison or zero, which could cause UB\n+    if (isa<PoisonValue>(X) || isa<PoisonValue>(Y) || \n+        isa<PoisonValue>(Z) || isa<PoisonValue>(W) ||\n+        (Opcode == Instruction::SDiv || Opcode == Instruction::UDiv ||\n+         Opcode == Instruction::SRem || Opcode == Instruction::URem)) {\n+      // For division and remainder operations, we need to ensure that\n+      // we're not creating a situation where zero divisors or poison\n+      // values would cause undefined behavior\n+      if (Opcode == Instruction::SDiv || Opcode == Instruction::UDiv ||\n+          Opcode == Instruction::SRem || Opcode == Instruction::URem) {\n+        // This is a conservative approach - if we have any poison values\n+        // or if we're dealing with potentially problematic operations,\n+        // don't perform the transformation\n+        return false;\n+      }\n+    }\n+  }\n+\n+  // If we have something like \"add X, Y\" and \"add Z, X\", swap ops to match.\n   if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n     std::swap(X, Y);\n \n@@ -1447,6 +1474,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.llvmreduce-plain.t2.json",
+      "bug": "89390",
+      "condition": "llvmreduce-plain",
+      "trial": 2,
+      "matched_panel": true,
+      "patch_sha256": "fc1ec48354f9b1c4e84bc95f9d3aa1bbd1f27a29cabffcd9525706ff2beb7828",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..fe2c41aff486 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1405,6 +1406,18 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n       B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n     return false;\n \n+  // For operations that can produce undefined behavior with poison inputs,\n+  // such as srem, we need to be more careful about the transformation.\n+  if (B0->getOpcode() == Instruction::SRem || B0->getOpcode() == Instruction::URem) {\n+    // Check if either operand contains poison values that would make the operation undefined\n+    // This is a conservative approach - if we can't prove safety, don't transform\n+    if (B0->getOperand(0)->getType()->isVectorTy() || B0->getOperand(1)->getType()->isVectorTy()) {\n+      // For now, avoid the transformation when dealing with potentially poisoned operands\n+      // This prevents the creation of undefined behavior from poison values\n+      return false;\n+    }\n+  }\n+\n   // Try to replace a binop with a shuffle if the shuffle is not costly.\n   // The new shuffle will choose from a single, common operand, so it may be\n   // cheaper than the existing two-operand shuffle.\n@@ -1447,6 +1460,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.llvmreduce-structured.t2.json",
+      "bug": "89390",
+      "condition": "llvmreduce-structured",
+      "trial": 2,
+      "matched_panel": true,
+      "patch_sha256": "87dfc19d822a184544ecef6dab5e264254f3ad7ea7e9c6f9eddbe12456c2fd10",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..6a678e147adf 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1422,6 +1423,31 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   if (BinaryOperator::isCommutative(Opcode) && X != Z && Y != W)\n     std::swap(X, Y);\n \n+  // Conservative check: don't transform operations that could introduce\n+  // undefined behavior. Specifically, for division-like operations, we need\n+  // to be careful about zero operands or poison values.\n+  if (Opcode == Instruction::SRem || Opcode == Instruction::SDiv ||\n+      Opcode == Instruction::URem || Opcode == Instruction::UDiv) {\n+    // For these operations, check if we might be introducing undefined behavior\n+    // by checking if operands could result in zero division\n+    if (X == Y && Y == Z && Z == W) {\n+      // All operands are the same - this might be okay, but be extra careful\n+      // Check if this operand is a constant zero\n+      if (auto *C = dyn_cast<ConstantInt>(X)) {\n+        if (C->isZero()) {\n+          // This is dangerous - we'd be computing op(0, 0) which is undefined\n+          return false;\n+        }\n+      }\n+    }\n+    \n+    // More generally, if we're transforming a case where the operands \n+    // could contain poison or undefined values that would make the operation\n+    // undefined, don't transform\n+    // This is a conservative approach - we're being very careful here\n+    return false;\n+  }\n+\n   Value *Shuf0, *Shuf1;\n   if (X == Z) {\n     // shuf (bo X, Y), (bo X, W) --> bo (shuf X), (shuf Y, W)\n@@ -1447,6 +1473,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.raw-structured.json",
+      "bug": "89390",
+      "condition": "raw-structured",
+      "trial": 1,
+      "matched_panel": true,
+      "patch_sha256": "e3f26e944c1fefbf799c803453576ea030530c023bc0408abc67f9b5f264be10",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..89ef7b076c11 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1405,6 +1406,36 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n       B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n     return false;\n \n+  // Check if any element of the mask is poison (-1), which would make this\n+  // transformation unsafe in some cases as it could introduce undefined behavior.\n+  // However, we still allow the transformation for most cases, since it's generally\n+  // beneficial and the existing code should handle poison appropriately.\n+  // The main concern is when we have srem operations where one operand might be zero.\n+  bool hasPoisonInMask = false;\n+  for (int MaskIdx : Mask) {\n+    if (MaskIdx == -1) {\n+      hasPoisonInMask = true;\n+      break;\n+    }\n+  }\n+\n+  // For the specific case in the bug report, we want to avoid transformations\n+  // that could lead to srem by zero or other undefined behavior.\n+  // Check if either of the binops is srem and if we're potentially creating\n+  // problematic scenarios.\n+  if (hasPoisonInMask && B0->getOpcode() == Instruction::SRem) {\n+    // If we have srem operations and poison in mask, be more conservative\n+    // We still want to allow the transformation in general, but we need to\n+    // make sure we don't introduce undefined behavior that wasn't there before.\n+    // This is a complex case, so for now, let's just skip the transformation\n+    // when there are poison values in the mask for srem operations.\n+    // Actually, let's be more precise: the bug occurs when we have \n+    // shuffle with poison that leads to undefined behavior in the result.\n+    // For now, let's just not apply this optimization when we detect poison\n+    // in the mask, since the original problem showed this caused issues.\n+    return false;\n+  }\n+\n   // Try to replace a binop with a shuffle if the shuffle is not costly.\n   // The new shuffle will choose from a single, common operand, so it may be\n   // cheaper than the existing two-operand shuffle.\n@@ -1447,6 +1478,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.raw-structured.t2.json",
+      "bug": "89390",
+      "condition": "raw-structured",
+      "trial": 2,
+      "matched_panel": true,
+      "patch_sha256": "f43877c677a90141a8f4002bce9b5b60842831517c5113d55ada7f6f3e1484f8",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..0714fab2a87a 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1405,6 +1406,32 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n       B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n     return false;\n \n+  // Don't transform if the shuffle mask contains poison values that would\n+  // cause the result to be undefined when the shuffled operands contain\n+  // poison values that aren't properly handled in the new form.\n+  // This is a conservative approach to avoid the specific bug where\n+  // srem with poison in shuffle mask could lead to undefined behavior.\n+  bool hasPoison = false;\n+  for (int M : Mask) {\n+    if (M < 0) {\n+      hasPoison = true;\n+      break;\n+    }\n+  }\n+  \n+  // If there are poison values in the mask, we need to be more careful\n+  // about whether this transformation preserves the semantics.\n+  // For the specific case in the bug report, we want to prevent\n+  // transformations that could introduce undefined behavior from poison\n+  // in shuffle results, but we still allow other transformations.\n+  if (hasPoison) {\n+    // Check if this is one of the problematic cases involving srem specifically\n+    // The original bug involves srem with poison in shuffle mask\n+    if (B0->getOpcode() == Instruction::SRem || B1->getOpcode() == Instruction::SRem) {\n+      return false;\n+    }\n+  }\n+\n   // Try to replace a binop with a shuffle if the shuffle is not costly.\n   // The new shuffle will choose from a single, common operand, so it may be\n   // cheaper than the existing two-operand shuffle.\n@@ -1447,6 +1474,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    },
+    {
+      "file": "results-qwen3-v2/89390.raw-structured.t3.json",
+      "bug": "89390",
+      "condition": "raw-structured",
+      "trial": 3,
+      "matched_panel": true,
+      "patch_sha256": "6f37c81997c669c47ae749dd6f76aad36e9fc93f0b2a2f5aa6546cb9b7f8b3ea",
+      "reference_patch_sha256": "f7468a2cb85411dc9fbde9cf8bc0f51c90154d3f411f2591c38b8de56714db99",
+      "patch": "diff --git a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\nindex 4918cee1fa82..f6b818070195 100644\n--- a/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n+++ b/llvm/lib/Transforms/Vectorize/VectorCombine.cpp\n@@ -1299,6 +1299,7 @@ bool VectorCombine::foldSingleElementStore(Instruction &I) {\n }\n \n /// Try to scalarize vector loads feeding extractelement instructions.\n+\n bool VectorCombine::scalarizeLoadExtract(Instruction &I) {\n   Value *Ptr;\n   if (!match(&I, m_Load(m_Value(Ptr))))\n@@ -1405,6 +1406,26 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n       B0->getOpcode() != B1->getOpcode() || B0->getType() != VecTy)\n     return false;\n \n+  // Check if any mask elements are poison, which could lead to undefined behavior\n+  // when the resulting shuffle vectors are used in binary operations.\n+  // Specifically, avoid transformations that could create poison in operands\n+  // that would be passed to operations that are sensitive to poison.\n+  bool hasPoisonInMask = false;\n+  for (int MaskVal : Mask) {\n+    if (MaskVal == -1) {\n+      hasPoisonInMask = true;\n+      break;\n+    }\n+  }\n+  \n+  // For the specific case reported in the bug where srem is involved,\n+  // we need to be more careful about poison propagation.\n+  // If the operation is srem and the mask contains poison, we should avoid\n+  // the transformation to prevent introducing undefined behavior.\n+  if (hasPoisonInMask && B0->getOpcode() == Instruction::SRem) {\n+    return false;\n+  }\n+\n   // Try to replace a binop with a shuffle if the shuffle is not costly.\n   // The new shuffle will choose from a single, common operand, so it may be\n   // cheaper than the existing two-operand shuffle.\n@@ -1447,6 +1468,7 @@ bool VectorCombine::foldShuffleOfBinops(Instruction &I) {\n   return true;\n }\n \n+\n /// Try to convert \"shuffle (castop), (castop)\" with a shared castop operand\n /// into \"castop (shuffle)\".\n bool VectorCombine::foldShuffleOfCastops(Instruction &I) {\n",
+      "status": "harness-passing; expert correctness review and additional semantic tests pending"
+    }
+  ],
+  "recorded_cost": {
+    "wall_seconds_sum": 85539.63,
+    "llm_prompt_tokens": 6936568,
+    "llm_completion_tokens": 1506874,
+    "oracle_calls": 44695.0,
+    "by_bug_wall_seconds": {
+      "116249": 11898.436,
+      "126012": 7368.421,
+      "126974": 11729.643,
+      "135182": 7386.728,
+      "143123": 10486.026,
+      "154116": 5490.698,
+      "165878": 18751.452,
+      "89390": 12428.226
+    },
+    "dollars": null,
+    "eta": null,
+    "caveat": "Durations include build/check/reduction/generation; no wall-clock throughput or API-equivalent dollar cost inferred."
+  }
+}

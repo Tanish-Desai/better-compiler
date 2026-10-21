@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "id": "repair-v3-prospective-six-2026-10-22",
+  "written": "2026-10-22",
+  "status": "prospective; no v3 outcomes exist at creation",
+  "harness_version": "repair-v3",
+  "model": "qwen3-coder-30b",
+  "model_repository": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+  "model_revision": null,
+  "bugs": [
+    "115149",
+    "114879",
+    "118467",
+    "91369",
+    "114738",
+    "167627",
+    "91177",
+    "82884",
+    "112350",
+    "173784",
+    "161492",
+    "179613",
+    "180870",
+    "89672",
+    "91957",
+    "114901"
+  ],
+  "excluded_development_bugs": [
+    "89390",
+    "165878",
+    "135182",
+    "126974",
+    "154116",
+    "116249",
+    "143123",
+    "126012",
+    "115575"
+  ],
+  "original_sample_sha256": "4b29f7c855bf8c56e62f723edc7ae7ee215a6bc781aee0f1a66d030318d622aa",
+  "conditions": [
+    "baseline",
+    "raw-plain",
+    "generic-plain",
+    "llvmreduce-plain",
+    "iraware-plain",
+    "iraware-structured"
+  ],
+  "repeat": 3,
+  "max_iterations": 4,
+  "oracle_budget": 400,
+  "oracle_strictness": "error_class",
+  "temperature": 0.8,
+  "max_completion_tokens": 8192,
+  "rationale": "Retain every arm of the original four primary comparisons on the remaining 16 preselected bugs; the first eight bugs supplied v2 harness-debugging evidence. This is an amended follow-up, not the completed original nine-condition study.",
+  "inference": "Exact paired McNemar in the four previously stated directions, Benjamini-Hochberg over all four. Freeze before v3 data. No optional stopping or selective extra trials.",
+  "budget_runs": 288,
+  "budget_model_replies_max": 1152,
+  "notes": [
+    "The exact serving revision remains to be captured on the H100 before generation; null is unknown, not a revision pin.",
+    "The two size tiers are not a representative sample of all LLVM bugs.",
+    "No full-factorial interaction claim is supported by six conditions."
+  ]
+}

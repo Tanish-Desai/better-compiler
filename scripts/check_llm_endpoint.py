@@ -2,7 +2,7 @@
 """Preflight: does the model endpoint work, before you start a multi-day sweep?
 
     python3 scripts/check_llm_endpoint.py
-    python3 scripts/check_llm_endpoint.py --repeat 3   # also check sampling
+    python3 scripts/check_llm_endpoint.py --repair-format --repeat 3
 
 WHY
 ---
@@ -12,9 +12,10 @@ tolerant -- a provider error ends one run, not the sweep -- so a misconfigured
 endpoint does not stop anything. It just quietly produces nothing, for hours.
 
 This checks the same environment the runner reads, in a few seconds, and
-reports the things that actually go wrong: wrong URL, wrong model name,
-temperature pinned to 0 when ``--repeat`` needs sampling, and a context window
-too small for the longest condition.
+reports wrong URLs, unavailable models, empty/truncated output and, with
+``--repair-format``, whether the endpoint can produce an applicable v3 edit.
+The tiny prompt does not validate a real repair or the experiment's full
+context length, and identical toy answers do not diagnose broken sampling.
 
 It never touches LLVM, the dataset, or ``results/``.
 """
@@ -23,35 +24,76 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
+import re
 import sys
 import time
 
-#: The longest condition (``raw-structured``) is a few thousand tokens; this is
-#: the margin below which the sweep would start truncating prompts.
-MIN_CONTEXT_HINT = 8192
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 PROMPT = (
     "Reply with exactly this C++ line and nothing else:\n"
     "```cpp\nreturn nullptr;\n```"
 )
 
+REPAIR_SOURCE = "int adjust(int value) {\n  return value - 1;\n}\n"
+REPAIR_EXPECTED = "int adjust(int value) {\n  return value + 1;\n}\n"
+
+
+def repair_messages() -> list[dict]:
+    """Use the sweep's actual system/format instructions without importing LLVM."""
+    from examples.repair_experiment import SYSTEM_PROMPT
+
+    return [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": (
+            "This is a patch-format preflight, not a benchmark repair.\n"
+            "In this ORIGINAL source excerpt, change `return value - 1;` to "
+            "`return value + 1;` and preserve every other line. Return only "
+            "the SEARCH/REPLACE edit required by the system prompt.\n"
+            f"```cpp\n{REPAIR_SOURCE}```"
+        )},
+    ]
+
+
+def validate_repair_reply(reply: str) -> None:
+    """Reject a malformed, inapplicable, nonediting or incorrect toy edit."""
+    from ce.patching import PatchFormatError, apply_edits
+
+    patched = apply_edits(REPAIR_SOURCE, reply)
+    compact = lambda text: re.sub(r"\s+", "", text)
+    if compact(patched) == compact(REPAIR_SOURCE):
+        raise PatchFormatError("The edit leaves the toy source unchanged.")
+    if compact(patched) != compact(REPAIR_EXPECTED):
+        raise PatchFormatError("The edit did not make the specified toy change while preserving the other lines.")
+
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--repeat", type=int, default=1,
                         help="send the same prompt N times and report how many "
-                             "distinct replies came back -- the check that "
-                             "--repeat k in the sweep is not buying k copies")
+                             "distinct replies came back (descriptive only)")
+    parser.add_argument("--repair-format", action="store_true",
+                        help="require an applicable v3 SEARCH/REPLACE edit using the runner's system prompt")
     args = parser.parse_args(argv)
+    if args.repeat < 1:
+        parser.error("--repeat must be positive")
 
     url = os.environ.get("LAB_LLM_URL", "https://api.deepseek.com")
     model = os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner")
-    temperature = float(os.environ.get("LAB_LLM_TEMP", "0.8"))
+    try:
+        temperature = float(os.environ.get("LAB_LLM_TEMP", "0.8"))
+        max_tokens = int(os.environ.get("LAB_LLM_MAX_TOKENS", "8192"))
+    except ValueError:
+        parser.error("LAB_LLM_TEMP must be numeric and LAB_LLM_MAX_TOKENS must be a positive integer")
+    if max_tokens < 1:
+        parser.error("LAB_LLM_MAX_TOKENS must be positive")
     token = os.environ.get("LAB_LLM_TOKEN")
 
     print(f"LAB_LLM_URL   {url}")
     print(f"LAB_LLM_MODEL {model}")
     print(f"LAB_LLM_TEMP  {temperature}")
+    print(f"LAB_LLM_MAX_TOKENS {max_tokens}")
     print(f"LAB_LLM_TOKEN {'set' if token else 'NOT SET'}")
 
     if not token:
@@ -70,57 +112,69 @@ def main(argv=None) -> int:
     client = OpenAI(api_key=token, base_url=url)
 
     try:
-        served = [m.id for m in client.models.list().data]
+        served = [m.id for m in client.models.list(timeout=30).data]
     except Exception as e:  # noqa: BLE001 - any failure here is the answer
         print(f"\ncannot list models at {url}: {type(e).__name__}: {e}",
               file=sys.stderr)
         return 1
     print(f"\nserved models: {', '.join(served) or '<none>'}")
     if model not in served:
-        print(f"WARNING: LAB_LLM_MODEL={model!r} is not in that list. vLLM "
+        print(f"ERROR: LAB_LLM_MODEL={model!r} is not in that list. vLLM "
               f"serves the name given by --served-model-name, or the full "
               f"HuggingFace repo id if that flag was omitted.", file=sys.stderr)
+        return 1
 
     replies = []
-    for i in range(max(1, args.repeat)):
+    messages = repair_messages() if args.repair_format else [{"role": "user", "content": PROMPT}]
+    for i in range(args.repeat):
         started = time.time()
         try:
             response = client.chat.completions.create(
                 model=model,
-                messages=[{"role": "user", "content": PROMPT}],
+                messages=messages,
                 temperature=temperature,
+                max_tokens=max_tokens,
                 timeout=300,
             )
+            choice = response.choices[0]
+            text = (choice.message.content or "").strip()
+            finish_reason = getattr(choice, "finish_reason", None)
         except Exception as e:  # noqa: BLE001
             print(f"\nrequest {i + 1} failed: {type(e).__name__}: {e}",
                   file=sys.stderr)
             return 1
-        text = (response.choices[0].message.content or "").strip()
         usage = getattr(response, "usage", None)
         replies.append(text)
         print(f"\nrequest {i + 1}: {time.time() - started:.1f}s, "
               f"{getattr(usage, 'prompt_tokens', '?')} prompt / "
               f"{getattr(usage, 'completion_tokens', '?')} completion tokens")
         print("  " + (text[:200].replace("\n", "\n  ") or "<empty reply>"))
-
-    if not any(replies):
-        print("\nthe model returned only empty replies -- a reasoning model "
-              "whose output lands in a channel this client does not read will "
-              "do this. The sweep would record every run as unfixed.",
-              file=sys.stderr)
-        return 1
+        if finish_reason == "length":
+            print("\nFAIL: reply hit the output limit; a partial edit is not safe to apply.", file=sys.stderr)
+            return 1
+        if not text:
+            print("\nFAIL: empty reply. Check the model's output channel and serving configuration.", file=sys.stderr)
+            return 1
+        if args.repair_format:
+            try:
+                validate_repair_reply(text)
+            except ValueError as error:
+                print(f"\nFAIL: v3 repair-format preflight: {error}", file=sys.stderr)
+                return 1
 
     if args.repeat > 1:
         distinct = len(set(replies))
         print(f"\n{distinct} distinct reply/replies out of {args.repeat}")
         if distinct == 1:
-            print("WARNING: identical replies. docs/ANALYSIS_PLAN.md sets k = 3, "
-                  "and repeats at temperature 0 are three copies of one answer -- "
-                  "triple the rebuilds for no extra information. Set "
-                  "LAB_LLM_TEMP above 0 (0.8 is the preregistered value).",
-                  file=sys.stderr)
+            print("Identical answers to this tightly specified toy task are expected; "
+                  "they do not establish that sampling is broken.")
+    if args.repeat > 1 and temperature == 0:
+        print("WARNING: temperature is 0. The study specifies 0.8 for repeated sampling; "
+              "the toy response count does not measure sampling quality.", file=sys.stderr)
 
-    print("\nendpoint OK. Next: the nine-run pilot in docs/SLM_SELECTION.md section 9.")
+    label = " and v3 repair format" if args.repair_format else ""
+    print(f"\nendpoint{label} OK. This does not validate LLVM repair quality or long prompts. "
+          "Next: the held-out pilot with full build/reproducer/regression validation.")
     return 0
 
 

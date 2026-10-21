@@ -84,6 +84,8 @@ def main() -> int:
         f.write(json.dumps({
             "ok": bool(result),
             "seconds": oracle.seconds,
+            "tool_failures": oracle.tool_failures,
+            "reason": result.reason,
         }) + "\n")
 
     return 0 if result else 1

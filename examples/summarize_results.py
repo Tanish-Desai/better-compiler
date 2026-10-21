@@ -65,6 +65,7 @@ from ce.benchmark import summarize  # noqa: E402
 from ce.analysis import select_complete_runs  # noqa: E402
 from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
 from ce.feedback import CONDITIONS  # noqa: E402
+from ce.protocol import load_protocol  # noqa: E402
 
 COLUMNS = (
     ("condition", 24),
@@ -101,11 +102,25 @@ def main(argv=None) -> int:
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--model", help="select one model from historical mixed results")
+    parser.add_argument("--protocol", help="restrict the paired panel to a frozen amended schedule")
     parser.add_argument("--repeat", type=int, default=3,
                         help="required completed trials per condition (default: 3; pilot: 1)")
     parser.add_argument("--condition", nargs="+", choices=sorted(CONDITIONS),
                         default=list(CONDITIONS), help="expected conditions; default: all nine")
     args = parser.parse_args(argv)
+    protocol = None
+    if args.protocol:
+        try:
+            protocol, protocol_sha = load_protocol(args.protocol)
+        except (OSError, ValueError) as error:
+            parser.error(str(error))
+        supplied = sys.argv[1:] if argv is None else argv
+        for option, attribute, key in (("--repeat", "repeat", "repeat"),
+                                       ("--condition", "condition", "conditions")):
+            if any(token == option or token.startswith(option + "=") for token in supplied):
+                if getattr(args, attribute) != protocol[key]:
+                    parser.error(f"{option} differs from the frozen protocol")
+        args.repeat, args.condition = protocol["repeat"], protocol["conditions"]
     if args.repeat < 1:
         parser.error("--repeat must be positive")
 
@@ -116,6 +131,11 @@ def main(argv=None) -> int:
     if not all_runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2
+    if protocol:
+        if any(run.get("notes", {}).get("experiment_config", {}).get("protocol_sha256") != protocol_sha
+               for run in all_runs):
+            parser.error("Run metadata does not match the supplied frozen protocol")
+        all_runs = [run for run in all_runs if str(run["bug_id"]) in protocol["bugs"]]
 
     # Records left behind by a run the model endpoint killed part-way are not
     # results: `fixed: false` there means "vLLM died", not "the model could not

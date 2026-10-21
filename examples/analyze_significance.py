@@ -90,6 +90,7 @@ from ce.benchmark import per_bug_outcomes  # noqa: E402
 from ce.analysis import select_complete_runs  # noqa: E402
 from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
 from ce.feedback import CONDITIONS  # noqa: E402
+from ce.protocol import load_protocol  # noqa: E402
 
 #: The preregistered primary family: ``(better, worse, what it asks)``.
 #: "better" is the direction the hypothesis predicts, which is what makes the
@@ -220,10 +221,12 @@ def print_rows(rows: Sequence[dict], adjusted: Optional[Sequence[float]] = None,
 
 
 def main(argv=None) -> int:
+    supplied = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", default="results")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--model", help="select one model from historical mixed results")
+    parser.add_argument("--protocol", help="frozen amended schedule for sample and equal-budget checks")
     parser.add_argument("--repeat", type=int, default=3,
                         help="required completed trials per condition (default: 3)")
     parser.add_argument("--condition", nargs="+", choices=sorted(CONDITIONS),
@@ -238,6 +241,20 @@ def main(argv=None) -> int:
     parser.add_argument("--ablation", action="store_true",
                         help="test promotion-on against promotion-off, per iraware condition")
     args = parser.parse_args(argv)
+    protocol = None
+    if args.protocol:
+        try:
+            protocol, protocol_sha = load_protocol(args.protocol)
+        except (OSError, ValueError) as error:
+            parser.error(str(error))
+        if args.ablation or any(value == "--sample" or value.startswith("--sample=") for value in supplied):
+            parser.error("--protocol supplies the main sample and does not describe an ablation")
+        for option, attribute, expected in (("--repeat", "repeat", protocol["repeat"]),
+                                             ("--condition", "condition", protocol["conditions"])):
+            if any(value == option or value.startswith(option + "=") for value in supplied):
+                if getattr(args, attribute) != expected:
+                    parser.error(f"{option} differs from the frozen protocol")
+            setattr(args, attribute, expected)
     if args.repeat < 1:
         parser.error("--repeat must be positive")
 
@@ -248,6 +265,20 @@ def main(argv=None) -> int:
     if not runs:
         print(f"no run records in {args.directory}", file=sys.stderr)
         return 2
+
+    if protocol:
+        for run in runs:
+            config = run.get("notes", {}).get("experiment_config", {})
+            expected = {"protocol_sha256": protocol_sha, "protocol_id": protocol["id"],
+                        "harness_version": protocol["harness_version"], "model": protocol["model"],
+                        "max_iterations": protocol["max_iterations"],
+                        "oracle_budget": protocol["oracle_budget"],
+                        "oracle_strictness": protocol["oracle_strictness"],
+                        "temperature": protocol["temperature"],
+                        "max_completion_tokens": protocol["max_completion_tokens"]}
+            if any(config.get(key) != value for key, value in expected.items()):
+                parser.error("Run metadata does not match the supplied frozen protocol")
+        runs = [run for run in runs if str(run["bug_id"]) in protocol["bugs"]]
 
     if args.ablation:
         # The ablation question is not "which condition wins" but "does turning
@@ -284,13 +315,13 @@ def main(argv=None) -> int:
 
     if args.final:
         from examples.repair_experiment import sample_bug_ids
-        planned = set(sample_bug_ids(args.sample))
+        planned = set(protocol["bugs"] if protocol else sample_bug_ids(args.sample))
         missing = planned - set(coverage["complete_bugs"])
         if missing:
             parser.error("Final analysis is incomplete; missing matched bugs: " + ", ".join(sorted(missing)))
-        if args.repeat != 3:
+        if args.repeat != (protocol["repeat"] if protocol else 3):
             parser.error("The registered final analysis requires --repeat 3")
-        if not args.ablation and set(args.condition) != set(CONDITIONS):
+        if not protocol and not args.ablation and set(args.condition) != set(CONDITIONS):
             parser.error("The registered final main analysis requires all nine conditions")
         # Final rates concern the planned sample, not extra diagnostic bugs.
         outcomes = {condition: {bug: fixed for bug, fixed in values.items() if bug in planned}
@@ -336,6 +367,7 @@ def main(argv=None) -> int:
             "analysis_status": "final" if args.final else "interim_descriptive",
             "coverage": coverage,
             "registered_family_size": len(family),
+            "protocol_id": protocol["id"] if protocol else None,
             "primary": primary,
             "exploratory": exploratory,
         }, indent=2))

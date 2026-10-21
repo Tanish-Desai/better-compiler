@@ -72,9 +72,10 @@ never checks which strategy it is running.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import time
 from typing import Dict, List, Optional, Sequence
 
-from .alive import AliveRun, FunctionResult, parse_alive_output, run_alive_tv
+from .alive import AliveRun, FunctionResult, parse_alive_output, parse_extra_args, run_alive_tv
 from .irmodel import measure_pair
 from .oracle import Oracle, Violation
 from .reduce_generic import reduce_generic
@@ -189,7 +190,7 @@ def build_feedback(
     tgt: str,
     condition: str = "iraware-structured",
     *,
-    extra_args: Sequence[str] = (),
+    extra_args: Sequence[str] | str | None = (),
     alive_tv: Optional[str] = None,
     bug_type: str = "miscompilation",
     timeout: float = 120.0,
@@ -206,6 +207,11 @@ def build_feedback(
     a live ``alive-tv`` because reduction is oracle-gated by definition.
     """
     cond = resolve_condition(condition, legacy=legacy_letters)
+    extra_args = tuple(parse_extra_args(extra_args) if isinstance(extra_args, str)
+                       else extra_args or ())
+    context_metrics = {"verifier_args": list(extra_args),
+                       "feedback_refresh_calls": 0, "feedback_refresh_seconds": 0.0,
+                       "feedback_refresh_tool_failures": 0}
 
     run: AliveRun = (
         parse_alive_output(alive_output)
@@ -213,14 +219,15 @@ def build_feedback(
         else run_alive_tv(src, tgt, extra_args, alive_tv=alive_tv, timeout=timeout)
     )
     if run.tool_error:
-        return Feedback(run.raw or run.tool_error, cond.name, error=run.tool_error)
+        return Feedback(run.raw or run.tool_error, cond.name,
+                        metrics=context_metrics, error=run.tool_error)
 
     violation = run.first_violation()
     if violation is None:
         return Feedback(
             "alive2 reports the transformation is correct.",
             cond.name,
-            metrics={"verified": True},
+            metrics={"verified": True, **context_metrics},
         )
 
     if not cond.counterexample:
@@ -228,7 +235,7 @@ def build_feedback(
             _NO_CE_TEXT,
             cond.name,
             violation=violation,
-            metrics=_metrics(_NO_CE_TEXT, src, tgt),
+            metrics={**_metrics(_NO_CE_TEXT, src, tgt), **context_metrics},
         )
 
     red_src, red_tgt, reduction = _apply_reduction(
@@ -242,17 +249,52 @@ def build_feedback(
     # is actually shown, not the original. Without this the structured view
     # would cite values the reduced IR no longer defines.
     shown = violation
+    fallback_reason = reduction.error if reduction is not None else None
     if (red_src, red_tgt) != (src, tgt):
+        refresh_started = time.perf_counter()
         rerun = run_alive_tv(red_src, red_tgt, extra_args, alive_tv=alive_tv, timeout=timeout)
-        refreshed = rerun.violation_for(violation.name) or rerun.first_violation()
+        # Refresh is a physical verifier call outside the candidate-search
+        # budget. Keep it separate so methods that actually shrink are not
+        # credited with a free re-verification in cost comparisons.
+        context_metrics.update({
+            "feedback_refresh_calls": 1,
+            "feedback_refresh_seconds": round(time.perf_counter() - refresh_started, 6),
+            "feedback_refresh_tool_failures": int(bool(rerun.tool_error)),
+        })
+        # Apply exactly the reducer's matching policy to this refreshed report.
+        # Selecting an arbitrary remaining violation could change the function,
+        # error class or outcome kind after the oracle had checked the candidate.
+        matcher = Oracle(target=Violation.from_result(violation),
+                         strictness=oracle_strictness)
+        refreshed = None
+        if not rerun.tool_error and not (rerun.num_errors and not rerun.num_incorrect):
+            refreshed = matcher._match(rerun)
         if refreshed is not None:
             shown = refreshed
         else:
             # The reduced pair no longer reproduces; fall back rather than
             # emit feedback that does not match its own IR.
             red_src, red_tgt, shown = src, tgt, violation
-            if reduction is not None:
-                reduction.error = "reduced pair failed re-verification; reverted"
+            fallback_reason = "reduced pair failed re-verification; reverted"
+
+    if fallback_reason and reduction is not None:
+        # Keep attempted work inspectable, while all ordinary size/ratio fields
+        # describe the pair the model actually sees. Costs remain incurred even
+        # when the candidate is discarded.
+        context_metrics.update({
+            "attempted_passes_applied": list(reduction.passes_applied),
+            "attempted_size_after": dict(reduction.size_after),
+        })
+        reduction = make_reduction(
+            reduction.strategy, src, tgt, src, tgt,
+            oracle_stats=dict(reduction.oracle_stats),
+            seconds=reduction.seconds, error=fallback_reason,
+        )
+        red_src, red_tgt, shown = src, tgt, violation
+    context_metrics.update({
+        "reduction_fallback": bool(fallback_reason),
+        "displayed_pair_changed": (red_src, red_tgt) != (src, tgt),
+    })
 
     text = (
         render_structured(shown, red_src, red_tgt, bug_type=bug_type)
@@ -264,7 +306,8 @@ def build_feedback(
         condition=cond.name,
         violation=shown,
         reduction=reduction,
-        metrics=_metrics(text, red_src, red_tgt, original=(src, tgt)),
+        metrics={**_metrics(text, red_src, red_tgt, original=(src, tgt)),
+                 **context_metrics},
     )
 
 
@@ -326,10 +369,14 @@ def build_feedback_from_check(
     This is the single integration point with the benchmark: wherever the
     repair loop currently pastes ``log`` into the prompt, it calls this instead.
     """
+    # Both direct alive2_check callers and the outer benchmark test adapter
+    # carry this metadata. Explicit caller settings, including (), take priority.
+    if "extra_args" not in kwargs and "additional_args" in check_log:
+        kwargs["extra_args"] = check_log["additional_args"]
+    kwargs.setdefault("alive_output", check_log.get("log"))
     return build_feedback(
         check_log["src"],
         check_log["tgt"],
         condition,
-        alive_output=check_log.get("log"),
         **kwargs,
     )

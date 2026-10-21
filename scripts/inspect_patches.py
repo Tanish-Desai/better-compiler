@@ -56,6 +56,7 @@ sys.path.insert(0, os.path.join(_HERE, os.pardir))
 sys.path.insert(0, os.path.join(_HERE, os.pardir, "examples"))
 
 from ce.experiment import ExperimentMismatch, load_experiment_runs  # noqa: E402
+from ce.patching import PatchFormatError, apply_edits  # noqa: E402
 
 try:  # keep one definition of "which part of the reply is code"
     from repair_experiment import extract_code  # noqa: E402
@@ -100,6 +101,22 @@ def similarity(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, a, b).ratio()
 
 
+def proposed_source(run: dict, hunk: str, index: int, reply: str) -> Tuple[Optional[str], Optional[str]]:
+    """Reconstruct the edited excerpt; never diff protocol text as if it were C++."""
+    iterations = run.get("iterations") or []
+    status = iterations[index].get("patch") if index < len(iterations) else None
+    if status in {"invalid_format", "truncated", "mismatch"}:
+        return None, status
+    if status == "unchanged":
+        return hunk, None
+    config = (run.get("notes") or {}).get("experiment_config") or {}
+    explicit_edits = config.get("patch_format") == "search-replace-v1" or "<<<<<<< SEARCH" in reply
+    try:
+        return (apply_edits(hunk, reply) if explicit_edits else extract_code(reply)), None
+    except PatchFormatError:
+        return None, "invalid_format"
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", default="results")
@@ -125,9 +142,11 @@ def main(argv=None) -> int:
     #: (bug, condition, trial) -> the original hunk, for --show
     hunks: Dict[str, str] = {}
     raw_first: Dict[Tuple[str, int, str], str] = {}
+    first_errors: Dict[Tuple[str, int, str], str] = {}
 
     unchanged = same_as_previous = no_fence = turns = missing = 0
     edit_sizes: List[int] = []
+    unapplied: collections.Counter = collections.Counter()
     #: normalised original hunk per bug, so a reply can be tested for "no edit"
     bases: Dict[str, str] = {}
     #: per condition: (turns, turns that returned the hunk unchanged)
@@ -151,7 +170,14 @@ def main(argv=None) -> int:
             by_condition[cond][0] += 1
             if "```" not in reply:
                 no_fence += 1
-            code = normalise(extract_code(reply))
+            source, error = proposed_source(run, hunk, index, reply)
+            if error:
+                unapplied[error] += 1
+                previous = None
+                if index == 0:
+                    first_errors[(bug, trial, cond)] = error
+                continue
+            code = normalise(source)
             if code == base:
                 unchanged += 1
                 by_condition[cond][1] += 1
@@ -165,7 +191,7 @@ def main(argv=None) -> int:
             ))
             if index == 0:
                 first[(bug, trial, cond)] = code
-                raw_first[(bug, trial, cond)] = extract_code(reply)
+                raw_first[(bug, trial, cond)] = source
 
     # --- the measurement that decides the study ---------------------------
     #
@@ -207,6 +233,10 @@ def main(argv=None) -> int:
         "returned_the_hunk_unchanged": unchanged,
         "identical_to_previous_turn": same_as_previous,
         "replies_without_a_code_fence": no_fence,
+        "replies_unapplied": sum(unapplied.values()),
+        "replies_with_invalid_patch_format": unapplied["invalid_format"],
+        "replies_truncated": unapplied["truncated"],
+        "replies_with_unmatched_source": unapplied["mismatch"],
         "median_lines_changed": statistics.median(edit_sizes) if edit_sizes else 0,
         "similarity_across_conditions": mean(across_conditions),
         "similarity_across_trials": mean(across_trials),
@@ -228,6 +258,9 @@ def main(argv=None) -> int:
         ("returned the hunk unchanged", unchanged),
         ("identical to the previous turn", same_as_previous),
         ("no code fence in the reply", no_fence),
+        ("unapplied: invalid patch format", unapplied["invalid_format"]),
+        ("unapplied: output limit", unapplied["truncated"]),
+        ("unapplied: unmatched source", unapplied["mismatch"]),
     ]
     width = max(len(name) for name, _ in rows)
     for name, count in rows:
@@ -235,6 +268,8 @@ def main(argv=None) -> int:
         print(f"  {name.ljust(width)}  {count:>4}  {share:5.1f}%")
     print(f"  {'median lines changed vs the hunk'.ljust(width)}  "
           f"{report['median_lines_changed']:>4}")
+    print("  v3 edit blocks do not require code fences. Unapplied replies are excluded "
+          "from edit sizes and similarities.")
 
     # Whether the model edits at all is itself a per-condition outcome. If the
     # richer feedback provokes an edit more often, the feedback is landing --
@@ -242,7 +277,7 @@ def main(argv=None) -> int:
     # chosen. That signal survives even when the similarity metric below has
     # gone degenerate.
     if by_condition:
-        print("\nHow often each condition provoked no edit at all")
+        print("\nUnchanged source replies by condition (unapplied replies counted separately)")
         width = max(len(c) for c in by_condition)
         rates = {}
         for cond in sorted(by_condition):
@@ -279,11 +314,9 @@ def main(argv=None) -> int:
               "first, then re-run this to find out whether the conditions "
               "differ.")
     elif not across_trials:
-        print("\n  -> No sampling-noise floor to compare against: every "
-              "condition here was run once, so there is no pair of trials of "
-              "an identical prompt. The across-conditions number alone means "
-              "nothing -- two samples of the same prompt differ too. Re-run "
-              "with --repeat 3 before reading it.")
+        print("\n  -> No usable pair of first-turn edits across trials is available. "
+              "Trials may be missing, unchanged or unapplied. The across-condition "
+              "similarity alone cannot isolate feedback from sampling variation.")
     elif (len(across_conditions) < 30 or len(across_trials) < 10
           or report["bugs_with_condition_pairs"] < 5 or report["bugs_with_trial_pairs"] < 5):
         print("\n  -> Too few genuine edits to compare; treat the similarity "
@@ -311,7 +344,12 @@ def main(argv=None) -> int:
         print("=" * 72)
         cells = {c: code for (b, t, c), code in raw_first.items()
                  if b == bug and t == 1}
-        for cond in sorted(cells):
+        errors = {c: error for (b, t, c), error in first_errors.items()
+                  if b == bug and t == 1}
+        for cond in sorted(set(cells) | set(errors)):
+            if cond in errors:
+                print(f"\n--- {cond}: no applicable source edit ({errors[cond]})")
+                continue
             diff = list(difflib.unified_diff(
                 hunk.splitlines(), cells[cond].splitlines(),
                 fromfile="original", tofile=cond, n=args.context, lineterm=""))
