@@ -362,3 +362,45 @@ v2 development evidence. It remains an amended follow-up to the original
 preregistration and must be described as such. A better result is not
 guaranteed. Validate on the excluded development pilot before starting it;
 see [H100_V3.md](H100_V3.md).
+
+### 2026-11-01: four-arm shared-H100 follow-up before any v3 runs
+
+The operator explicitly confirmed that neither a v3 pilot nor the October
+288-cell evaluation had started. The replacement container reports Ubuntu
+24.04, driver 580.178.04, and an H100 PCIe with 81,559 MiB total and 21,796 MiB
+free at inspection. The October protocol is preserved as history. For new
+data, `data/repair_v3_shared_h100_protocol.json` supersedes its schedule:
+
+- Keep exactly the same 16 remaining preselected bugs, three trials and four
+  turns. Keep the `115149` prior diagnostic-exposure disclosure.
+- Use four arms: raw plain, raw structured, LLVM-reduce structured, IR-aware
+  structured. This is **192 cells**, at most 768 model replies. Raw structured
+  was the strongest descriptive v2 control and must not be excluded.
+- Freeze three directed primary contrasts: IR-aware structured versus raw
+  structured; IR-aware structured versus LLVM-reduce structured; raw
+  structured versus raw plain. Correct all three together with BH. This is
+  an explicitly revised hypothesis family, not the original four comparisons.
+- Rotate condition order by `(bug_index + trial - 1) mod 4`, without outcomes.
+  Across 16 bugs each condition occupies each position 12 times in 48 rows.
+- Use the pinned official FP8 checkpoint and 20 GiB CPU weight offload in the
+  manifest, targeting at most 17 GiB of GPU allocation with 4 GiB free headroom.
+  This is an estimated fit. Require endpoint/context probes, a human-patch
+  check and a four-cell excluded pilot before evaluation. Freeze the generated
+  serving receipt; do not increase GPU allocation or change offload amounts
+  mid-experiment when more VRAM happens to become free.
+- All arms retain 400 budgeted oracle calls, error-class matching, temperature
+  0.8, and an 8,192-token completion allowance. Hardware, packages, binary and
+  source identity are archived. On shared hardware use wall time descriptively;
+  oracle calls, build attempts and tokens are more reproducible cost measures.
+
+No generic-ddmin, no-counterexample or repair-rate promotion-ablation claim
+is supported by this schedule. A separate CPU-only reducer diagnostic uses
+the eight frozen v2 development witnesses; it reports preservation, sizes,
+fallback and physical verifier costs, including an operand-promotion ablation.
+It provides no new independent repair sample and does not establish that an
+error-class-preserving witness retains the original semantic root cause.
+
+This remains a small amended follow-up. Do not promise a positive result,
+statistical significance or Q1 acceptance. All failures, unchanged feedback,
+infrastructure errors and plausible-but-unreviewed patches remain visible.
+See [NEW_CONTAINER_SHARED_H100.md](NEW_CONTAINER_SHARED_H100.md) for execution.

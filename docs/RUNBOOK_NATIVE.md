@@ -1,5 +1,10 @@
 # Runbook: running the sweep without Docker
 
+**Latest, 2026-11-01:** start at
+[NEW_CONTAINER_SHARED_H100.md](NEW_CONTAINER_SHARED_H100.md) for the fresh
+Ubuntu24.04 container and current 192-cell protocol. Setup sources, memory
+limits, CPU offload and tmux commands there replace the old execution steps.
+
 **Current follow-up, 2026-10-22:** use [H100_V3.md](H100_V3.md) for the
 validated v3 pilot and frozen 288-cell protocol. Pause v2 at a completed-cell
 boundary and preserve its records. The nine-condition sweep instructions

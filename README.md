@@ -142,10 +142,12 @@ through unchanged, so a loop can route all its feedback through it.
 
 ## Running the experiment
 
-**Current H100 procedure (2026-10-22):** follow
-[docs/H100_V3.md](docs/H100_V3.md). The v2 snapshot exposed harness faults;
-its descriptive outcomes are in `our_paper/`, and its records remain intact.
-Validate the revised pilot before launching the frozen 288-cell follow-up.
+**Current shared-H100 procedure (2026-11-01):** follow
+[docs/NEW_CONTAINER_SHARED_H100.md](docs/NEW_CONTAINER_SHARED_H100.md).
+It covers fresh Ubuntu24.04 setup, a pinned model with CPU weight offload,
+the four-cell pilot and a frozen **192-cell** comparison. The October
+288-cell plan was superseded before v3 data collection. Historical v2 records
+and their descriptive paper tables remain intact.
 
 Needs `opt` built for each bug's `base_commit` and a model endpoint. The
 runner is an OpenAI-compatible client, so a local vLLM server is a drop-in.
@@ -153,20 +155,20 @@ See [`docs/SLM_SELECTION.md`](docs/SLM_SELECTION.md) for which model and how
 to serve it.
 
 ```bash
-export LAB_LLM_URL=http://<h100-host>:8000/v1   # LAB_LLVM_* are set in the image
-export LAB_LLM_TOKEN=... LAB_LLM_MODEL=qwen3-coder-30b LAB_LLM_TEMP=0.8
-export LAB_LLM_MAX_TOKENS=8192
+# After setup/configuration in NEW_CONTAINER_SHARED_H100.md:
+source run-provenance/shared-h100/env.sh
+export BUILD_JOBS="$(python3 -c 'from scripts.resource_plan import collect; print(collect()["recommended_build_jobs"])')"
 
 python3 scripts/check_llm_endpoint.py --repair-format
 
-python3 examples/repair_experiment.py --protocol data/repair_v3_protocol.json \
-    --out results-qwen3-v3 --plan
-# After the known-patch check and pilot in H100_V3.md pass, omit --plan.
+python3 examples/repair_experiment.py --protocol data/repair_v3_shared_h100_protocol.json \
+    --build-jobs "$BUILD_JOBS" --out results-qwen3-v3-shared --plan
+# After the known-patch check and four-cell pilot pass, omit --plan.
 
-python3 examples/summarize_results.py results-qwen3-v3 \
-    --protocol data/repair_v3_protocol.json
-python3 examples/analyze_significance.py results-qwen3-v3 \
-    --protocol data/repair_v3_protocol.json --final
+python3 examples/summarize_results.py results-qwen3-v3-shared \
+    --protocol data/repair_v3_shared_h100_protocol.json
+python3 examples/analyze_significance.py results-qwen3-v3-shared \
+    --protocol data/repair_v3_shared_h100_protocol.json --final
 ```
 
 Passing every condition to one invocation runs the sweep **bug-major**: all

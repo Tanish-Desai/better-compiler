@@ -26,7 +26,8 @@ def endpoint(monkeypatch):
     calls = []
     model_calls = []
 
-    def install(replies, *, served="test-model"):
+    def install(replies, *, served="test-model", prompt_tokens=100,
+                completion_tokens=30, report_usage=True):
         iterator = iter(replies)
 
         def create(**kwargs):
@@ -34,7 +35,8 @@ def endpoint(monkeypatch):
             text, reason = next(iterator)
             return SimpleNamespace(
                 choices=[SimpleNamespace(message=SimpleNamespace(content=text), finish_reason=reason)],
-                usage=SimpleNamespace(prompt_tokens=100, completion_tokens=30),
+                usage=SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
+                      if report_usage else None,
             )
 
         def models(**kwargs):
@@ -65,6 +67,50 @@ def test_explicit_output_budget_matches_runner_environment(endpoint, monkeypatch
     monkeypatch.setenv("LAB_LLM_MAX_TOKENS", "4096")
     assert preflight.main(["--repair-format"]) == 0
     assert calls[0]["max_tokens"] == 4096
+
+
+def test_context_probe_sends_long_deterministic_source_and_reports_actual_usage(endpoint, monkeypatch, capsys):
+    calls, _ = endpoint([(VALID_EDIT, "stop")], prompt_tokens=12345, completion_tokens=30)
+    clock = iter([100.0, 102.0])
+    monkeypatch.setattr(preflight.time, "perf_counter", lambda: next(clock))
+    assert preflight.main(["--context-probe"]) == 0  # Implies --repair-format.
+    messages = calls[0]["messages"]
+    assert messages == preflight.repair_messages(context_probe=True)
+    assert messages[0]["content"] == SYSTEM_PROMPT
+    assert 45000 < len(preflight.CONTEXT_PADDING) < 55000
+    assert preflight.CONTEXT_PADDING + preflight.REPAIR_SOURCE in messages[1]["content"]
+    assert len(preflight.CONTEXT_PADDING.splitlines()) == 650
+    assert all(line.startswith(f"// Context {index:04d}:")
+               for index, line in enumerate(preflight.CONTEXT_PADDING.splitlines()))
+    assert calls[0]["max_tokens"] == 8192
+    output = capsys.readouterr().out
+    assert "2.00s wall, 12345 prompt / 30 completion tokens" in output
+    assert "15.00 completion tokens/s over request wall time" in output
+    assert "includes prompt prefill, queueing and network time" in output
+    assert "does not establish the full 32K window, multi-turn capacity" in output
+
+
+@pytest.mark.parametrize("reply,reason", [(VALID_EDIT, "length"), ("", "stop"),
+                                         (UNCHANGED_EDIT, "stop"), ("malformed", "stop")])
+def test_context_probe_retains_output_and_patch_validation_guards(endpoint, reply, reason):
+    endpoint([(reply, reason)])
+    assert preflight.main(["--context-probe"]) == 1
+
+
+def test_context_probe_rejects_edit_to_padding_even_when_toy_edit_is_correct(endpoint, capsys):
+    comment = preflight.CONTEXT_PADDING.splitlines()[0]
+    comment_edit = f"<<<<<<< SEARCH\n{comment}\n=======\n// Changed padding.\n>>>>>>> REPLACE"
+    endpoint([(VALID_EDIT + "\n" + comment_edit, "stop")])
+    assert preflight.main(["--context-probe"]) == 1
+    assert "preserving the other lines" in capsys.readouterr().err
+
+
+def test_context_probe_does_not_invent_token_usage_when_server_omits_it(endpoint, capsys):
+    endpoint([(VALID_EDIT, "stop")], report_usage=False)
+    assert preflight.main(["--context-probe"]) == 0
+    output = capsys.readouterr().out
+    assert "? prompt / ? completion tokens" in output
+    assert "wall token rate unavailable" in output
 
 
 @pytest.mark.parametrize("value", ["0", "-1", "not-an-integer"])

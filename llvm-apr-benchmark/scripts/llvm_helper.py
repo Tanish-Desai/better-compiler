@@ -111,6 +111,12 @@ def decode_output(output):
 
 
 def build(max_build_jobs: int, additional_cmake_args=[]):
+    try:
+        link_jobs = int(os.environ.get("LAB_LLVM_PARALLEL_LINK_JOBS", "4"))
+    except ValueError as error:
+        raise ValueError("LAB_LLVM_PARALLEL_LINK_JOBS must be a positive integer") from error
+    if link_jobs < 1:
+        raise ValueError("LAB_LLVM_PARALLEL_LINK_JOBS must be a positive integer")
     os.makedirs(llvm_build_dir, exist_ok=True)
     log = ""
     try:
@@ -130,7 +136,7 @@ def build(max_build_jobs: int, additional_cmake_args=[]):
                 "-DLLVM_ENABLE_WARNINGS=OFF",
                 "-DLLVM_APPEND_VC_REV=OFF",
                 "-DLLVM_TARGETS_TO_BUILD='X86;RISCV;AArch64;SystemZ;Hexagon;PowerPC;NVPTX;'",
-                "-DLLVM_PARALLEL_LINK_JOBS=4",
+                f"-DLLVM_PARALLEL_LINK_JOBS={link_jobs}",
                 "-DLLVM_INCLUDE_EXAMPLES=OFF",
                 "-DLLVM_ENABLE_ZSTD=OFF",
             ]

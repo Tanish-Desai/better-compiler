@@ -124,3 +124,13 @@ older quantitative literature claim.
 | McNemar + BH + odds ratios in a code study | SLM-as-a-judge | Sec. on statistics |
 | Fine-tuned Java repair models lose >50% under some transformations | HEJ-Robust | Abstract |
 | pass@k over k samples | ReduceFix | Sec. 4.3 |
+
+## 2026-11-01 prospective amendment
+
+`data/repair_v3_shared_h100_protocol.json` freezes the four-arm/192-cell
+follow-up before any v3 runs (operator confirmed). The three primary
+comparisons are defined in that manifest and condition ordering is balanced
+by bug index and trial. `scripts/compare_saved_witnesses.py` is a corrected-
+pipeline diagnostic on the eight saved initial development witnesses, with
+fresh oracle checks and explicit costs; no measurements from it are claimed
+yet. Model and hardware startup estimates are not empirical repair results.

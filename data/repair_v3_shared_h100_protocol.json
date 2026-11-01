@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "id": "repair-v3-shared-h100-four-2026-11-01",
+  "written": "2026-11-01",
+  "status": "prospective amendment; operator confirmed no v3 runs on 2026-11-01",
+  "harness_version": "repair-v3",
+  "model": "qwen3-coder-30b-fp8-offload",
+  "model_repository": "Qwen/Qwen3-Coder-30B-A3B-Instruct-FP8",
+  "model_revision": "dcaee4d4dfc5ee71ad501f01f530e5652438fde0",
+  "require_pinned_model": true,
+  "require_semantic_baseline": true,
+  "serving_profile": {
+    "vllm": "0.28.0",
+    "precision": "official prequantized FP8; BF16 activation/KV dtype",
+    "cpu_offload_gb": 20,
+    "max_model_len": 32768,
+    "max_num_seqs": 1,
+    "max_num_batched_tokens": 2048,
+    "enforce_eager": true,
+    "generation_config": "vllm",
+    "gpu_budget": "up to 17 GiB with 4 GiB free headroom; determine before the pilot and retain the exact serving identity on resume"
+  },
+  "bugs": [
+    "115149", "114879", "118467", "91369", "114738", "167627", "91177", "82884",
+    "112350", "173784", "161492", "179613", "180870", "89672", "91957", "114901"
+  ],
+  "excluded_development_bugs": [
+    "89390", "165878", "135182", "126974", "154116", "116249", "143123", "126012", "115575"
+  ],
+  "original_sample_sha256": "4b29f7c855bf8c56e62f723edc7ae7ee215a6bc781aee0f1a66d030318d622aa",
+  "conditions": ["raw-plain", "raw-structured", "llvmreduce-structured", "iraware-structured"],
+  "condition_order": "rotate-by-bug-and-trial-v1",
+  "primary_comparisons": [
+    {
+      "better": "iraware-structured",
+      "worse": "raw-structured",
+      "question": "Does IR-aware witness reduction improve repair over unreduced feedback with the same structured renderer?"
+    },
+    {
+      "better": "iraware-structured",
+      "worse": "llvmreduce-structured",
+      "question": "Does paired witness-aware reduction improve repair over sequential llvm-reduce with the same renderer?"
+    },
+    {
+      "better": "raw-structured",
+      "worse": "raw-plain",
+      "question": "Does structured rendering improve repair when neither witness is reduced?"
+    }
+  ],
+  "repeat": 3,
+  "max_iterations": 4,
+  "oracle_budget": 400,
+  "oracle_strictness": "error_class",
+  "temperature": 0.8,
+  "max_completion_tokens": 8192,
+  "budget_runs": 192,
+  "budget_model_replies_max": 768,
+  "rationale": "Shared GPU capacity and CPU/build cost motivate four arms. Preserve raw-structured, the strongest descriptive v2 control, and llvmreduce-structured to isolate the reducer contribution at fixed presentation. Raw-plain anchors the rendering comparison. This supersedes the unstarted October six-arm plan; it does not complete the original factorial study.",
+  "inference": "Exact paired one-sided McNemar in the three stated directions, Benjamini-Hochberg across all three. Unit is one bug with pass@3. Report paired effect sizes and all counts. No optional stopping or selected extra trials.",
+  "notes": [
+    "This sample is the two remaining preselected size tiers, not a pristine unseen set: 115149 had previous diagnostic exposure.",
+    "Do not pool v2, local FP8 offload, a smaller model or a hosted API as one experiment.",
+    "Pinned weights and startup estimates do not prove fit or repair quality. Require the known-patch check and excluded development pilot before evaluation.",
+    "The shared text renderer is fixed, but its derived fields depend on the displayed IR; this is a comparison of complete feedback pipelines.",
+    "There are no generic-ddmin, no-counterexample or promotion ablation repair-rate claims under this four-arm schedule. Reducer-only development ablations are separate.",
+    "Do not guarantee significance or journal acceptance from a 16-bug follow-up."
+  ]
+}

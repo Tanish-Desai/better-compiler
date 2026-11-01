@@ -1,5 +1,10 @@
 # Runbook: running the sweep on the H100 server
 
+**Latest, 2026-11-01:** use
+[NEW_CONTAINER_SHARED_H100.md](NEW_CONTAINER_SHARED_H100.md) for the fresh
+shared container and 192-cell follow-up. Earlier execution schedules below
+are historical.
+
 **2026-10-22 update:** [H100_V3.md](H100_V3.md) is the current pilot and
 evaluation procedure after the v2 audit. Preserve old results and use a fresh
 v3 directory. The setup below remains useful; its original sweep schedule is

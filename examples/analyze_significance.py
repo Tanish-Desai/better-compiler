@@ -276,6 +276,12 @@ def main(argv=None) -> int:
                         "oracle_strictness": protocol["oracle_strictness"],
                         "temperature": protocol["temperature"],
                         "max_completion_tokens": protocol["max_completion_tokens"]}
+            for key in ("require_semantic_baseline", "condition_order"):
+                if key in protocol:
+                    expected[key] = protocol[key]
+            if protocol.get("require_pinned_model"):
+                expected.update(model_repository=protocol["model_repository"],
+                                model_revision=protocol["model_revision"])
             if any(config.get(key) != value for key, value in expected.items()):
                 parser.error("Run metadata does not match the supplied frozen protocol")
         runs = [run for run in runs if str(run["bug_id"]) in protocol["bugs"]]
@@ -311,7 +317,9 @@ def main(argv=None) -> int:
         matched, coverage = select_complete_runs(
             runs, repeats=args.repeat, conditions=args.condition)
         outcomes = per_bug_outcomes(matched)
-        family = list(PRIMARY)
+        family = ([(pair["better"], pair["worse"], pair["question"])
+                   for pair in protocol["primary_comparisons"]]
+                  if protocol and "primary_comparisons" in protocol else list(PRIMARY))
 
     if args.final:
         from examples.repair_experiment import sample_bug_ids

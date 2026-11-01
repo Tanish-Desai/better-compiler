@@ -117,3 +117,12 @@ files have been finalized. Check citation resolution, generated table labels,
 long code names, algorithm wrapping, table fit, references, page limit, author
 information, and the venue's disclosure and submission requirements. The current
 source uses the authors and affiliations supplied in the original draft.
+
+## 2026-11-01 update
+
+The current manuscript includes the November shared-H100 amendment, before
+any v3 generation: four conditions, 192 planned cells and a separate CPU-only
+diagnostic on eight development witnesses. The October six-arm plan is
+historical. No new repair or reducer measurements are available yet. Follow
+`docs/NEW_CONTAINER_SHARED_H100.md`; retain all patch-quality and coverage
+checks elsewhere in this checklist before interpreting future outcomes.

@@ -1,5 +1,10 @@
 # Running the sweep, day to day
 
+**Latest, 2026-11-01:**
+[NEW_CONTAINER_SHARED_H100.md](NEW_CONTAINER_SHARED_H100.md) is the current
+fresh-container and tmux procedure: four pilot cells, then192 evaluation cells.
+Use its generated serving receipt; don't start the earlier schedules below.
+
 **Current H100 procedure, 2026-10-22:** [H100_V3.md](H100_V3.md) has the
 known-patch check, six-cell pilot and frozen 288-cell follow-up. Pause v2 at a
 completed-cell boundary and preserve its data. Earlier sweep commands below

@@ -9,6 +9,8 @@ results/
 results-qwen3-v2*/
 results-qwen3-v3*/
 results-devstral*/
+witness-comparison*/
+archives/
 validation-checks/
 run-provenance/
 

@@ -3,19 +3,21 @@
 
     python3 scripts/check_llm_endpoint.py
     python3 scripts/check_llm_endpoint.py --repair-format --repeat 3
+    python3 scripts/check_llm_endpoint.py --context-probe
 
 WHY
 ---
-The sweep is 792 runs and each one is an LLVM rebuild
-(``docs/ANALYSIS_PLAN.md`` section 5). ``repair_experiment.py`` is deliberately
+The sweep can require hundreds of LLVM rebuilds. ``repair_experiment.py`` is deliberately
 tolerant -- a provider error ends one run, not the sweep -- so a misconfigured
 endpoint does not stop anything. It just quietly produces nothing, for hours.
 
 This checks the same environment the runner reads, in a few seconds, and
 reports wrong URLs, unavailable models, empty/truncated output and, with
 ``--repair-format``, whether the endpoint can produce an applicable v3 edit.
-The tiny prompt does not validate a real repair or the experiment's full
-context length, and identical toy answers do not diagnose broken sampling.
+``--context-probe`` additionally checks the toy edit with about 50K characters
+of immutable C++ comments in its source excerpt and reports server token usage
+and request wall throughput. Neither probe validates a real repair, full context
+capacity or a multi-turn run; identical toy answers do not diagnose sampling.
 
 It never touches LLVM, the dataset, or ``results/``.
 """
@@ -38,12 +40,17 @@ PROMPT = (
 
 REPAIR_SOURCE = "int adjust(int value) {\n  return value - 1;\n}\n"
 REPAIR_EXPECTED = "int adjust(int value) {\n  return value + 1;\n}\n"
+CONTEXT_PADDING = "".join(
+    f"// Context {index:04d}: Preserve this harmless C++ comment during the endpoint probe.\n"
+    for index in range(650)
+)
 
 
-def repair_messages() -> list[dict]:
+def repair_messages(*, context_probe: bool = False) -> list[dict]:
     """Use the sweep's actual system/format instructions without importing LLVM."""
     from examples.repair_experiment import SYSTEM_PROMPT
 
+    source = (CONTEXT_PADDING if context_probe else "") + REPAIR_SOURCE
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": (
@@ -51,20 +58,23 @@ def repair_messages() -> list[dict]:
             "In this ORIGINAL source excerpt, change `return value - 1;` to "
             "`return value + 1;` and preserve every other line. Return only "
             "the SEARCH/REPLACE edit required by the system prompt.\n"
-            f"```cpp\n{REPAIR_SOURCE}```"
+            f"```cpp\n{source}```"
         )},
     ]
 
 
-def validate_repair_reply(reply: str) -> None:
+def validate_repair_reply(reply: str, *, context_probe: bool = False) -> None:
     """Reject a malformed, inapplicable, nonediting or incorrect toy edit."""
     from ce.patching import PatchFormatError, apply_edits
 
-    patched = apply_edits(REPAIR_SOURCE, reply)
+    padding = CONTEXT_PADDING if context_probe else ""
+    source = padding + REPAIR_SOURCE
+    expected = padding + REPAIR_EXPECTED
+    patched = apply_edits(source, reply)
     compact = lambda text: re.sub(r"\s+", "", text)
-    if compact(patched) == compact(REPAIR_SOURCE):
+    if compact(patched) == compact(source):
         raise PatchFormatError("The edit leaves the toy source unchanged.")
-    if compact(patched) != compact(REPAIR_EXPECTED):
+    if compact(patched) != compact(expected):
         raise PatchFormatError("The edit did not make the specified toy change while preserving the other lines.")
 
 
@@ -75,6 +85,9 @@ def main(argv=None) -> int:
                              "distinct replies came back (descriptive only)")
     parser.add_argument("--repair-format", action="store_true",
                         help="require an applicable v3 SEARCH/REPLACE edit using the runner's system prompt")
+    parser.add_argument("--context-probe", action="store_true",
+                        help="also require the v3 toy edit with about 50K characters of C++ comment context; "
+                             "report token usage and request wall throughput (implies --repair-format)")
     args = parser.parse_args(argv)
     if args.repeat < 1:
         parser.error("--repeat must be positive")
@@ -125,9 +138,15 @@ def main(argv=None) -> int:
         return 1
 
     replies = []
-    messages = repair_messages() if args.repair_format else [{"role": "user", "content": PROMPT}]
+    check_repair_format = args.repair_format or args.context_probe
+    messages = repair_messages(context_probe=args.context_probe) if check_repair_format else [{"role": "user", "content": PROMPT}]
+    if args.context_probe:
+        print(f"\ncontext probe: {len(CONTEXT_PADDING):,} padding characters; "
+              f"{len(CONTEXT_PADDING + REPAIR_SOURCE):,} source-excerpt characters")
+        print("Wall throughput includes prompt prefill, queueing and network time; "
+              "it is not isolated decode speed or a full-context capacity test.")
     for i in range(args.repeat):
-        started = time.time()
+        started = time.perf_counter()
         try:
             response = client.chat.completions.create(
                 model=model,
@@ -143,11 +162,16 @@ def main(argv=None) -> int:
             print(f"\nrequest {i + 1} failed: {type(e).__name__}: {e}",
                   file=sys.stderr)
             return 1
+        elapsed = time.perf_counter() - started
         usage = getattr(response, "usage", None)
+        completion_tokens = getattr(usage, "completion_tokens", None)
+        wall_rate = completion_tokens / elapsed if isinstance(completion_tokens, int) and elapsed > 0 else None
         replies.append(text)
-        print(f"\nrequest {i + 1}: {time.time() - started:.1f}s, "
+        print(f"\nrequest {i + 1}: {elapsed:.2f}s wall, "
               f"{getattr(usage, 'prompt_tokens', '?')} prompt / "
-              f"{getattr(usage, 'completion_tokens', '?')} completion tokens")
+              f"{completion_tokens if completion_tokens is not None else '?'} completion tokens")
+        print(f"  {wall_rate:.2f} completion tokens/s over request wall time" if wall_rate is not None
+              else "  wall token rate unavailable: the server did not report completion-token usage")
         print("  " + (text[:200].replace("\n", "\n  ") or "<empty reply>"))
         if finish_reason == "length":
             print("\nFAIL: reply hit the output limit; a partial edit is not safe to apply.", file=sys.stderr)
@@ -155,9 +179,9 @@ def main(argv=None) -> int:
         if not text:
             print("\nFAIL: empty reply. Check the model's output channel and serving configuration.", file=sys.stderr)
             return 1
-        if args.repair_format:
+        if check_repair_format:
             try:
-                validate_repair_reply(text)
+                validate_repair_reply(text, context_probe=args.context_probe)
             except ValueError as error:
                 print(f"\nFAIL: v3 repair-format preflight: {error}", file=sys.stderr)
                 return 1
@@ -172,8 +196,10 @@ def main(argv=None) -> int:
         print("WARNING: temperature is 0. The study specifies 0.8 for repeated sampling; "
               "the toy response count does not measure sampling quality.", file=sys.stderr)
 
-    label = " and v3 repair format" if args.repair_format else ""
-    print(f"\nendpoint{label} OK. This does not validate LLVM repair quality or long prompts. "
+    label = " and bounded long-input v3 toy probe" if args.context_probe else " and v3 repair format" if check_repair_format else ""
+    limitation = ("This does not establish the full 32K window, multi-turn capacity or LLVM repair quality. "
+                  if args.context_probe else "This does not validate LLVM repair quality or long prompts. ")
+    print(f"\nendpoint{label} OK. {limitation}"
           "Next: the held-out pilot with full build/reproducer/regression validation.")
     return 0
 

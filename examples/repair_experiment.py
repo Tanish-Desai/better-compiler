@@ -80,6 +80,8 @@ from ce.feedback import CONDITIONS, resolve_condition  # noqa: E402
 from ce.experiment import ExperimentMismatch, prepare_output  # noqa: E402
 from ce.patching import PatchFormatError, apply_edits, extract_single_code  # noqa: E402
 from ce.protocol import load_protocol  # noqa: E402
+from ce.alive import parse_alive_output  # noqa: E402
+from ce.benchmark import first_failed_test, is_alive2_log  # noqa: E402
 
 # The benchmark's helpers read LAB_* at import time, so import them only after
 # argument parsing has had a chance to fail fast on a missing environment.
@@ -121,6 +123,23 @@ HARNESS_VERSION = "repair-v3"
 
 class BaselineBuildError(RuntimeError):
     """Infrastructure failure: stop the sweep rather than query the model."""
+
+
+def semantic_baseline(log) -> dict:
+    """Require an actual Alive2 violation before studying witness feedback."""
+    failed = first_failed_test(log)
+    inner = failed.get("log") if failed else log
+    if not is_alive2_log(inner):
+        raise BaselineBuildError("Unpatched failure is not an Alive2 witness; no model reply was requested.")
+    parsed = parse_alive_output(inner["log"])
+    violation = parsed.first_violation()
+    if (parsed.tool_error or parsed.num_errors or parsed.num_failed_to_prove
+            or parsed.num_incorrect < 1 or violation is None):
+        raise BaselineBuildError("Unpatched Alive2 failure is not a clean semantic violation; "
+                                 "no model reply was requested. Inspect the verifier/toolchain.\n"
+                                 + str(inner["log"])[-4000:])
+    return {"semantic_failure_confirmed": True, "function": violation.name,
+            "error_class": violation.error_class}
 
 #: Sent back when the model returns the window verbatim. Passed through
 #: ``normalize_feedback`` unchanged, like any other non-alive2 failure.
@@ -215,6 +234,8 @@ def experiment_config(args) -> dict:
         "model_revision": os.environ.get("LAB_LLM_MODEL_REVISION"),
         "serving_identity": os.environ.get("LAB_LLM_SERVING_ID"),
         "dataset_identity": dataset_identity(args),
+        "condition_order": getattr(args, "condition_order", "fixed"),
+        "require_semantic_baseline": getattr(args, "require_semantic_baseline", False),
     }
 
 
@@ -461,6 +482,7 @@ def repair(bug_id: str, condition: str, args, model: Model,
             "trial": trial,
             "experiment_config": experiment_config(args),
             "build_jobs": args.build_jobs,
+            "parallel_link_jobs": os.environ.get("LAB_LLVM_PARALLEL_LINK_JOBS", "4"),
             "source_commit": subprocess.run(
                 ["git", "rev-parse", "HEAD"], cwd=os.path.join(_HERE, os.pardir),
                 capture_output=True, text=True, timeout=10,
@@ -477,6 +499,9 @@ def repair(bug_id: str, condition: str, args, model: Model,
     if ok:
         print(f"[{bug_id}] skipped: the bug does not reproduce at base_commit")
         return None
+
+    if getattr(args, "require_semantic_baseline", False) and env.get_bug_type() == "miscompilation":
+        run.notes["baseline_validation"] = semantic_baseline(log)
 
     file, hunk = bug_hunk(env)
 
@@ -613,6 +638,16 @@ def sample_bug_ids(path: str) -> List[str]:
     return [str(row["bug_id"]) for tier in data["tiers"].values() for row in tier]
 
 
+def scheduled_conditions(conditions, bug_index: int, trial: int, order: str = "fixed"):
+    """Counterbalance the four-arm schedule without consulting any outcomes."""
+    if order == "fixed":
+        return list(conditions)
+    if order != "rotate-by-bug-and-trial-v1":
+        raise ValueError(f"Unknown condition order: {order}")
+    offset = (bug_index + trial - 1) % len(conditions)
+    return list(conditions[offset:]) + list(conditions[:offset])
+
+
 def main(argv=None) -> int:
     supplied = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -634,6 +669,8 @@ def main(argv=None) -> int:
     parser.add_argument("--strictness", default="error_class",
                         choices=["any_failure", "error_class", "error_class_and_kind"])
     parser.add_argument("--no-promotion", action="store_true")
+    parser.add_argument("--require-semantic-baseline", action="store_true",
+                        help="stop before model calls if unpatched failure is a tool error rather than an Alive2 violation")
     parser.add_argument("--build-jobs", type=int, default=os.cpu_count())
     parser.add_argument("--overwrite", action="store_true",
                         help="redo cells that already have a record")
@@ -655,10 +692,13 @@ def main(argv=None) -> int:
         expected_env = {"LAB_LLM_MODEL": protocol["model"],
                         "LAB_LLM_TEMP": protocol["temperature"],
                         "LAB_LLM_MAX_TOKENS": protocol["max_completion_tokens"]}
+        if protocol.get("require_pinned_model"):
+            expected_env.update(LAB_LLM_MODEL_REPOSITORY=protocol["model_repository"],
+                                LAB_LLM_MODEL_REVISION=protocol["model_revision"])
         defaults = {"LAB_LLM_MODEL": "deepseek-reasoner", "LAB_LLM_TEMP": "0.8",
                     "LAB_LLM_MAX_TOKENS": "8192"}
         for key, expected in expected_env.items():
-            actual = os.environ.get(key, defaults[key])
+            actual = os.environ.get(key, defaults.get(key))
             if str(actual) != str(expected):
                 parser.error(f"{key}={actual!r} differs from protocol value {expected!r}")
         fields = (("--condition", "condition", "conditions"), ("--repeat", "repeat", "repeat"),
@@ -671,6 +711,10 @@ def main(argv=None) -> int:
                     parser.error(f"{option} differs from the frozen protocol")
             setattr(args, attribute, protocol[key])
         args.protocol_id, args.protocol_sha256 = protocol["id"], protocol_sha
+        args.condition_order = protocol.get("condition_order", "fixed")
+        if args.require_semantic_baseline and not protocol.get("require_semantic_baseline", False):
+            parser.error("--require-semantic-baseline differs from the frozen protocol")
+        args.require_semantic_baseline = protocol.get("require_semantic_baseline", False)
         protocol_bugs = protocol["bugs"]
 
     conditions = [resolve_condition(c).name for c in args.condition]
@@ -740,9 +784,10 @@ def main(argv=None) -> int:
     prepare_output(args.out, experiment_config(args))
     total = len(bug_ids) * args.repeat * len(conditions)
     done = 0
-    for bug_id in bug_ids:
+    for bug_index, bug_id in enumerate(bug_ids):
         for trial in range(1, args.repeat + 1):
-            for condition in conditions:
+            for condition in scheduled_conditions(conditions, bug_index, trial,
+                                                   getattr(args, "condition_order", "fixed")):
                 done += 1
                 record = run_record_path(args.out, bug_id, condition,
                                          allow_promotion=not args.no_promotion,
