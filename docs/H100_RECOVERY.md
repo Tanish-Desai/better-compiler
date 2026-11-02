@@ -53,7 +53,7 @@ check and repair loop both reset the same checkout/build directory.
 
 ```bash
 git checkout feat/h100-sweep
-git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
+git pull --ff-only https://github.com/Tanish-Desai/better-compiler.git feat/h100-sweep
 source ~/better-compiler-runtime/env.sh
 
 # Override the native setup's 14B defaults AFTER sourcing env.sh.

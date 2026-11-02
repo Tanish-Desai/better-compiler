@@ -47,7 +47,7 @@ apt-get update
 apt-get install -y git tmux ca-certificates curl python3 python3-venv util-linux
 
 git clone --branch feat/h100-sweep --single-branch \
-    https://github.com/Abhyuday-06/better-compiler.git "$HOME/better-compiler"
+    https://github.com/Tanish-Desai/better-compiler.git "$HOME/better-compiler"
 cd "$HOME/better-compiler"
 mkdir -p run-provenance
 

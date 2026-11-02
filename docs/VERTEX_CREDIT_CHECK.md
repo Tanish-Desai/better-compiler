@@ -44,9 +44,14 @@ export PROJECT_ID="your-research-project-id"
 gcloud config set project "$PROJECT_ID"
 gcloud services enable aiplatform.googleapis.com --project "$PROJECT_ID"
 curl --fail --location --output "$HOME/bc-probe-vertex.py" \
-    https://raw.githubusercontent.com/Abhyuday-06/better-compiler/feat/h100-sweep/scripts/probe_vertex.py
+    https://raw.githubusercontent.com/Tanish-Desai/better-compiler/04a8f198d3ab6d71c8d3d5eb0a135a6089fb1a1c/scripts/probe_vertex.py &&
 python3 "$HOME/bc-probe-vertex.py" --project "$PROJECT_ID"
 ```
+
+The download uses a fixed commit in the public Tanish-Desai mirror. The
+Abhyuday-06 mirror is private, so unauthenticated raw-file downloads from it
+return 404. Both mirrors contain the same probe. If the download fails, `&&`
+prevents Python from attempting to run a missing file.
 
 The default command only counts tokens for the toy prompt. It uses gcloud's
 current OAuth session without printing or storing its access token. No API key

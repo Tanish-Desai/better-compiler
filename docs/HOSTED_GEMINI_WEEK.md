@@ -61,7 +61,7 @@ Use Bash inside the container. For an existing clone at `$HOME/better-compiler`:
 ```bash
 cd "$HOME/better-compiler"
 git status --short
-git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
+git pull --ff-only https://github.com/Tanish-Desai/better-compiler.git feat/h100-sweep
 mkdir -p run-provenance
 ```
 
