@@ -8,6 +8,11 @@ operator's billing account, or executed this pilot. Local tests use mocks.
 
 ## 1. Confirm usable credits before generation
 
+**Confirmed operator update:** AI Studio asked to buy credits after billing
+setup. Check [VERTEX_CREDIT_CHECK.md](VERTEX_CREDIT_CHECK.md) before paying.
+It prepares a separate Cloud Shell access probe; the Developer API adapter
+below does not become a Vertex adapter by changing its base URL.
+
 The operator reports three monthly **Gen AI & Cloud** grants of ₹955.46,
 expiring August 18, 2027. If all three are unused, their combined face value
 is **₹2,866.38**. Check the remaining balance, eligibility and billing-account

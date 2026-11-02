@@ -66,6 +66,8 @@ With an occupied GPU, use the [hosted Gemini and CPU runbook](docs/HOSTED_GEMINI
 It includes credit eligibility checks, tmux commands, a separate 192-cell
 protocol and a persistent generation-budget ledger. Live billing and a pilot
 must pass before evaluation; no Gemini results are claimed by this update.
+If AI Studio requires purchasing Prepay credits, start with the
+[Vertex Cloud-credit check](docs/VERTEX_CREDIT_CHECK.md) before paying.
 
 The container has `alive-tv` and the dataset already:
 
