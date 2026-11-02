@@ -9,6 +9,7 @@ results/
 results-qwen3-v2*/
 results-qwen3-v3*/
 results-devstral*/
+results-gemini*/
 witness-comparison*/
 archives/
 validation-checks/

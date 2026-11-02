@@ -80,6 +80,8 @@ from ce.feedback import CONDITIONS, resolve_condition  # noqa: E402
 from ce.experiment import ExperimentMismatch, prepare_output  # noqa: E402
 from ce.patching import PatchFormatError, apply_edits, extract_single_code  # noqa: E402
 from ce.protocol import load_protocol  # noqa: E402
+from ce.llm_api import endpoint_url, model_is_listed, request_options, response_metadata  # noqa: E402
+from ce.api_budget import APIBudgetError, budget_limits, reserve_generation  # noqa: E402
 from ce.alive import parse_alive_output  # noqa: E402
 from ce.benchmark import first_failed_test, is_alive2_log  # noqa: E402
 
@@ -206,7 +208,7 @@ def completion_token_limit() -> int:
 
 def experiment_config(args) -> dict:
     sources = ("examples/repair_experiment.py", "ce/benchmark.py", "ce/feedback.py",
-               "ce/patching.py", "ce/oracle.py", "ce/protocol.py", "ce/experiment.py",
+               "ce/patching.py", "ce/oracle.py", "ce/protocol.py", "ce/experiment.py", "ce/llm_api.py", "ce/api_budget.py",
                "ce/reduction.py", "ce/reduce_generic.py",
                "ce/reduce_iraware.py", "ce/reduce_llvmreduce.py", "ce/_llvmreduce_test.py",
                "ce/alive.py", "ce/irmodel.py", "ce/structured.py",
@@ -218,6 +220,9 @@ def experiment_config(args) -> dict:
             digest.update(source.encode() + b"\0" + handle.read().replace(b"\r\n", b"\n") + b"\0")
     return {
         "model": os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner"),
+        "endpoint_url": endpoint_url(),
+        "request_options": request_options(),
+        "api_limits": budget_limits(),
         "base_model_cutoff": os.environ.get("LAB_LLM_BASEMODEL_CUTOFF", "2023-12-31Z"),
         "temperature": float(os.environ.get("LAB_LLM_TEMP", "0.8")),
         "max_iterations": args.max_iterations,
@@ -270,6 +275,7 @@ class Model:
 
     def __init__(self) -> None:
         self.max_tokens = completion_token_limit()
+        self.request_options = request_options()
         from openai import OpenAI
 
         self.name = os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner")
@@ -287,26 +293,31 @@ class Model:
         self.client = OpenAI(
             api_key=os.environ["LAB_LLM_TOKEN"],
             base_url=os.environ.get("LAB_LLM_URL", "https://api.deepseek.com"),
+            **({"max_retries": 0} if budget_limits() else {}),
         )
 
     def check_endpoint(self) -> None:
         served = {entry.id for entry in self.client.models.list(timeout=30).data}
-        if self.name not in served:
+        if not model_is_listed(self.name, served, endpoint_url()):
             raise RuntimeError(f"LAB_LLM_MODEL={self.name!r} is not served by the endpoint "
                                f"(available: {', '.join(sorted(served))}).")
 
     def chat(self, messages: List[dict]) -> Tuple[str, dict]:
         for attempt in range(_LLM_ATTEMPTS):
             try:
+                reservation = reserve_generation(messages, self.name, self.max_tokens)
                 response = self.client.chat.completions.create(
                     model=self.name,
                     messages=messages,
                     timeout=300,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
+                    **self.request_options,
                 )
                 break
             except Exception as e:  # noqa: BLE001 - see _LLM_ATTEMPTS
+                if isinstance(e, APIBudgetError):
+                    raise
                 status = getattr(e, "status_code", None)
                 permanent = (
                     status is not None
@@ -330,6 +341,8 @@ class Model:
             "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
             "finish_reason": response.choices[0].finish_reason,
             "response_model": getattr(response, "model", self.name),
+            **response_metadata(response),
+            **reservation,
         }
         return (response.choices[0].message.content or ""), stats
 
@@ -535,6 +548,8 @@ def repair(bug_id: str, condition: str, args, model: Model,
             reply, llm_stats = model.chat(messages)
         except Exception as e:  # noqa: BLE001 - a provider error ends this run, not the sweep
             run.notes["llm_error"] = str(e)
+            if isinstance(e, APIBudgetError):
+                run.notes["api_budget_error"] = str(e)
             break
         messages.append({"role": "assistant", "content": reply})
 
@@ -606,6 +621,8 @@ def repair(bug_id: str, condition: str, args, model: Model,
         )})
 
     if not run.iterations:
+        if run.notes.get("api_budget_error"):
+            raise APIBudgetError(run.notes["api_budget_error"])
         # The provider failed before the model ever answered, so nothing about
         # this bug was tested.  Writing the record anyway would file an
         # infrastructure outage as a failed repair and drag the condition's
@@ -695,6 +712,22 @@ def main(argv=None) -> int:
         if protocol.get("require_pinned_model"):
             expected_env.update(LAB_LLM_MODEL_REPOSITORY=protocol["model_repository"],
                                 LAB_LLM_MODEL_REVISION=protocol["model_revision"])
+        if "endpoint_url" in protocol and endpoint_url() != protocol["endpoint_url"].rstrip("/"):
+            parser.error("LAB_LLM_URL differs from the frozen protocol endpoint")
+        if "request_options" in protocol:
+            try:
+                actual_options = request_options()
+            except ValueError as error:
+                parser.error(str(error))
+            if actual_options != protocol["request_options"]:
+                parser.error("LAB_LLM_REQUEST_OPTIONS differs from the frozen protocol")
+        if "api_limits" in protocol:
+            try:
+                actual_limits = budget_limits()
+            except ValueError as error:
+                parser.error(str(error))
+            if actual_limits != protocol["api_limits"]:
+                parser.error("LAB_LLM_API_LIMITS differs from the frozen protocol")
         defaults = {"LAB_LLM_MODEL": "deepseek-reasoner", "LAB_LLM_TEMP": "0.8",
                     "LAB_LLM_MAX_TOKENS": "8192"}
         for key, expected in expected_env.items():
@@ -808,12 +841,18 @@ def main(argv=None) -> int:
                 except BaselineBuildError as e:
                     print(f"[{bug_id}] stopping sweep: {e}", file=sys.stderr)
                     return 1
+                except APIBudgetError as e:
+                    print(f"Stopping before further builds or generations: {e}", file=sys.stderr)
+                    return 2
                 except Exception as e:  # noqa: BLE001 - one bad cell must not end the sweep
                     print(f"[{bug_id}/{condition}/t{trial}] error: "
                           f"{type(e).__name__}: {e}", file=sys.stderr)
                     continue
                 if run is not None:
                     print(f"[{bug_id}] -> {run.write(args.out)}")
+                    if run.notes.get("api_budget_error"):
+                        print("Stopped at the API/context budget guard; partial records are preserved.", file=sys.stderr)
+                        return 2
     return 0
 
 

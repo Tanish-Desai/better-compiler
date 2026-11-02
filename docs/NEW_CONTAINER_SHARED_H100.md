@@ -1,5 +1,10 @@
 # Fresh shared-H100 container: commands and evaluation gates
 
+**2026-11-02 alternative:** If fewer than 10 GiB of VRAM remain, use
+[HOSTED_GEMINI_WEEK.md](HOSTED_GEMINI_WEEK.md) for hosted inference and local
+CPU validation. The local offload profile below will not fit that allocation.
+The API study has its own protocol and output directory; do not pool them.
+
 Written 2026-11-01 for the operator's Ubuntu 24.04.1 container, H100 PCIe,
 driver 580.178.04, 81,559 MiB total / 21,796 MiB free VRAM, 928 GiB host RAM
 available, and 1.2 TB disk free. Host RAM is not necessarily the container's

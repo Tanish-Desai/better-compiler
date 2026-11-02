@@ -404,3 +404,30 @@ This remains a small amended follow-up. Do not promise a positive result,
 statistical significance or Q1 acceptance. All failures, unchanged feedback,
 infrastructure errors and plausible-but-unreviewed patches remain visible.
 See [NEW_CONTAINER_SHARED_H100.md](NEW_CONTAINER_SHARED_H100.md) for execution.
+
+### 2026-11-02: separately identified hosted alternative for unavailable GPU
+
+The operator reports that free VRAM can fall below 10 GiB and has three
+monthly GenAI & Cloud credit grants. Credit availability/billing and hosted
+model access remain unverified. `data/repair_v3_gemini_api_protocol.json`
+specifies a separate Gemini 2.5 Flash experiment, retaining the November 1
+16-bug sample, four arms, three trials, four turns, counterbalanced ordering,
+semantic-baseline gate, 400-call oracle budget and three directed primary
+contrasts. No Gemini generations were executed by this update. This amendment
+does not assert that no intervening local v3 work has occurred.
+
+Thinking is explicitly disabled, temperature is 0.8 and the maximum completion
+is 8,192 tokens. A native prompt count plus 512 serialization tokens must fit
+24,576 input tokens. A persistent ledger reserves the configured worst-case
+input/output allowance before each generation attempt, including retries,
+and stops at $25 in reservations. This is not actual billing or a credit cap.
+Context, counter or budget failures preserve incomplete cells; they do not
+become failed repairs. Report any stopped/incomplete study and its coverage.
+
+Keep the excluded 115575 pilot separate and require feasibility gates before
+evaluation. Keep Qwen/local/API experiments separate. The hosted model ID is
+recorded but is not an immutable weight revision; its size and benchmark
+training exposure are unknown. No SLM-specific or model-superiority claim is
+licensed by this alternative. Budgeted API inference removes the GPU
+requirement, not LLVM build costs, limited independent bug count or the need
+to review plausible patches. Follow [HOSTED_GEMINI_WEEK.md](HOSTED_GEMINI_WEEK.md).

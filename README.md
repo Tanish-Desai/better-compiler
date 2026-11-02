@@ -62,6 +62,11 @@ comparison needed to find out whether that helps.
 
 ## Getting started
 
+With an occupied GPU, use the [hosted Gemini and CPU runbook](docs/HOSTED_GEMINI_WEEK.md).
+It includes credit eligibility checks, tmux commands, a separate 192-cell
+protocol and a persistent generation-budget ledger. Live billing and a pilot
+must pass before evaluation; no Gemini results are claimed by this update.
+
 The container has `alive-tv` and the dataset already:
 
 ```bash

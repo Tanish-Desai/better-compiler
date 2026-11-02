@@ -33,6 +33,9 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from ce.llm_api import model_is_listed, request_options  # noqa: E402
+from ce.api_budget import budget_limits, reserve_generation  # noqa: E402
+
 PROMPT = (
     "Reply with exactly this C++ line and nothing else:\n"
     "```cpp\nreturn nullptr;\n```"
@@ -88,6 +91,7 @@ def main(argv=None) -> int:
     parser.add_argument("--context-probe", action="store_true",
                         help="also require the v3 toy edit with about 50K characters of C++ comment context; "
                              "report token usage and request wall throughput (implies --repair-format)")
+    parser.add_argument("--list-models", action="store_true", help="list model IDs without generating replies")
     args = parser.parse_args(argv)
     if args.repeat < 1:
         parser.error("--repeat must be positive")
@@ -101,6 +105,11 @@ def main(argv=None) -> int:
         parser.error("LAB_LLM_TEMP must be numeric and LAB_LLM_MAX_TOKENS must be a positive integer")
     if max_tokens < 1:
         parser.error("LAB_LLM_MAX_TOKENS must be positive")
+    try:
+        options = request_options()
+        limits = budget_limits()
+    except ValueError as error:
+        parser.error(str(error))
     token = os.environ.get("LAB_LLM_TOKEN")
 
     print(f"LAB_LLM_URL   {url}")
@@ -110,8 +119,8 @@ def main(argv=None) -> int:
     print(f"LAB_LLM_TOKEN {'set' if token else 'NOT SET'}")
 
     if not token:
-        print("\nLAB_LLM_TOKEN is unset. A local vLLM server still needs one -- "
-              "pass --api-key when starting it and export the same string.",
+        print("\nLAB_LLM_TOKEN is unset. Set the provider's API key privately. "
+              "For local vLLM, use the string configured by --api-key.",
               file=sys.stderr)
         return 2
 
@@ -122,7 +131,7 @@ def main(argv=None) -> int:
               file=sys.stderr)
         return 2
 
-    client = OpenAI(api_key=token, base_url=url)
+    client = OpenAI(api_key=token, base_url=url, **({"max_retries": 0} if limits else {}))
 
     try:
         served = [m.id for m in client.models.list(timeout=30).data]
@@ -131,10 +140,12 @@ def main(argv=None) -> int:
               file=sys.stderr)
         return 1
     print(f"\nserved models: {', '.join(served) or '<none>'}")
-    if model not in served:
-        print(f"ERROR: LAB_LLM_MODEL={model!r} is not in that list. vLLM "
-              f"serves the name given by --served-model-name, or the full "
-              f"HuggingFace repo id if that flag was omitted.", file=sys.stderr)
+    if args.list_models:
+        return 0
+    if not model_is_listed(model, served, url):
+        print(f"ERROR: LAB_LLM_MODEL={model!r} is not in that list. Select a model "
+              "available to this API project. For local vLLM, match --served-model-name "
+              "or the full HuggingFace repo id if that flag was omitted.", file=sys.stderr)
         return 1
 
     replies = []
@@ -148,12 +159,14 @@ def main(argv=None) -> int:
     for i in range(args.repeat):
         started = time.perf_counter()
         try:
+            reserve_generation(messages, model, max_tokens)
             response = client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 timeout=300,
+                **options,
             )
             choice = response.choices[0]
             text = (choice.message.content or "").strip()

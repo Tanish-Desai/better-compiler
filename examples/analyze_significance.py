@@ -279,6 +279,9 @@ def main(argv=None) -> int:
             for key in ("require_semantic_baseline", "condition_order"):
                 if key in protocol:
                     expected[key] = protocol[key]
+            for key in ("endpoint_url", "request_options", "api_limits"):
+                if key in protocol:
+                    expected[key] = protocol[key]
             if protocol.get("require_pinned_model"):
                 expected.update(model_repository=protocol["model_repository"],
                                 model_revision=protocol["model_revision"])
