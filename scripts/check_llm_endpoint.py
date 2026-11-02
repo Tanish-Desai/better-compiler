@@ -33,7 +33,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from ce.llm_api import model_is_listed, request_options  # noqa: E402
+from ce.llm_api import backend, model_is_listed, request_options  # noqa: E402
 from ce.api_budget import budget_limits, reserve_generation  # noqa: E402
 
 PROMPT = (
@@ -106,6 +106,7 @@ def main(argv=None) -> int:
     if max_tokens < 1:
         parser.error("LAB_LLM_MAX_TOKENS must be positive")
     try:
+        is_vertex = backend() == "vertex"
         options = request_options()
         limits = budget_limits()
     except ValueError as error:
@@ -118,35 +119,43 @@ def main(argv=None) -> int:
     print(f"LAB_LLM_MAX_TOKENS {max_tokens}")
     print(f"LAB_LLM_TOKEN {'set' if token else 'NOT SET'}")
 
-    if not token:
+    if not token and not is_vertex:
         print("\nLAB_LLM_TOKEN is unset. Set the provider's API key privately. "
               "For local vLLM, use the string configured by --api-key.",
               file=sys.stderr)
         return 2
 
-    try:
-        from openai import OpenAI
-    except ImportError:
-        print("\nthe openai package is not installed in this interpreter",
-              file=sys.stderr)
-        return 2
-
-    client = OpenAI(api_key=token, base_url=url, **({"max_retries": 0} if limits else {}))
-
-    try:
-        served = [m.id for m in client.models.list(timeout=30).data]
-    except Exception as e:  # noqa: BLE001 - any failure here is the answer
-        print(f"\ncannot list models at {url}: {type(e).__name__}: {e}",
-              file=sys.stderr)
-        return 1
-    print(f"\nserved models: {', '.join(served) or '<none>'}")
-    if args.list_models:
-        return 0
-    if not model_is_listed(model, served, url):
-        print(f"ERROR: LAB_LLM_MODEL={model!r} is not in that list. Select a model "
-              "available to this API project. For local vLLM, match --served-model-name "
-              "or the full HuggingFace repo id if that flag was omitted.", file=sys.stderr)
-        return 1
+    if is_vertex:
+        if args.list_models:
+            parser.error("Vertex uses publisher-model access checks; use --repair-format instead of --list-models")
+        from ce.vertex_api import VertexClient
+        try:
+            client = VertexClient()
+            client.check_access()
+        except Exception as error:
+            print(f"Vertex access check failed before generation: {error}", file=sys.stderr)
+            return 1
+        print(f"Vertex ADC/counter access OK for {model}; generation remains to be tested.")
+    else:
+        try:
+            from openai import OpenAI
+        except ImportError:
+            print("\nthe openai package is not installed in this interpreter", file=sys.stderr)
+            return 2
+        client = OpenAI(api_key=token, base_url=url, **({"max_retries": 0} if limits else {}))
+        try:
+            served = [m.id for m in client.models.list(timeout=30).data]
+        except Exception as e:  # noqa: BLE001 - any failure here is the answer
+            print(f"\ncannot list models at {url}: {type(e).__name__}: {e}", file=sys.stderr)
+            return 1
+        print(f"\nserved models: {', '.join(served) or '<none>'}")
+        if args.list_models:
+            return 0
+        if not model_is_listed(model, served, url):
+            print(f"ERROR: LAB_LLM_MODEL={model!r} is not in that list. Select a model "
+                  "available to this API project. For local vLLM, match --served-model-name "
+                  "or the full HuggingFace repo id if that flag was omitted.", file=sys.stderr)
+            return 1
 
     replies = []
     check_repair_format = args.repair_format or args.context_probe
@@ -160,7 +169,8 @@ def main(argv=None) -> int:
         started = time.perf_counter()
         try:
             reserve_generation(messages, model, max_tokens)
-            response = client.chat.completions.create(
+            generate = client.generate if is_vertex else client.chat.completions.create
+            response = generate(
                 model=model,
                 messages=messages,
                 temperature=temperature,

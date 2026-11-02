@@ -1,0 +1,3 @@
+# Optional Vertex transport. Archive pip freeze with the experiment provenance.
+google-auth>=2.29,<3
+requests>=2.32.4,<3

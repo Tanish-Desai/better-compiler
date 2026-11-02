@@ -431,3 +431,37 @@ training exposure are unknown. No SLM-specific or model-superiority claim is
 licensed by this alternative. Budgeted API inference removes the GPU
 requirement, not LLVM build costs, limited independent bug count or the need
 to review plausible patches. Follow [HOSTED_GEMINI_WEEK.md](HOSTED_GEMINI_WEEK.md).
+
+### 2026-11-03: native Vertex follow-up after a successful access probe
+
+The operator demonstrated native Vertex generation for `gemini-3.1-flash-lite`
+on project `better-compiler` (5 prompt + 2 visible output tokens, normal STOP,
+ON_DEMAND). They confirmed the existing H100 native runtime and known-patch
+validation pass. This is feasibility evidence only; no Vertex compiler repair
+or new main-sample outcome was executed by this update. AI Studio's Prepay
+requirement remains a separate billing obstacle, not a reason to pool APIs.
+
+`data/repair_v3_vertex_protocol.json` keeps the 16 bugs, four arms, three
+trials, four-turn maximum, 400-call oracle budget, semantic-baseline gate,
+counterbalanced condition order and three directed primary contrasts. It
+replaces model/backend/thinking with native global Vertex 3.1 Flash-Lite,
+temperature 0.8, MINIMAL thinking and 8,192 maximum output tokens including
+thoughts. This is a separately reported amended study. The older local and
+Developer API manifests remain historical alternatives.
+
+ADC tokens refresh before requests as needed. Native countTokens includes the
+system instruction and message history; count plus 512 must fit 24,576 input
+tokens. Reserve maximum input plus maximum output before every generation,
+including explicit retries. A separate development pilot ledger has a $1
+reservation ceiling; the main ledger has $18 at checked $0.25/M input and
+$1.50/M output. Retain both ledgers and actual reported token counts, including
+thoughts. The one verified grant balance (₹952.30) does not establish coverage
+of maximum main allowances; verify combined eligible credits before starting.
+Reservations are not bills. Interrupted cells remain incomplete and cannot
+enter a final matched analysis as negative outcomes.
+
+Require the excluded 115575 pilot gates before the fixed main sample. Keep all
+previous diagnostic-exposure and small-sample limitations. No SLM-size,
+model-superiority, contamination-free or journal-acceptance claim is supported.
+Execute [VERTEX_H100_RUNBOOK.md](VERTEX_H100_RUNBOOK.md); no prior API study
+results may be silently relabelled as Vertex evidence.

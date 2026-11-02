@@ -1,5 +1,10 @@
 # Check the Cloud-credit route when AI Studio demands prepayment
 
+**2026-11-03 update:** The operator passed this native Vertex smoke check.
+The [Vertex H100 runbook](VERTEX_H100_RUNBOOK.md) now provides the repair adapter,
+refreshable ADC setup, a $1-limited pilot and a separate 192-cell protocol.
+The probe instructions below remain an account-access diagnostic.
+
 Written 2026-11-02 after the operator confirmed AI Studio requires buying
 credits. That is consistent with its Prepay billing gate. Existing eligible
 Cloud grants do not remove AI Studio's requirement for purchased Prepay funds.
@@ -11,11 +16,10 @@ without purchasing the AI Studio wallet balance.
 [program benefits and eligible services](https://developers.google.com/profile/help/benefits).
 
 This is a check of account access and one model, **not a repair experiment**.
-The current repair adapter/protocol in `HOSTED_GEMINI_WEEK.md` is for Gemini
-Developer API, not Vertex. Do not change its URL/model by hand and start a
-sweep: Vertex needs different authentication, a new serving profile/protocol,
-token accounting and a validated development pilot. Those depend on a usable
-account/model endpoint first. No authenticated Vertex request was made here.
+The adapter/protocol in `HOSTED_GEMINI_WEEK.md` is for Gemini Developer API.
+Use `VERTEX_H100_RUNBOOK.md` for the separate native Vertex adapter and protocol;
+changing the older protocol's URL/model by hand is not equivalent. No
+authenticated Vertex requests were made from this development workspace.
 
 ## 1. Select the credited Cloud project
 

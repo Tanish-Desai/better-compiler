@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "id": "repair-v3-vertex-gemini31flashlite-2026-11-03",
+  "written": "2026-11-03",
+  "status": "Operator account/model smoke check passed; repair pilot and main study not executed by this update",
+  "harness_version": "repair-v3",
+  "model": "gemini-3.1-flash-lite",
+  "model_repository": null,
+  "model_revision": null,
+  "require_pinned_model": false,
+  "require_semantic_baseline": true,
+  "serving_profile": {
+    "backend": "Native Vertex REST, global, standard on-demand service",
+    "model_version": "Hosted model identifier; immutable weight revision unavailable",
+    "thinking": "Explicit MINIMAL level; not disabled; 8192 output allowance includes thoughts",
+    "credentials": "Refreshable Google Application Default Credentials; one credited research project; no account rotation",
+    "context": "Native countTokens plus 512-token margin must fit 24576 input tokens"
+  },
+  "bugs": [
+    "115149",
+    "114879",
+    "118467",
+    "91369",
+    "114738",
+    "167627",
+    "91177",
+    "82884",
+    "112350",
+    "173784",
+    "161492",
+    "179613",
+    "180870",
+    "89672",
+    "91957",
+    "114901"
+  ],
+  "excluded_development_bugs": [
+    "89390",
+    "165878",
+    "135182",
+    "126974",
+    "154116",
+    "116249",
+    "143123",
+    "126012",
+    "115575"
+  ],
+  "original_sample_sha256": "4b29f7c855bf8c56e62f723edc7ae7ee215a6bc781aee0f1a66d030318d622aa",
+  "conditions": [
+    "raw-plain",
+    "raw-structured",
+    "llvmreduce-structured",
+    "iraware-structured"
+  ],
+  "condition_order": "rotate-by-bug-and-trial-v1",
+  "primary_comparisons": [
+    {
+      "better": "iraware-structured",
+      "worse": "raw-structured",
+      "question": "Does IR-aware witness reduction improve repair over unreduced feedback with the same structured renderer?"
+    },
+    {
+      "better": "iraware-structured",
+      "worse": "llvmreduce-structured",
+      "question": "Does paired witness-aware reduction improve repair over sequential llvm-reduce with the same renderer?"
+    },
+    {
+      "better": "raw-structured",
+      "worse": "raw-plain",
+      "question": "Does structured rendering improve repair when neither witness is reduced?"
+    }
+  ],
+  "repeat": 3,
+  "max_iterations": 4,
+  "oracle_budget": 400,
+  "oracle_strictness": "error_class",
+  "temperature": 0.8,
+  "max_completion_tokens": 8192,
+  "budget_runs": 192,
+  "budget_model_replies_max": 768,
+  "rationale": "AI Studio requires purchased Prepay funds. Operator demonstrated native Vertex generation on project better-compiler. Retain the 16 bugs, four arms and matched budgets in a separately identified Vertex study; do not pool providers/models.",
+  "inference": "Exact paired one-sided McNemar in the three stated directions, Benjamini-Hochberg across all three. Unit is one bug with pass@3. Report paired effect sizes and all counts. No optional stopping or selected extra trials.",
+  "notes": [
+    "This sample is the two remaining preselected size tiers, not a pristine unseen set: 115149 had previous diagnostic exposure.",
+    "Do not pool v2, local FP8 offload, a smaller model or a hosted API as one experiment.",
+    "The shared text renderer is fixed, but its derived fields depend on the displayed IR; this is a comparison of complete feedback pipelines.",
+    "There are no generic-ddmin, no-counterexample or promotion ablation repair-rate claims under this four-arm schedule. Reducer-only development ablations are separate.",
+    "Do not guarantee significance or journal acceptance from a 16-bug follow-up.",
+    "Credit eligibility, remaining balance and account rate limits must be confirmed before generation.",
+    "Reservation ledger counts every explicitly attempted generation at configured prompt/output ceilings; it is not a bill or credit balance. Prices/taxes/provider overhead may differ.",
+    "A context or budget guard stops the sweep and preserves partial records; it is not reported as a completed negative repair result.",
+    "Do not change model or thinking policy after observing main-sample outcomes. API pilot and full validation are required.",
+    "The legacy benchmark cutoff date is not a verified training cutoff. No contamination-free or SLM-size claim is supported for Gemini.",
+    "The seven-token operator smoke response is account-access evidence only, not a repair result or proof of credit application.",
+    "Preserve all Vertex retry reservations. Check credit eligibility/balance before main evaluation; no zero-bill guarantee.",
+    "Gemini 3.1 Flash-Lite is not interchangeable with Gemini 2.5 Flash; prior Developer API plans are preserved as history."
+  ],
+  "request_options": {
+    "thinking_level": "MINIMAL"
+  },
+  "api_limits": {
+    "max_prompt_tokens": 24576,
+    "max_output_tokens": 8192,
+    "max_usd": 18.0,
+    "input_usd_per_million": 0.25,
+    "output_usd_per_million": 1.5
+  },
+  "llm_backend": "vertex",
+  "vertex_location": "global",
+  "endpoint_url_template": "https://aiplatform.googleapis.com/v1/projects/{project}/locations/global/publishers/google/models"
+}

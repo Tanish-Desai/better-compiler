@@ -80,7 +80,7 @@ from ce.feedback import CONDITIONS, resolve_condition  # noqa: E402
 from ce.experiment import ExperimentMismatch, prepare_output  # noqa: E402
 from ce.patching import PatchFormatError, apply_edits, extract_single_code  # noqa: E402
 from ce.protocol import load_protocol  # noqa: E402
-from ce.llm_api import endpoint_url, model_is_listed, request_options, response_metadata  # noqa: E402
+from ce.llm_api import backend, endpoint_url, model_is_listed, request_options, response_metadata  # noqa: E402
 from ce.api_budget import APIBudgetError, budget_limits, reserve_generation  # noqa: E402
 from ce.alive import parse_alive_output  # noqa: E402
 from ce.benchmark import first_failed_test, is_alive2_log  # noqa: E402
@@ -208,7 +208,7 @@ def completion_token_limit() -> int:
 
 def experiment_config(args) -> dict:
     sources = ("examples/repair_experiment.py", "ce/benchmark.py", "ce/feedback.py",
-               "ce/patching.py", "ce/oracle.py", "ce/protocol.py", "ce/experiment.py", "ce/llm_api.py", "ce/api_budget.py",
+               "ce/patching.py", "ce/oracle.py", "ce/protocol.py", "ce/experiment.py", "ce/llm_api.py", "ce/api_budget.py", "ce/vertex_api.py",
                "ce/reduction.py", "ce/reduce_generic.py",
                "ce/reduce_iraware.py", "ce/reduce_llvmreduce.py", "ce/_llvmreduce_test.py",
                "ce/alive.py", "ce/irmodel.py", "ce/structured.py",
@@ -220,6 +220,9 @@ def experiment_config(args) -> dict:
             digest.update(source.encode() + b"\0" + handle.read().replace(b"\r\n", b"\n") + b"\0")
     return {
         "model": os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner"),
+        "llm_backend": backend(),
+        "vertex_project": os.environ.get("LAB_VERTEX_PROJECT") if backend() == "vertex" else None,
+        "vertex_location": os.environ.get("LAB_VERTEX_LOCATION", "global") if backend() == "vertex" else None,
         "endpoint_url": endpoint_url(),
         "request_options": request_options(),
         "api_limits": budget_limits(),
@@ -276,7 +279,7 @@ class Model:
     def __init__(self) -> None:
         self.max_tokens = completion_token_limit()
         self.request_options = request_options()
-        from openai import OpenAI
+        self.backend = backend()
 
         self.name = os.environ.get("LAB_LLM_MODEL", "deepseek-reasoner")
         # SELF-DECLARED, not verified (docs/IMPLEMENTATION.md Blocker 4):
@@ -290,13 +293,21 @@ class Model:
         # legality; see Blocker 4's resolution in context.md/METHODOLOGY.md.
         self.cutoff = os.environ.get("LAB_LLM_BASEMODEL_CUTOFF", "2023-12-31Z")
         self.temperature = float(os.environ.get("LAB_LLM_TEMP", "0.8"))
-        self.client = OpenAI(
-            api_key=os.environ["LAB_LLM_TOKEN"],
-            base_url=os.environ.get("LAB_LLM_URL", "https://api.deepseek.com"),
-            **({"max_retries": 0} if budget_limits() else {}),
-        )
+        if self.backend == "vertex":
+            from ce.vertex_api import VertexClient
+            self.client = VertexClient()
+        else:
+            from openai import OpenAI
+            self.client = OpenAI(
+                api_key=os.environ["LAB_LLM_TOKEN"],
+                base_url=os.environ.get("LAB_LLM_URL", "https://api.deepseek.com"),
+                **({"max_retries": 0} if budget_limits() else {}),
+            )
 
     def check_endpoint(self) -> None:
+        if self.backend == "vertex":
+            self.client.check_access()
+            return
         served = {entry.id for entry in self.client.models.list(timeout=30).data}
         if not model_is_listed(self.name, served, endpoint_url()):
             raise RuntimeError(f"LAB_LLM_MODEL={self.name!r} is not served by the endpoint "
@@ -306,7 +317,8 @@ class Model:
         for attempt in range(_LLM_ATTEMPTS):
             try:
                 reservation = reserve_generation(messages, self.name, self.max_tokens)
-                response = self.client.chat.completions.create(
+                generate = self.client.generate if self.backend == "vertex" else self.client.chat.completions.create
+                response = generate(
                     model=self.name,
                     messages=messages,
                     timeout=300,
@@ -712,6 +724,19 @@ def main(argv=None) -> int:
         if protocol.get("require_pinned_model"):
             expected_env.update(LAB_LLM_MODEL_REPOSITORY=protocol["model_repository"],
                                 LAB_LLM_MODEL_REVISION=protocol["model_revision"])
+        if "llm_backend" in protocol and backend() != protocol["llm_backend"]:
+            parser.error("LAB_LLM_BACKEND differs from the frozen protocol")
+        if "vertex_location" in protocol and os.environ.get("LAB_VERTEX_LOCATION", "global") != protocol["vertex_location"]:
+            parser.error("LAB_VERTEX_LOCATION differs from the frozen protocol")
+        if "endpoint_url_template" in protocol:
+            expected_url = protocol["endpoint_url_template"].format(project=os.environ.get("LAB_VERTEX_PROJECT", ""))
+            if endpoint_url() != expected_url:
+                parser.error("LAB_LLM_URL differs from the frozen Vertex project endpoint")
+            from ce.vertex_api import settings
+            try:
+                settings()
+            except ValueError as error:
+                parser.error(str(error))
         if "endpoint_url" in protocol and endpoint_url() != protocol["endpoint_url"].rstrip("/"):
             parser.error("LAB_LLM_URL differs from the frozen protocol endpoint")
         if "request_options" in protocol:
@@ -806,7 +831,7 @@ def main(argv=None) -> int:
     # Trials sit outside conditions so that an interrupted sweep leaves whole
     # (bug, trial) rows covering every condition, which is exactly what the
     # paired table and the significance test can still use.
-    if not os.environ.get("LAB_LLM_TOKEN"):
+    if backend() != "vertex" and not os.environ.get("LAB_LLM_TOKEN"):
         parser.error("LAB_LLM_TOKEN is not set")
     model = Model()
     try:

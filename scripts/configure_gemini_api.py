@@ -26,7 +26,7 @@ def main(argv=None) -> int:
     if not runtime.is_file():
         parser.error("Native runtime env.sh is missing; complete CPU setup first")
     protocol, _ = load_protocol(str(ROOT / "data/repair_v3_gemini_api_protocol.json"))
-    values = {"LAB_LLM_URL": protocol["endpoint_url"], "LAB_LLM_MODEL": protocol["model"],
+    values = {"LAB_LLM_BACKEND": "openai", "LAB_LLM_URL": protocol["endpoint_url"], "LAB_LLM_MODEL": protocol["model"],
               "LAB_LLM_TEMP": protocol["temperature"], "LAB_LLM_MAX_TOKENS": protocol["max_completion_tokens"],
               "LAB_LLM_REQUEST_OPTIONS": json.dumps(protocol["request_options"], separators=(",", ":")),
               "LAB_LLM_API_LIMITS": json.dumps(protocol["api_limits"], separators=(",", ":")),
@@ -34,7 +34,7 @@ def main(argv=None) -> int:
               "LAB_LLM_SERVING_ID": f"gemini-developer-project:{args.project}"}
     content = ("# Nonsecret profile. Billing, model availability and credits require live verification.\n"
                f"source {shlex.quote(str(runtime))}\n"
-               "unset LAB_LLM_TOKEN LAB_LLM_MODEL_REPOSITORY LAB_LLM_MODEL_REVISION\n")
+               "unset LAB_LLM_TOKEN LAB_LLM_MODEL_REPOSITORY LAB_LLM_MODEL_REVISION LAB_VERTEX_PROJECT LAB_VERTEX_LOCATION\n")
     content += "".join(f"export {key}={shlex.quote(str(value))}\n" for key, value in values.items())
     path = Path(args.out)
     if path.exists():

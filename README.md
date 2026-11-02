@@ -62,12 +62,14 @@ comparison needed to find out whether that helps.
 
 ## Getting started
 
-With an occupied GPU, use the [hosted Gemini and CPU runbook](docs/HOSTED_GEMINI_WEEK.md).
-It includes credit eligibility checks, tmux commands, a separate 192-cell
-protocol and a persistent generation-budget ledger. Live billing and a pilot
-must pass before evaluation; no Gemini results are claimed by this update.
-If AI Studio requires purchasing Prepay credits, start with the
-[Vertex Cloud-credit check](docs/VERTEX_CREDIT_CHECK.md) before paying.
+With an occupied GPU and the credited Cloud project, use the
+[Vertex H100 repair runbook](docs/VERTEX_H100_RUNBOOK.md). It includes refreshable
+credentials, tmux commands, a $1-limited pilot and a separate 192-cell study.
+The operator passed a native Vertex access probe; credit coverage and the
+compiler-repair pilot remain gates before evaluation. No Vertex repair results
+are claimed by this update. The [Cloud-credit check](docs/VERTEX_CREDIT_CHECK.md)
+and older [Developer API alternative](docs/HOSTED_GEMINI_WEEK.md) explain the
+AI Studio Prepay obstacle and the distinction between the two APIs.
 
 The container has `alive-tv` and the dataset already:
 

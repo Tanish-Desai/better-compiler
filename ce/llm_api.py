@@ -18,14 +18,24 @@ def endpoint_url() -> str:
     return os.environ.get("LAB_LLM_URL", DEFAULT_URL).rstrip("/")
 
 
+def backend() -> str:
+    value = os.environ.get("LAB_LLM_BACKEND", "openai")
+    if value not in ("openai", "vertex"):
+        raise ValueError("LAB_LLM_BACKEND must be openai or vertex")
+    return value
+
+
 def request_options() -> dict:
     raw = os.environ.get("LAB_LLM_REQUEST_OPTIONS", "{}")
     try:
         options = json.loads(raw)
     except ValueError as error:
         raise ValueError("LAB_LLM_REQUEST_OPTIONS must be a JSON object") from error
-    if not isinstance(options, dict) or set(options) - {"reasoning_effort", "extra_body"}:
-        raise ValueError("LAB_LLM_REQUEST_OPTIONS only supports reasoning_effort and extra_body")
+    allowed = {"thinking_level"} if backend() == "vertex" else {"reasoning_effort", "extra_body"}
+    if not isinstance(options, dict) or set(options) - allowed:
+        raise ValueError("LAB_LLM_REQUEST_OPTIONS has unsupported fields for the selected backend")
+    if "thinking_level" in options and options["thinking_level"] not in ("MINIMAL", "LOW", "MEDIUM", "HIGH"):
+        raise ValueError("Unsupported thinking_level")
     effort = options.get("reasoning_effort")
     if "reasoning_effort" in options and effort not in ("none", "minimal", "low", "medium", "high"):
         raise ValueError("Unsupported reasoning_effort")

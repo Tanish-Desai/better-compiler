@@ -279,9 +279,11 @@ def main(argv=None) -> int:
             for key in ("require_semantic_baseline", "condition_order"):
                 if key in protocol:
                     expected[key] = protocol[key]
-            for key in ("endpoint_url", "request_options", "api_limits"):
+            for key in ("endpoint_url", "request_options", "api_limits", "llm_backend", "vertex_location"):
                 if key in protocol:
                     expected[key] = protocol[key]
+            if "endpoint_url_template" in protocol:
+                expected["endpoint_url"] = protocol["endpoint_url_template"].format(project=config.get("vertex_project", ""))
             if protocol.get("require_pinned_model"):
                 expected.update(model_repository=protocol["model_repository"],
                                 model_revision=protocol["model_revision"])

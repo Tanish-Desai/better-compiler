@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-from .llm_api import endpoint_url, request_options
+from .llm_api import backend, endpoint_url, request_options
 
 
 class APIBudgetError(RuntimeError):
@@ -70,10 +70,17 @@ def count_gemini_prompt(messages: list[dict], model: str) -> int:
 def reserve_generation(messages: list[dict], model: str, max_tokens: int) -> dict:
     limits = budget_limits()
     if not limits:
+        if backend() == "vertex":
+            raise APIBudgetError("Vertex generation requires the configured reservation limits and ledger")
         return {}
-    if (endpoint_url() != "https://generativelanguage.googleapis.com/v1beta/openai"
-            or model != "gemini-2.5-flash" or request_options() != {"reasoning_effort": "none"}):
-        raise APIBudgetError("This reservation profile requires Gemini 2.5 Flash with thinking disabled")
+    if backend() == "vertex":
+        from .vertex_api import VertexClient
+        counter = VertexClient().count_prompt
+    else:
+        if (endpoint_url() != "https://generativelanguage.googleapis.com/v1beta/openai"
+                or model != "gemini-2.5-flash" or request_options() != {"reasoning_effort": "none"}):
+            raise APIBudgetError("This reservation profile requires Gemini 2.5 Flash with thinking disabled")
+        counter = lambda messages: count_gemini_prompt(messages, model)
     if not 1 <= max_tokens <= limits["max_output_tokens"]:
         raise APIBudgetError("Completion allowance exceeds the API budget profile")
     path_value = os.environ.get("LAB_LLM_API_LEDGER")
@@ -82,14 +89,14 @@ def reserve_generation(messages: list[dict], model: str, max_tokens: int) -> dic
     if not os.environ.get("LAB_LLM_SERVING_ID", "").strip():
         raise APIBudgetError("Set LAB_LLM_SERVING_ID to identify the authorized research project")
     try:
-        count = count_gemini_prompt(messages, model)
+        count = counter(messages)
     except APIBudgetError:
         raise
     except Exception as error:
         # An unavailable counter must not turn off accounting or send paid
         # requests anyway. Preserve partial cells and stop the worker.
-        raise APIBudgetError(f"Prompt token counter failed ({type(error).__name__}); generation withheld") from error
-    # Leave margin for the OpenAI-compatible endpoint's message serialization.
+        raise APIBudgetError(f"Prompt token counter failed ({type(error).__name__}: {error}); generation withheld") from error
+    # Leave margin for provider-side prompt serialization.
     if count + 512 > limits["max_prompt_tokens"]:
         raise APIBudgetError(f"Prompt needs {count} tokens plus serialization margin; "
                              "study context exhausted before generation")
