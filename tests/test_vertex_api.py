@@ -42,7 +42,9 @@ def response(text="patch", finish="STOP"):
                               "thoughtsTokenCount": 20, "cachedContentTokenCount": 5, "totalTokenCount": 130}}
 
 
-def test_native_multi_turn_messages_and_thought_usage(configured, monkeypatch):
+@pytest.mark.parametrize("thinking", ["MINIMAL", "LOW"])
+def test_native_multi_turn_messages_and_thought_usage(configured, monkeypatch, thinking):
+    monkeypatch.setenv("LAB_LLM_REQUEST_OPTIONS", json.dumps({"thinking_level": thinking}))
     calls = []
     def post(self, action, payload, timeout):
         calls.append((action, payload, timeout))
@@ -51,11 +53,12 @@ def test_native_multi_turn_messages_and_thought_usage(configured, monkeypatch):
     messages = [{"role": role, "content": content} for role, content in
                 (("system", "rules"), ("user", "bug"), ("assistant", "first patch"), ("user", "feedback"))]
     reply = vertex.VertexClient().generate(model=vertex.MODEL, messages=messages, temperature=0.8,
-                                         max_tokens=8192, thinking_level="MINIMAL")
+                                         max_tokens=8192, thinking_level=thinking)
     payload = calls[0][1]
     assert payload["systemInstruction"] == {"parts": [{"text": "rules"}]}
     assert [part["role"] for part in payload["contents"]] == ["user", "model", "user"]
     assert payload["generationConfig"]["maxOutputTokens"] == 8192
+    assert payload["generationConfig"]["thinkingConfig"] == {"thinkingLevel": thinking}
     assert reply.choices[0].message.content == "patch"
     assert reply.choices[0].finish_reason == "length"
     assert reply.usage.completion_tokens == 30
@@ -167,23 +170,52 @@ def test_stage_profiles_preserve_independent_pilot_and_main_ledgers(configured, 
         configure_vertex.main(["--project", "different-project", "--out", str(paths[0]), "--runtime-env", str(runtime)])
 
 
-def test_final_vertex_analysis_uses_three_comparisons_and_rejects_incomplete_cells(configured, monkeypatch, capsys):
+@pytest.mark.parametrize("filename", ["repair_v3_vertex_protocol.json", "repair_v3b_vertex_protocol.json"])
+def test_final_vertex_analysis_uses_three_comparisons_and_rejects_incomplete_cells(configured, monkeypatch, capsys, filename):
     from examples import analyze_significance as analysis
-    protocol, _ = configured
-    _, digest = load_protocol(str(PROTOCOL))
+    path = PROTOCOL.with_name(filename)
+    protocol, digest = load_protocol(str(path))
     keys = ("model", "harness_version", "max_iterations", "oracle_budget", "oracle_strictness", "temperature",
             "max_completion_tokens", "require_semantic_baseline", "condition_order", "request_options",
             "api_limits", "llm_backend", "vertex_location")
     config = {key: protocol[key] for key in keys}
+    for key in ("revision_context", "prompt_hash"):
+        if key in protocol:
+            config[key] = protocol[key]
     config.update(protocol_sha256=digest, protocol_id=protocol["id"], vertex_project="better-compiler",
                   endpoint_url=protocol["endpoint_url_template"].format(project="better-compiler"))
     rows = [{"bug_id": bug, "condition": condition, "trial": trial, "max_iterations": 4,
              "iterations": [{}] * 4, "totals": {"fixed": False}, "notes": {"experiment_config": config}}
             for bug in protocol["bugs"] for condition in protocol["conditions"] for trial in range(1, 4)]
     monkeypatch.setattr(analysis, "load_experiment_runs", lambda *args: rows)
-    argv = ["unused", "--protocol", str(PROTOCOL), "--final", "--json"]
+    argv = ["unused", "--protocol", str(path), "--final", "--json"]
     assert analysis.main(argv) == 0
     assert len(json.loads(capsys.readouterr().out)["primary"]) == 3
     rows[-1]["notes"] = {"experiment_config": config, "llm_error": "budget stopped"}
     with pytest.raises(SystemExit):
         analysis.main(argv)
+
+
+def test_revised_profile_has_its_own_capped_ledger_and_offline_plan(configured, monkeypatch, capsys):
+    _, root = configured
+    path = PROTOCOL.with_name("repair_v3b_vertex_protocol.json")
+    protocol, _ = load_protocol(str(path))
+    runtime = root / "runtime.env"
+    runtime.write_text("# native runtime")
+    profile = root / "revised.env"
+    assert configure_vertex.main(["--project", "better-compiler", "--protocol", str(path),
+                                  "--runtime-env", str(runtime), "--out", str(profile)]) == 0
+    text = profile.read_text()
+    assert '"thinking_level":"LOW"' in text
+    assert '"max_usd":0.5' in text
+    assert "vertex-v3b-pilot-budget.json" in text
+    monkeypatch.setenv("LAB_LLM_REQUEST_OPTIONS", json.dumps(protocol["request_options"]))
+    monkeypatch.setenv("LAB_LLM_API_LIMITS", json.dumps(protocol["api_limits"]))
+    monkeypatch.setattr(vertex, "_credentials", lambda *args: pytest.fail("ADC accessed in plan"))
+    assert runner.main(["--protocol", str(path), "--out", str(root / "main"), "--plan"]) == 0
+    assert "192 cells" in capsys.readouterr().out
+    assert not (root / "main").exists()
+    monkeypatch.setattr(runner, "SYSTEM_PROMPT", runner.SYSTEM_PROMPT + " changed without a new protocol")
+    with pytest.raises(SystemExit) as error:
+        runner.main(["--protocol", str(path), "--plan"])
+    assert error.value.code == 2

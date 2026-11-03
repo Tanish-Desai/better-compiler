@@ -28,8 +28,8 @@ def settings() -> dict:
         raise ValueError("Vertex profile requires its exact project URL and global location")
     if backend() != "vertex" or os.environ.get("LAB_LLM_MODEL") != MODEL:
         raise ValueError(f"Vertex transport is configured for {MODEL}")
-    if request_options() != {"thinking_level": "MINIMAL"}:
-        raise ValueError("Vertex study requires explicit MINIMAL thinking")
+    if request_options() not in ({"thinking_level": "MINIMAL"}, {"thinking_level": "LOW"}):
+        raise ValueError("Vertex requires a frozen MINIMAL or LOW thinking profile")
     return {"project": project, "location": location}
 
 
@@ -83,6 +83,7 @@ class VertexHTTPError(RuntimeError):
 class VertexClient:
     def __init__(self):
         self.config = settings()
+        self.options = request_options()
         self.base_url = endpoint_url() + "/" + MODEL
 
     def _post(self, action: str, payload: dict, timeout: int) -> dict:
@@ -110,11 +111,11 @@ class VertexClient:
 
     def generate(self, *, model: str, messages: list[dict], temperature: float,
                  max_tokens: int, timeout: int = 300, **options):
-        if model != MODEL or options != {"thinking_level": "MINIMAL"}:
+        if model != MODEL or options != self.options:
             raise ValueError("Vertex generation differs from its fixed model/thinking profile")
         payload = native_messages(messages)
         payload["generationConfig"] = {"temperature": temperature, "maxOutputTokens": max_tokens,
-                                       "thinkingConfig": {"thinkingLevel": "MINIMAL"}}
+                                       "thinkingConfig": {"thinkingLevel": options["thinking_level"]}}
         response = self._post("generateContent", payload, timeout)
         candidates = response.get("candidates") or []
         if len(candidates) != 1:

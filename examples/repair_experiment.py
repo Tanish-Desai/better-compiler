@@ -121,6 +121,7 @@ FORMAT_REQUIREMENT = (
 # Increment when windowing, patch handling or validation semantics change.
 # Prompt wording is hashed as well, so editing it cannot reuse old cells.
 HARNESS_VERSION = "repair-v3"
+REVISION_CONTEXT = "original-excerpt-per-turn-v1"
 
 
 class BaselineBuildError(RuntimeError):
@@ -157,10 +158,23 @@ SYSTEM_PROMPT = (
     "Make the smallest targeted change that addresses the reported failure. "
     "Preserve unrelated optimizations and IR invariants. A valid repair must "
     "pass both the reproducer and the existing regression tests. When tests "
-    "fail, use their specific diagnostics to revise your previous patch; "
+    "fail, use their specific diagnostics to produce a complete revised patch "
+    "against the original excerpt, including earlier changes you wish to retain. "
+    "The checkout is reset before each attempt: previous additions are absent. "
     "do not disable the optimization wholesale or weaken the tests."
     + FORMAT_REQUIREMENT
 )
+
+
+def revision_message(text: str, file: str, original: str) -> str:
+    """Refresh the actual edit base; previous replies are proposals, not state."""
+    return ("Feedback:\n" + text + "\nPlease adjust code according to the feedback.\n"
+            "The checkout has been RESET to the original code below. Your previous "
+            "patch is not present. Return the complete revised edit against this "
+            "original, incorporating any earlier changes you retain; do not search "
+            "for code that only appeared in an earlier reply.\n"
+            f"Please modify the following code in {file} to fix the bug:\n"
+            f"```cpp\n{original}\n```\n" + FORMAT_REQUIREMENT)
 
 
 @lru_cache(maxsize=8)
@@ -234,6 +248,7 @@ def experiment_config(args) -> dict:
         "harness_version": HARNESS_VERSION,
         "prompt_hash": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
         "patch_format": "search-replace-v1",
+        "revision_context": REVISION_CONTEXT,
         "max_completion_tokens": completion_token_limit(),
         "harness_code_hash": digest.hexdigest(),
         "protocol_id": getattr(args, "protocol_id", None),
@@ -626,11 +641,7 @@ def repair(bug_id: str, condition: str, args, model: Model,
             oracle_strictness=args.strictness,
             allow_promotion=not args.no_promotion,
         )
-        messages.append({"role": "user", "content": (
-            "Feedback:\n" + feedback.text
-            + "\nPlease adjust code according to the feedback."
-            + FORMAT_REQUIREMENT
-        )})
+        messages.append({"role": "user", "content": revision_message(feedback.text, file, hunk)})
 
     if not run.iterations:
         if run.notes.get("api_budget_error"):
@@ -718,6 +729,10 @@ def main(argv=None) -> int:
             parser.error("--protocol supplies its own bugs and promotion-on schedule")
         if protocol["harness_version"] != HARNESS_VERSION:
             parser.error("Protocol harness_version does not match this runner")
+        if "revision_context" in protocol and protocol["revision_context"] != REVISION_CONTEXT:
+            parser.error("Protocol revision_context does not match this runner")
+        if "prompt_hash" in protocol and protocol["prompt_hash"] != hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest():
+            parser.error("Protocol prompt_hash does not match this runner")
         expected_env = {"LAB_LLM_MODEL": protocol["model"],
                         "LAB_LLM_TEMP": protocol["temperature"],
                         "LAB_LLM_MAX_TOKENS": protocol["max_completion_tokens"]}

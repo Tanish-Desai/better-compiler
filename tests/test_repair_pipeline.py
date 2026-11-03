@@ -116,3 +116,23 @@ def test_truncated_reply_cannot_be_applied_even_if_first_block_is_complete(monke
     result = rx.repair("111", "baseline", config, llm)
     assert result.iterations[0].patch == "truncated"
     assert result.iterations[0].validation["failure_kind"] == "output_limit"
+
+
+def test_retry_refreshes_reset_edit_base_instead_of_presenting_previous_proposal_as_source(monkeypatch):
+    monkeypatch.setattr(rx, "Env", FakeEnvironment)
+    monkeypatch.setattr(rx, "bug_hunk", lambda env: ("file.cpp", "return 0;"))
+    monkeypatch.setattr(rx, "apply_patch", lambda *args: True)
+    llm = model()
+    original = llm.chat
+    seen = []
+    def chat(messages):
+        seen.append(messages[-1]["content"])
+        if len(seen) == 2:
+            assert "RESET" in seen[-1]
+            assert "```cpp\nreturn 0;\n```" in seen[-1]
+            assert "```cpp\nreturn 1;\n```" not in seen[-1]
+            assert "previous patch is not present" in seen[-1]
+        return original(messages)
+    llm.chat = chat
+    result = rx.repair("111", "baseline", args(), llm)
+    assert result.fixed and len(seen) == 2

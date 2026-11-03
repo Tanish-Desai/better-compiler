@@ -66,10 +66,13 @@ With an occupied GPU and the credited Cloud project, use the
 [Vertex H100 repair runbook](docs/VERTEX_H100_RUNBOOK.md). It includes refreshable
 credentials, tmux commands, a $1-limited pilot and a separate 192-cell study.
 The operator passed a native Vertex access probe; credit coverage and the
-compiler-repair pilot remain gates before evaluation. No Vertex repair results
+compiler-repair pilot remain gates before evaluation. No Vertex main-study results
 are claimed by this update. The [Cloud-credit check](docs/VERTEX_CREDIT_CHECK.md)
 and older [Developer API alternative](docs/HOSTED_GEMINI_WEEK.md) explain the
 AI Studio Prepay obstacle and the distinction between the two APIs.
+The first MINIMAL repair pilot failed; its saved diagnostics motivated the
+[separately capped revised pilot](docs/VERTEX_V3B_PILOT.md). Use that follow-up
+before committing the main study, and retain the original failed pilot.
 
 The container has `alive-tv` and the dataset already:
 

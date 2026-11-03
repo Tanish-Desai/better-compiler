@@ -1,0 +1,267 @@
+{
+  "source": "User-supplied same-turn diagnostics from the first native Vertex development pilot",
+  "source_sha256": "8b81d175c03a15a8fd48ae10919d9ff4bb999325876b658519ae74c3d4fad8ce",
+  "bug_id": "115575",
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "MINIMAL",
+  "trials_per_condition": 1,
+  "runs": 4,
+  "turns": 16,
+  "full_validation_passes": 0,
+  "build_failures": 5,
+  "regression_failed_turns": 5,
+  "reproducer_failed_turns": 3,
+  "rejected_replies": 3,
+  "rejected_edits_matching_previous_candidate": 3,
+  "independently_rebuilt_or_revalidated": false,
+  "interpretation": "Saved logs show candidate C++ API/type mistakes and scalable-vector regressions. All rejected SEARCH blocks match prior proposals, not the reset original. This is not evidence of method improvement or a verified harness environment fault.",
+  "turn_evidence": [
+    {
+      "condition": "iraware-structured",
+      "turn": 1,
+      "patch": "applied",
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": "error: \u2018isSafeToSpeculativelyExecute\u2019 is not a member of \u2018llvm::Instruction\u2019"
+    },
+    {
+      "condition": "iraware-structured",
+      "turn": 2,
+      "patch": "applied",
+      "validation": {
+        "stage": "regression",
+        "passed": false,
+        "reproducer_pass": true,
+        "failure_kind": "test_failure"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [
+        "LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll"
+      ],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "iraware-structured",
+      "turn": 3,
+      "patch": "invalid_format",
+      "validation": {
+        "stage": "no_patch",
+        "passed": false,
+        "failure_kind": "patch_format"
+      },
+      "replay_error": "SEARCH was not found exactly in the original source excerpt.",
+      "matches_previous_candidate": true,
+      "regression_tests": [],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "iraware-structured",
+      "turn": 4,
+      "patch": "applied",
+      "validation": {
+        "stage": "regression",
+        "passed": false,
+        "reproducer_pass": true,
+        "failure_kind": "test_failure"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [
+        "LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll"
+      ],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "llvmreduce-structured",
+      "turn": 1,
+      "patch": "applied",
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": "error: \u2018class llvm::Instruction\u2019 has no member named \u2018isSafeToSpeculativelyExecute\u2019"
+    },
+    {
+      "condition": "llvmreduce-structured",
+      "turn": 2,
+      "patch": "applied",
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "llvmreduce-structured",
+      "turn": 3,
+      "patch": "applied",
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "llvmreduce-structured",
+      "turn": 4,
+      "patch": "applied",
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "raw-plain",
+      "turn": 1,
+      "patch": "applied",
+      "validation": {
+        "stage": "regression",
+        "passed": false,
+        "reproducer_pass": true,
+        "failure_kind": "test_failure"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [
+        "LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll"
+      ],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "raw-plain",
+      "turn": 2,
+      "patch": "applied",
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": "error: conflicting declaration \u2018llvm::Type* VecTy\u2019"
+    },
+    {
+      "condition": "raw-plain",
+      "turn": 3,
+      "patch": "applied",
+      "validation": {
+        "stage": "regression",
+        "passed": false,
+        "reproducer_pass": true,
+        "failure_kind": "test_failure"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [
+        "LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll"
+      ],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "raw-plain",
+      "turn": 4,
+      "patch": "invalid_format",
+      "validation": {
+        "stage": "no_patch",
+        "passed": false,
+        "failure_kind": "patch_format"
+      },
+      "replay_error": "SEARCH was not found exactly in the original source excerpt.",
+      "matches_previous_candidate": true,
+      "regression_tests": [],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "raw-structured",
+      "turn": 1,
+      "patch": "applied",
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": "error: \u2018PossiblyNonNegatingInst\u2019 was not declared in this scope"
+    },
+    {
+      "condition": "raw-structured",
+      "turn": 2,
+      "patch": "applied",
+      "validation": {
+        "stage": "build",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [],
+      "build_diagnostic": "error: \u2018class llvm::Instruction\u2019 has no member named \u2018isSafeToSpeculativelyExecute\u2019"
+    },
+    {
+      "condition": "raw-structured",
+      "turn": 3,
+      "patch": "applied",
+      "validation": {
+        "stage": "regression",
+        "passed": false,
+        "reproducer_pass": true,
+        "failure_kind": "test_failure"
+      },
+      "replay_error": null,
+      "matches_previous_candidate": null,
+      "regression_tests": [
+        "LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll"
+      ],
+      "build_diagnostic": null
+    },
+    {
+      "condition": "raw-structured",
+      "turn": 4,
+      "patch": "invalid_format",
+      "validation": {
+        "stage": "no_patch",
+        "passed": false,
+        "failure_kind": "patch_format"
+      },
+      "replay_error": "SEARCH was not found exactly in the original source excerpt.",
+      "matches_previous_candidate": true,
+      "regression_tests": [],
+      "build_diagnostic": null
+    }
+  ]
+}

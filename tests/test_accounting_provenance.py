@@ -174,8 +174,12 @@ def test_completion_limit_fails_cleanly_before_plan_writes(monkeypatch, tmp_path
     assert not destination.exists()
 
 
-def test_prompt_literal_reformat_preserves_exact_model_input():
+def test_reviewed_v3b_prompt_identity_is_pinned():
     assert hashlib.sha256(runner.FORMAT_REQUIREMENT.encode()).hexdigest() == (
         "4eef2bd02f3d1d4a71e5257a2ff92267984c098e6f0ad08dc66172b5dbb73168")
     assert hashlib.sha256(runner.SYSTEM_PROMPT.encode()).hexdigest() == (
-        "95a36ffc45d1665b72e07e013f7e73cc7ed16a514509156a2044ce253468cc92")
+        "827218b3f3182a4c7b784cfbe0349b483707661a56095a4f1c8e3ed074fbfe41")
+    # The first failed pilot used 95a36ffc...; the deliberate v3b prompt
+    # change has its own protocol and cannot resume those records.
+    protocol = json.loads((ROOT / "data/repair_v3b_vertex_protocol.json").read_text())
+    assert protocol["prompt_hash"] == hashlib.sha256(runner.SYSTEM_PROMPT.encode()).hexdigest()

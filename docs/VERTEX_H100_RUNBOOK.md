@@ -1,5 +1,10 @@
 # Vertex repair study on the existing H100 container
 
+**Pilot diagnosis update:** The first MINIMAL pilot failed. Its exact saved
+patch/test logs were inspected; use [VERTEX_V3B_PILOT.md](VERTEX_V3B_PILOT.md)
+for the separate LOW-thinking pilot with a refreshed original edit base.
+Keep this first protocol/profile/results as historical development evidence.
+
 Written 2026-11-03. The operator's project `better-compiler` passed a native
 Vertex smoke check: model `gemini-3.1-flash-lite`, 5 input tokens, 2 visible
 output tokens, normal STOP, ON_DEMAND traffic. This establishes account/model

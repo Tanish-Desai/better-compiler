@@ -276,7 +276,7 @@ def main(argv=None) -> int:
                         "oracle_strictness": protocol["oracle_strictness"],
                         "temperature": protocol["temperature"],
                         "max_completion_tokens": protocol["max_completion_tokens"]}
-            for key in ("require_semantic_baseline", "condition_order"):
+            for key in ("require_semantic_baseline", "condition_order", "revision_context", "prompt_hash"):
                 if key in protocol:
                     expected[key] = protocol[key]
             for key in ("endpoint_url", "request_options", "api_limits", "llm_backend", "vertex_location"):

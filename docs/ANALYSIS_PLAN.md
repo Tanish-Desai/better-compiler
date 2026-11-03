@@ -485,3 +485,37 @@ identified separately and justified from development diagnostics, not selected
 main-sample outcomes. The accepted-pass no-op count on one bug is not a measure
 of actual IR shrinkage or a basis for changing the preregistered decision
 threshold. No primary comparison or model-floor claim follows from four cells.
+
+### 2026-11-03: inspected pilot diagnostics and prospective v3b follow-up
+
+The operator supplied complete same-turn diagnostic JSON, SHA256
+`8b81d175c03a15a8fd48ae10919d9ff4bb999325876b658519ae74c3d4fad8ce`.
+The saved evidence contains five candidate C++ build errors, five
+regression-failing turns across three conditions, three reproducer failures
+and three rejected edits. Every lit failure names
+`AArch64/scalarize-scalable.ll`: one fixed-vector cast asserts on scalable
+vectors and other candidates suppress valid scalarization. All three rejected
+SEARCH blocks match their immediately preceding candidate source, not the
+reset original; this was verified by offline edit replay only, not LLVM
+revalidation. The derived audit is
+`data/diagnostics/vertex_minimal_115575_pilot.json`. No environment-failure
+attribution or full fix is established by these candidate failures.
+
+Freeze `data/repair_v3b_vertex_protocol.json` before any new requests. Supply
+the original excerpt again in every retry and remove the ambiguous request to
+revise a previous patch as though it remained in the checkout. Preserve resets,
+exact matching, code window and validation. Select LOW thinking under the same
+model, 8,192 output allowance and 24,576 input guard. Prompt refresh and thinking
+change together; this pilot cannot estimate their separate effects. No
+reference repair, target-specific bounds hint or weakened regression is added.
+
+Keep the same fixed main sample, four arms, three trials, four turns, oracle
+budget and three-contrast analysis. Preserve all old data. The revised pilot
+has its own $0.50 ledger; the prior $1 pilot ledger remains intact. The revised
+main retains a separate $18 ceiling and requires sufficient verified eligible
+credits. This is a prospective feasibility follow-up on an excluded bug, not a
+selected extension of main trials. Require a completed four-cell pilot, a full
+pass and passing-patch review before main generation. If the revised pilot has
+zero full passes, do not spend the main schedule on this profile or add
+selected repetitions until it passes. No revised pilot or main run was
+executed from this development workspace. See `docs/VERTEX_V3B_PILOT.md`.
