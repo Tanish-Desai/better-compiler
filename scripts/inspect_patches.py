@@ -292,7 +292,7 @@ def main(argv=None) -> int:
     print("\nDoes the feedback change what the model writes?")
     print("  (only replies that actually edited something -- verbatim echoes "
           "carry no signal)")
-    print(f"  same bug+trial, ACROSS the 9 conditions   "
+    print(f"  same bug+trial, ACROSS the {len(by_condition)} conditions   "
           f"{report['similarity_across_conditions']:.3f}   "
           f"({len(across_conditions)} pairs, feedback differs)")
     trials_cell = (f"{report['similarity_across_trials']:.3f}"
@@ -324,7 +324,7 @@ def main(argv=None) -> int:
               "independent evidence about the model or feedback design.")
     elif gap <= 0.02:
         print("\n  -> Changing the feedback moves the model no more than "
-              "resampling the same prompt does. The nine conditions are "
+              "resampling the same prompt does. The observed conditions are "
               "similar under this descriptive text metric. Shared source "
               "dominates character similarity, so this does not establish "
               "that feedback has no effect or that another model cannot help.")

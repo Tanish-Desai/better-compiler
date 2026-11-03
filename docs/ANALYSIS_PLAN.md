@@ -465,3 +465,23 @@ previous diagnostic-exposure and small-sample limitations. No SLM-size,
 model-superiority, contamination-free or journal-acceptance claim is supported.
 Execute [VERTEX_H100_RUNBOOK.md](VERTEX_H100_RUNBOOK.md); no prior API study
 results may be silently relabelled as Vertex evidence.
+
+### 2026-11-03: first operator-reported Vertex repair pilot
+
+The operator reported four completed 115575 development cells (one per arm,
+one trial, four turns) with **zero full validation passes**. Of 16 turns, 13
+reached a build: five build failures and eight compiled candidates. Three
+replies were rejected as invalid-format edits; none were unchanged, empty or
+truncated. Three runs reached regression testing after a reproducer pass and
+failed there. The raw pilot records are not yet present in this development
+workspace, so the exact failing tests/patches have not been independently
+inspected. These reported counts establish neither an infrastructure fault
+nor a method improvement.
+
+The feasibility gate remains unmet. Inspect same-turn patches and regression
+logs before committing the 192-cell study or selecting a different model or
+thinking policy. Preserve this pilot. Any revised repair protocol must be
+identified separately and justified from development diagnostics, not selected
+main-sample outcomes. The accepted-pass no-op count on one bug is not a measure
+of actual IR shrinkage or a basis for changing the preregistered decision
+threshold. No primary comparison or model-floor claim follows from four cells.

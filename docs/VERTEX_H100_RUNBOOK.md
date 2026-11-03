@@ -144,6 +144,23 @@ check, and at least one full validation pass on this excluded development bug.
 If the pilot fails, diagnose it and retain its failures before the main sample.
 The smoke reply `OK.` alone does not establish a compiler-repair model floor.
 Inspect build failures, malformed/truncated edits and verifier fallbacks.
+
+For the exact patch and test diagnostics from each failed turn, with no new
+builds or model requests:
+
+```bash
+python3 scripts/diagnose_repairs.py results-vertex-v3-pilot --bug 115575 \
+    | tee run-provenance/vertex-pilot-diagnostics.txt
+python3 scripts/diagnose_repairs.py results-vertex-v3-pilot --bug 115575 --json \
+    > run-provenance/vertex-pilot-diagnostics.json
+```
+
+The console report is bounded; JSON preserves full saved replies, patches and
+feedback. An invalid-format label can include a SEARCH anchor that does not
+match the original excerpt. Missing code fences are expected for edit blocks.
+The final saved patch is not necessarily the earlier one that passed the
+reproducer, so use each turn's own diagnostics. Keep the original records.
+
 Record pilot API/build timings; use those to judge whether the study fits the
 remaining week. The planner initially caps compile jobs at eight and accounts
 for container CPU/RAM limits. No GPU availability is needed.
