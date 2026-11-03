@@ -1,5 +1,11 @@
 # Revised Vertex pilot after inspecting the first failed pilot
 
+> **Main-sweep recovery:** The v3b main schedule later halted before a model
+> request on bug 91369 because its unpatched Alive2 check timed out. Do not
+> restart that schedule unchanged. Use the same-tier reserve, no-model cohort
+> preflight and safe carry-forward steps in
+> [VERTEX_V3C_RECOVERY.md](VERTEX_V3C_RECOVERY.md).
+
 Written 2026-11-03. The first four-cell MINIMAL-thinking pilot remains a failed
 development pilot: zero full passes. Its supplied same-turn diagnostic JSON
 was inspected independently. The derived audit is
