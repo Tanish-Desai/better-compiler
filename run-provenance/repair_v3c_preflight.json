@@ -1,0 +1,362 @@
+{
+  "schema": 1,
+  "action": "baseline eligibility only; zero model generations",
+  "started_on": "2026-11-04",
+  "base_protocol": {
+    "path": "data/repair_v3c_vertex_protocol.json",
+    "id": "repair-v3c-vertex-low-reanchor-eligibility-2026-11-03",
+    "sha256": "99bf8b9881defc483b36b2585d3211fe9e8a293001fb1a3d0c84984153aaf8a6"
+  },
+  "parent_protocol": {
+    "path": "data/repair_v3b_vertex_protocol.json",
+    "id": "repair-v3b-vertex-low-reanchor-2026-11-03",
+    "sha256": "c9f6d91319217938e90c241f541c01ee0286824853be3cc29277e63cc3edc442"
+  },
+  "reused_completed_baselines_from": "results-vertex-v3b",
+  "reused_baseline_bugs": [
+    "114879",
+    "115149",
+    "118467"
+  ],
+  "candidate_results": [
+    {
+      "bug_id": "115149",
+      "eligible": true,
+      "method": "reused_completed_baseline",
+      "evidence": {
+        "source": "results-vertex-v3b",
+        "cells": 12,
+        "dataset_sha256": "b7d2d9d27fe0ee113a3af9ce3cb1d39f3edb9bc781fb3036ae45cbcafbd4f8d3"
+      }
+    },
+    {
+      "bug_id": "114879",
+      "eligible": true,
+      "method": "reused_completed_baseline",
+      "evidence": {
+        "source": "results-vertex-v3b",
+        "cells": 12,
+        "dataset_sha256": "82e88c6c8612b1e1268e2888c915ca43c4a4a7aae102abe1e77b30658736c20c"
+      }
+    },
+    {
+      "bug_id": "118467",
+      "eligible": true,
+      "method": "reused_completed_baseline",
+      "evidence": {
+        "source": "results-vertex-v3b",
+        "cells": 12,
+        "dataset_sha256": "ed1c7b867fede6dc57575d1438eea49a4767b2b8d9013a1daf5a0247f27e41bb"
+      }
+    },
+    {
+      "bug_id": "78621",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@umin_not_used",
+        "error_class": "Value mismatch"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "114738",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@test",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "167627",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@pr167627",
+        "error_class": "Value mismatch"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "91177",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@pr91177_non_inbounds_gep",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "82884",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@pr82884",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "112350",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@test_select_inverse_samesign_false_arm_rhsc_same_sign",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "173784",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@test_explicit_poison_leaves",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "161492",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@pr161492_2",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "179613",
+      "eligible": false,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "reason": "Unpatched failure is not an Alive2 witness; no model reply was requested."
+    },
+    {
+      "bug_id": "180870",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@not_invariant_samesign",
+        "error_class": "Value mismatch"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "89672",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@wrong_align_store",
+        "error_class": "Source is more defined than target"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "91957",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@main",
+        "error_class": "Value mismatch"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "114901",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@PR114901",
+        "error_class": "Target is more poisonous than source"
+      },
+      "reason": "clean unpatched Alive2 semantic violation"
+    },
+    {
+      "bug_id": "116553",
+      "eligible": true,
+      "method": "fresh_baseline_check",
+      "build_count": 1,
+      "build_failure_count": 0,
+      "baseline_validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      },
+      "semantic_baseline": {
+        "semantic_failure_confirmed": true,
+        "function": "@test_non_dedicated_exit",
+        "error_class": "Value mismatch"
+      },
+      "reason": "clean unpatched Alive2 semantic violation",
+      "cohort": "hard",
+      "reserve_for_primary": "179613"
+    }
+  ],
+  "selected_by_cohort": {
+    "medium": [
+      "115149",
+      "114879",
+      "118467",
+      "78621",
+      "114738",
+      "167627",
+      "91177",
+      "82884"
+    ],
+    "hard": [
+      "112350",
+      "173784",
+      "161492",
+      "116553",
+      "180870",
+      "89672",
+      "91957",
+      "114901"
+    ]
+  },
+  "eligible_bugs": [
+    "115149",
+    "114879",
+    "118467",
+    "78621",
+    "114738",
+    "167627",
+    "91177",
+    "82884",
+    "112350",
+    "173784",
+    "161492",
+    "116553",
+    "180870",
+    "89672",
+    "91957",
+    "114901"
+  ],
+  "status": "passed",
+  "resolved_protocol": {
+    "path": "run-provenance/repair_v3c_vertex_resolved.json",
+    "id": "repair-v3c-vertex-low-reanchor-eligibility-2026-11-03-resolved-3b0afec438",
+    "sha256": "3e1610da76bdb00835936f08b9bb690feedb90e9a5fb4318f67bf586db991712"
+  }
+}

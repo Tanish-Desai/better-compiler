@@ -1,0 +1,21 @@
+{
+  "identity_sha256": "3182ac30829b7e007568dbc7cc8817d10407d47de114d8be59a25c71e10449cb",
+  "identity": {
+    "model": "gemini-3.1-flash-lite",
+    "endpoint": "https://aiplatform.googleapis.com/v1/projects/better-compiler/locations/global/publishers/google/models",
+    "limits": {
+      "max_prompt_tokens": 24576,
+      "max_output_tokens": 8192,
+      "max_usd": 18.0,
+      "input_usd_per_million": 0.25,
+      "output_usd_per_million": 1.5
+    },
+    "serving_identity": "vertex-project:better-compiler:global:native-rest",
+    "request_options": {
+      "thinking_level": "LOW"
+    }
+  },
+  "reserved_micro_usd": 11649024,
+  "generation_attempts": 632,
+  "note": "Conservative reservations, not measured charges; no timeout refunds. Taxes and changed prices excluded."
+}

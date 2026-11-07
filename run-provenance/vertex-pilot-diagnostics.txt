@@ -1,0 +1,537 @@
+Saved-turn diagnostics only: no new validation, builds or model requests.
+Inspect the patch and feedback from the SAME turn; final certificate flags can be sticky.
+
+=== 115575.iraware-structured.json | gemini-3.1-flash-lite | trial 1 ===
+turn 1: applied; build; passed=False; reason=error
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-1
+@@ -29,6 +29,10 @@
+   if (IsConst0 && IsConst1)
+     return false;
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
++    return false;
++
++  // If the scalar operation can trap (e.g., div/rem), we cannot hoist it.
++  if (Instruction::isSafeToSpeculativelyExecute(&I))
+     return false;
+ 
+   // Bail for single insertion if it is a load.
+  Returned feedback for THIS turn:
+CMake Deprecation Warning at /root/better-compiler-runtime/work/llvm-project/cmake/Modules/CMakePolicy.cmake:6 (cmake_policy):
+  The OLD behavior for policy CMP0116 will be removed from a future version
+  of CMake.
+-- Targeting PowerPC
+-- Targeting NVPTX
+-- Failed to find LLVM FileCheck
+-- Google Benchmark version: v0.0.0, normalized to 0.0.0
+-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile
+-- Performing Test HAVE_POSIX_REGEX -- success
+-- Performing Test HAVE_STEADY_CLOCK -- success
+-- Performing Test HAVE_PTHREAD_AFFINITY -- success
+-- Configuring done (2.5s)
+-- Generating done (1.3s)
+-- Build files have been written to: /root/better-compiler-runtime/llvm-build
+
+FAILED: lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o 
+ccache /usr/bin/g++-13 -DGTEST_HAS_RTTI=0 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Transforms/Vectorize -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -fno-lifetime-dse -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -MF lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o.d -o lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp: In member function ‘bool {anonymous}::VectorCombine::scalarizeBinopOrCmp(llvm::Instruction&)’:
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:956:20: error: ‘isSafeToSpeculativelyExecute’ is not a member of ‘llvm::Instruction’
+  956 |   if (Instruction::isSafeToSpeculativelyExecute(&I))
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ninja: build stopped: subcommand failed.
+
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 2: applied; regression; passed=False; reason=test_failure
+  Failed tests: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (1 of 52)
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-2
+@@ -29,6 +29,10 @@
+   if (IsConst0 && IsConst1)
+     return false;
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
++    return false;
++
++  // If the scalar operation can trap (e.g., div/rem), we cannot hoist it.
++  if (!isSafeToSpeculativelyExecute(&I))
+     return false;
+ 
+   // Bail for single insertion if it is a load.
+  Returned feedback for THIS turn:
+Command '['/root/better-compiler-runtime/llvm-build/bin/llvm-lit', '--no-progress-bar', '-j', '8', '--max-failures', '1', '--order', 'lexical', '-sv', '/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine']' returned non-zero exit status 1.
+-- Testing: 52 tests, 8 workers --
+FAIL: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (1 of 52)
+******************** TEST 'LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll' FAILED ********************
+Exit Code: 1
+
+Command Output (stderr):
+--
+RUN: at line 2: /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll | /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll:28:15: error: CHECK-NEXT: expected string not found in input
+; CHECK-NEXT: [[R_SCALAR:%.*]] = udiv i32 [[X:%.*]], [[Y:%.*]]
+              ^
+<stdin>:14:52: note: scanning from here
+define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) {
+                                                   ^
+
+Input file: <stdin>
+Check file: /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+
+-dump-input=help explains the following input dump.
+
+        13:  
+        14: define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) { 
+next:28                                                        X~~~~~~~~~~~~~~~~~ error: no match found
+        15:  %splatx = insertelement <vscale x 4 x i32> poison, i32 %x, i64 0 
+next:28     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        16:  %splaty = insertelement <vscale x 4 x i32> poison, i32 %y, i64 0 
+next:28     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        17:  %r = udiv <vscale x 4 x i32> %splatx, %splaty 
+next:28     ~~~~~~~~~~~~~~~~~
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 3: invalid_format; no_patch; passed=False; reason=patch_format
+  Edit replay: SEARCH was not found exactly in the original source excerpt.
+  Rejected model reply:
+<<<<<<< SEARCH
+  // If the scalar operation can trap (e.g., div/rem), we cannot hoist it.
+  if (!isSafeToSpeculativelyExecute(&I))
+    return false;
+
+  // Bail for single insertion if it is a load.
+=======
+  // If the scalar operation can trap (e.g., div/rem), we cannot hoist it,
+  // unless the vector operation is already safe.
+  if (!isSafeToSpeculativelyExecute(&I) && !isSafeToSpeculativelyExecute(&I))
+    return false;
+
+  // Bail for single insertion if it is a load.
+>>>>>>> REPLACE
+  Returned feedback for THIS turn:
+No source was changed: SEARCH was not found exactly in the original source excerpt.
+Return exact SEARCH/REPLACE blocks against the original excerpt.
+turn 4: applied; regression; passed=False; reason=test_failure
+  Failed tests: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (1 of 52)
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-4
+@@ -29,6 +29,11 @@
+   if (IsConst0 && IsConst1)
+     return false;
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
++    return false;
++
++  // If the scalar operation can trap (e.g., div/rem), we cannot hoist it.
++  // We only check the original instruction, as it is already being executed.
++  if (!isSafeToSpeculativelyExecute(&I))
+     return false;
+ 
+   // Bail for single insertion if it is a load.
+  Returned feedback for THIS turn:
+Command '['/root/better-compiler-runtime/llvm-build/bin/llvm-lit', '--no-progress-bar', '-j', '8', '--max-failures', '1', '--order', 'lexical', '-sv', '/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine']' returned non-zero exit status 1.
+-- Testing: 52 tests, 8 workers --
+FAIL: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (1 of 52)
+******************** TEST 'LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll' FAILED ********************
+Exit Code: 1
+
+Command Output (stderr):
+--
+RUN: at line 2: /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll | /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll:28:15: error: CHECK-NEXT: expected string not found in input
+; CHECK-NEXT: [[R_SCALAR:%.*]] = udiv i32 [[X:%.*]], [[Y:%.*]]
+              ^
+<stdin>:14:52: note: scanning from here
+define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) {
+                                                   ^
+
+Input file: <stdin>
+Check file: /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+
+-dump-input=help explains the following input dump.
+
+        13:  
+        14: define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) { 
+next:28                                                        X~~~~~~~~~~~~~~~~~ error: no match found
+        15:  %splatx = insertelement <vscale x 4 x i32> poison, i32 %x, i64 0 
+next:28     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        16:  %splaty = insertelement <vscale x 4 x i32> poison, i32 %y, i64 0 
+next:28     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        17:  %r = udiv <vscale x 4 x i32> %splatx, %splaty 
+next:28     ~~~~~~~~~~~~~~~~~
+[Console excerpt shortened; --json retains the complete saved text.]
+
+=== 115575.llvmreduce-structured.json | gemini-3.1-flash-lite | trial 1 ===
+turn 1: applied; build; passed=False; reason=error
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-1
+@@ -31,12 +31,15 @@
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
+     return false;
+ 
+-  // Bail for single insertion if it is a load.
++  // Bail for single insertion if it is a load or a potentially trapping instruction.
+   // TODO: Handle this once getVectorInstrCost can cost for load/stores.
+   auto *I0 = dyn_cast_or_null<Instruction>(V0);
+   auto *I1 = dyn_cast_or_null<Instruction>(V1);
+-  if ((IsConst0 && I1 && I1->mayReadFromMemory()) ||
+-      (IsConst1 && I0 && I0->mayReadFromMemory()))
++  if ((IsConst0 && I1 && (I1->mayReadFromMemory() || I1->isSafeToSpeculativelyExecute())) ||
++      (IsConst1 && I0 && (I0->mayReadFromMemory() || I0->isSafeToSpeculativelyExecute())))
++    return false;
++  if ((IsConst0 && I1 && !isSafeToSpeculativelyExecute(I1)) ||
++      (IsConst1 && I0 && !isSafeToSpeculativelyExecute(I0)))
+     return false;
+ 
+   uint64_t Index = IsConst0 ? Index1 : Index0;
+  Returned feedback for THIS turn:
+CMake Deprecation Warning at /root/better-compiler-runtime/work/llvm-project/cmake/Modules/CMakePolicy.cmake:6 (cmake_policy):
+  The OLD behavior for policy CMP0116 will be removed from a future version
+  of CMake.
+-- Targeting PowerPC
+-- Targeting NVPTX
+-- Failed to find LLVM FileCheck
+-- Google Benchmark version: v0.0.0, normalized to 0.0.0
+-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile
+-- Performing Test HAVE_POSIX_REGEX -- success
+-- Performing Test HAVE_STEADY_CLOCK -- success
+-- Performing Test HAVE_PTHREAD_AFFINITY -- success
+-- Configuring done (3.6s)
+-- Generating done (1.5s)
+-- Build files have been written to: /root/better-compiler-runtime/llvm-build
+
+FAILED: lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o 
+ccache /usr/bin/g++-13 -DGTEST_HAS_RTTI=0 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Transforms/Vectorize -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -fno-lifetime-dse -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -MF lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o.d -o lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp: In member function ‘bool {anonymous}::VectorCombine::scalarizeBinopOrCmp(llvm::Instruction&)’:
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:959:58: error: ‘class llvm::Instruction’ has no member named ‘isSafeToSpeculativelyExecute’
+  959 |   if ((IsConst0 && I1 && (I1->mayReadFromMemory() || I1->isSafeToSpeculativelyExecute())) ||
+      |                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:960:58: error: ‘class llvm::Instruction’ has no
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 2: applied; reproducer; passed=False; reason=error
+turn 3: applied; reproducer; passed=False; reason=error
+turn 4: applied; reproducer; passed=False; reason=error
+
+=== 115575.raw-plain.json | gemini-3.1-flash-lite | trial 1 ===
+turn 1: applied; regression; passed=False; reason=test_failure
+  Failed tests: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (52 of 52)
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-1
+@@ -22,6 +22,10 @@
+   if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),
+                                m_ConstantInt(Index1))) &&
+       !match(Ins1, m_Constant(VecC1)))
++    return false;
++
++  unsigned NumElements = cast<FixedVectorType>(I.getType())->getNumElements();
++  if ((V0 && Index0 >= NumElements) || (V1 && Index1 >= NumElements))
+     return false;
+ 
+   bool IsConst0 = !V0;
+  Returned feedback for THIS turn:
+Command '['/root/better-compiler-runtime/llvm-build/bin/llvm-lit', '--no-progress-bar', '-j', '8', '--max-failures', '1', '--order', 'lexical', '-sv', '/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine']' returned non-zero exit status 1.
+-- Testing: 52 tests, 8 workers --
+FAIL: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (52 of 52)
+******************** TEST 'LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll' FAILED ********************
+Exit Code: 2
+
+Command Output (stderr):
+--
+RUN: at line 2: /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll | /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+opt: /root/better-compiler-runtime/work/llvm-project/llvm/include/llvm/Support/Casting.h:578: decltype(auto) llvm::cast(From*) [with To = FixedVectorType; From = Type]: Assertion `isa<To>(Val) && "cast<Ty>() argument of incompatible type!"' failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+1.	Running pass "function(vector-combine)" on module "/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll"
+2.	Running pass "vector-combine" on function "scalarize_scalable"
+ #0 0x0000779ca1dfd922 llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) /root/better-compiler-runtime/work/llvm-project/llvm/lib/Support/Unix/Signals.inc:727:3
+ #1 0x0000779ca1dfb2ef llvm::sys::RunSignalHandlers() /root/better-compiler-runtime/work/llvm-project/llvm/lib/Support/Signals.cpp:105:20
+ #2 0x0000779ca1dfb686 SignalHandler(int) /root/better-compiler-runtime/work/llvm-project/llvm/lib/Suppor
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 2: applied; build; passed=False; reason=error
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-2
+@@ -22,6 +22,13 @@
+   if (!match(Ins1, m_InsertElt(m_Constant(VecC1), m_Value(V1),
+                                m_ConstantInt(Index1))) &&
+       !match(Ins1, m_Constant(VecC1)))
++    return false;
++
++  auto *VecTy = dyn_cast<FixedVectorType>(I.getType());
++  if (!VecTy)
++    return false;
++  uint64_t NumElements = VecTy->getNumElements();
++  if ((V0 && Index0 >= NumElements) || (V1 && Index1 >= NumElements))
+     return false;
+ 
+   bool IsConst0 = !V0;
+  Returned feedback for THIS turn:
+CMake Deprecation Warning at /root/better-compiler-runtime/work/llvm-project/cmake/Modules/CMakePolicy.cmake:6 (cmake_policy):
+  The OLD behavior for policy CMP0116 will be removed from a future version
+  of CMake.
+-- Targeting PowerPC
+-- Targeting NVPTX
+-- Failed to find LLVM FileCheck
+-- Google Benchmark version: v0.0.0, normalized to 0.0.0
+-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile
+-- Performing Test HAVE_POSIX_REGEX -- success
+-- Performing Test HAVE_STEADY_CLOCK -- success
+-- Performing Test HAVE_PTHREAD_AFFINITY -- success
+-- Configuring done (2.5s)
+-- Generating done (1.5s)
+-- Build files have been written to: /root/better-compiler-runtime/llvm-build
+
+FAILED: lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o 
+ccache /usr/bin/g++-13 -DGTEST_HAS_RTTI=0 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Transforms/Vectorize -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -fno-lifetime-dse -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -MF lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o.d -o lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp: In member function ‘bool {anonymous}::VectorCombine::scalarizeBinopOrCmp(llvm::Instruction&)’:
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:972:9: error: conflicting declaration ‘llvm::Type* VecTy’
+  972 |   Type *VecTy = I.getType();
+      |         ^~~~~
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:948:9: note: previous declaration as ‘llvm::FixedVectorType* VecTy’
+  948 |   auto *VecTy = dyn_cast<FixedVectorType>(I.getType());
+      |         ^~~~~
+ninja: build stopped: subcommand failed.
+
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 3: applied; regression; passed=False; reason=test_failure
+  Failed tests: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (4 of 52)
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-3
+@@ -31,6 +31,13 @@
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
+     return false;
+ 
++  auto *VecTy = dyn_cast<FixedVectorType>(I.getType());
++  if (!VecTy)
++    return false;
++  uint64_t NumElements = VecTy->getNumElements();
++  if ((V0 && Index0 >= NumElements) || (V1 && Index1 >= NumElements))
++    return false;
++
+   // Bail for single insertion if it is a load.
+   // TODO: Handle this once getVectorInstrCost can cost for load/stores.
+   auto *I0 = dyn_cast_or_null<Instruction>(V0);
+@@ -41,7 +48,6 @@
+ 
+   uint64_t Index = IsConst0 ? Index1 : Index0;
+   Type *ScalarTy = IsConst0 ? V1->getType() : V0->getType();
+-  Type *VecTy = I.getType();
+   assert(VecTy->isVectorTy() &&
+          (IsConst0 || IsConst1 || V0->getType() == V1->getType()) &&
+          (ScalarTy->isIntegerTy() || ScalarTy->isFloatingPointTy() ||
+  Returned feedback for THIS turn:
+Command '['/root/better-compiler-runtime/llvm-build/bin/llvm-lit', '--no-progress-bar', '-j', '8', '--max-failures', '1', '--order', 'lexical', '-sv', '/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine']' returned non-zero exit status 1.
+-- Testing: 52 tests, 8 workers --
+FAIL: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (4 of 52)
+******************** TEST 'LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll' FAILED ********************
+Exit Code: 1
+
+Command Output (stderr):
+--
+RUN: at line 2: /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll | /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll:7:15: error: CHECK-NEXT: expected string not found in input
+; CHECK-NEXT: [[DOTSCALAR:%.*]] = fadd fast float [[TMP1:%.*]], [[TMP0:%.*]]
+              ^
+<stdin>:5:7: note: scanning from here
+entry:
+      ^
+<stdin>:10:2: note: possible intended match here
+ %4 = fadd fast <vscale x 4 x float> %broadcast.splatinsert28, %broadcast.splatinsert
+ ^
+/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll:28:15: error: CHECK-NEXT: expected string not found in input
+; CHECK-NEXT: [[R_SCALAR:%.*]] = udiv i32 [[X:%.*]], [[Y:%.*]]
+              ^
+<stdin>:17:52: note: scanning from here
+define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) {
+                                                   ^
+/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll:40:15: error: CHECK-NEXT: expected string not found in input
+; CHECK-NEXT: [[R_SCALAR:%.*]] = icmp sgt i32 [[X:%.*]], [[Y:%.*]]
+              ^
+<stdin>:24:51: note: scanning from here
+define <vscale x 4 x i1> @scalarize_scalable_icmp(i
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 4: invalid_format; no_patch; passed=False; reason=patch_format
+  Edit replay: SEARCH was not found exactly in the original source excerpt.
+  Rejected model reply:
+<<<<<<< SEARCH
+  auto *VecTy = dyn_cast<FixedVectorType>(I.getType());
+  if (!VecTy)
+    return false;
+  uint64_t NumElements = VecTy->getNumElements();
+  if ((V0 && Index0 >= NumElements) || (V1 && Index1 >= NumElements))
+    return false;
+=======
+  auto *VecTy = dyn_cast<FixedVectorType>(I.getType());
+  if (VecTy) {
+    uint64_t NumElements = VecTy->getNumElements();
+    if ((V0 && Index0 >= NumElements) || (V1 && Index1 >= NumElements))
+      return false;
+  }
+>>>>>>> REPLACE
+  Returned feedback for THIS turn:
+No source was changed: SEARCH was not found exactly in the original source excerpt.
+Return exact SEARCH/REPLACE blocks against the original excerpt.
+
+=== 115575.raw-structured.json | gemini-3.1-flash-lite | trial 1 ===
+turn 1: applied; build; passed=False; reason=error
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-1
+@@ -29,6 +29,10 @@
+   if (IsConst0 && IsConst1)
+     return false;
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
++    return false;
++
++  // Bail if we might introduce UB by scalarizing a potentially trapping op.
++  if (isa<PossiblyNonNegatingInst>(&I))
+     return false;
+ 
+   // Bail for single insertion if it is a load.
+  Returned feedback for THIS turn:
+CMake Deprecation Warning at /root/better-compiler-runtime/work/llvm-project/cmake/Modules/CMakePolicy.cmake:6 (cmake_policy):
+  The OLD behavior for policy CMP0116 will be removed from a future version
+  of CMake.
+-- Targeting PowerPC
+-- Targeting NVPTX
+-- Failed to find LLVM FileCheck
+-- Google Benchmark version: v0.0.0, normalized to 0.0.0
+-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile
+-- Performing Test HAVE_POSIX_REGEX -- success
+-- Performing Test HAVE_STEADY_CLOCK -- success
+-- Performing Test HAVE_PTHREAD_AFFINITY -- success
+-- Configuring done (2.4s)
+-- Generating done (1.3s)
+-- Build files have been written to: /root/better-compiler-runtime/llvm-build
+
+FAILED: lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o 
+ccache /usr/bin/g++-13 -DGTEST_HAS_RTTI=0 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Transforms/Vectorize -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -fno-lifetime-dse -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -MF lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o.d -o lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp: In member function ‘bool {anonymous}::VectorCombine::scalarizeBinopOrCmp(llvm::Instruction&)’:
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:956:11: error: ‘PossiblyNonNegatingInst’ was not declared in this scope
+  956 |   if (isa<PossiblyNonNegatingInst>(&I))
+      |           ^~~~~~~~~~~~~~~~~~~~~~~
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:956:35: error: no matching function for call to ‘isa<<expression error> >(llvm::Instruction*)’
+  956 |   if (isa<PossiblyNonNegatingInst>(&I))
+      |       ~~~~~~~~~~~~~~~
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 2: applied; build; passed=False; reason=error
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-2
+@@ -29,6 +29,10 @@
+   if (IsConst0 && IsConst1)
+     return false;
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
++    return false;
++
++  // Bail if we might introduce UB by scalarizing a potentially trapping op.
++  if (I.isSafeToSpeculativelyExecute())
+     return false;
+ 
+   // Bail for single insertion if it is a load.
+  Returned feedback for THIS turn:
+CMake Deprecation Warning at /root/better-compiler-runtime/work/llvm-project/cmake/Modules/CMakePolicy.cmake:6 (cmake_policy):
+  The OLD behavior for policy CMP0116 will be removed from a future version
+  of CMake.
+-- Targeting PowerPC
+-- Targeting NVPTX
+-- Failed to find LLVM FileCheck
+-- Google Benchmark version: v0.0.0, normalized to 0.0.0
+-- Performing Test HAVE_GNU_POSIX_REGEX -- failed to compile
+-- Performing Test HAVE_POSIX_REGEX -- success
+-- Performing Test HAVE_STEADY_CLOCK -- success
+-- Performing Test HAVE_PTHREAD_AFFINITY -- success
+-- Configuring done (2.4s)
+-- Generating done (1.3s)
+-- Build files have been written to: /root/better-compiler-runtime/llvm-build
+
+FAILED: lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o 
+ccache /usr/bin/g++-13 -DGTEST_HAS_RTTI=0 -DLLVM_EXPORTS -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/root/better-compiler-runtime/llvm-build/lib/Transforms/Vectorize -I/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize -I/root/better-compiler-runtime/llvm-build/include -I/root/better-compiler-runtime/work/llvm-project/llvm/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -fno-lifetime-dse -w -fdiagnostics-color -ffunction-sections -fdata-sections -O2 -g -DNDEBUG -std=c++17 -fPIC  -fno-exceptions -funwind-tables -fno-rtti -UNDEBUG -MD -MT lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -MF lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o.d -o lib/Transforms/Vectorize/CMakeFiles/LLVMVectorize.dir/VectorCombine.cpp.o -c /root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp: In member function ‘bool {anonymous}::VectorCombine::scalarizeBinopOrCmp(llvm::Instruction&)’:
+/root/better-compiler-runtime/work/llvm-project/llvm/lib/Transforms/Vectorize/VectorCombine.cpp:956:9: error: ‘class llvm::Instruction’ has no member named ‘isSafeToSpeculativelyExecute’
+  956 |   if (I.isSafeToSpeculativelyExecute())
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ninja: build stopped: subcommand failed.
+
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 3: applied; regression; passed=False; reason=test_failure
+  Failed tests: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (1 of 52)
+  Applied patch for THIS turn:
+--- original-excerpt
++++ turn-3
+@@ -29,6 +29,10 @@
+   if (IsConst0 && IsConst1)
+     return false;
+   if (!IsConst0 && !IsConst1 && Index0 != Index1)
++    return false;
++
++  // Bail if we might introduce UB by scalarizing a potentially trapping op.
++  if (!isSafeToSpeculativelyExecute(&I))
+     return false;
+ 
+   // Bail for single insertion if it is a load.
+  Returned feedback for THIS turn:
+Command '['/root/better-compiler-runtime/llvm-build/bin/llvm-lit', '--no-progress-bar', '-j', '8', '--max-failures', '1', '--order', 'lexical', '-sv', '/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine']' returned non-zero exit status 1.
+-- Testing: 52 tests, 8 workers --
+FAIL: LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll (1 of 52)
+******************** TEST 'LLVM :: Transforms/VectorCombine/AArch64/scalarize-scalable.ll' FAILED ********************
+Exit Code: 1
+
+Command Output (stderr):
+--
+RUN: at line 2: /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll | /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/opt -passes=vector-combine -S /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
++ /root/better-compiler-runtime/llvm-build/bin/FileCheck /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+/root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll:28:15: error: CHECK-NEXT: expected string not found in input
+; CHECK-NEXT: [[R_SCALAR:%.*]] = udiv i32 [[X:%.*]], [[Y:%.*]]
+              ^
+<stdin>:14:52: note: scanning from here
+define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) {
+                                                   ^
+
+Input file: <stdin>
+Check file: /root/better-compiler-runtime/work/llvm-project/llvm/test/Transforms/VectorCombine/AArch64/scalarize-scalable.ll
+
+-dump-input=help explains the following input dump.
+
+        13:  
+        14: define <vscale x 4 x i32> @scalarize_scalable_udiv(i32 %x, i32 %y) { 
+next:28                                                        X~~~~~~~~~~~~~~~~~ error: no match found
+        15:  %splatx = insertelement <vscale x 4 x i32> poison, i32 %x, i64 0 
+next:28     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        16:  %splaty = insertelement <vscale x 4 x i32> poison, i32 %y, i64 0 
+next:28     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        17:  %r = udiv <vscale x 4 x i32> %splatx, %splaty 
+next:28     ~~~~~~~~~~~~~~~~~
+[Console excerpt shortened; --json retains the complete saved text.]
+turn 4: invalid_format; no_patch; passed=False; reason=patch_format
+  Edit replay: SEARCH was not found exactly in the original source excerpt.
+  Rejected model reply:
+<<<<<<< SEARCH
+  // Bail if we might introduce UB by scalarizing a potentially trapping op.
+  if (!isSafeToSpeculativelyExecute(&I))
+    return false;
+
+  // Bail for single insertion if it is a load.
+=======
+  // Bail if we might introduce UB by scalarizing a potentially trapping op.
+  // Scalable vectors cannot be fully scalarized.
+  if (I.getType()->isScalableTy() || !isSafeToSpeculativelyExecute(&I))
+    return false;
+
+  // Bail for single insertion if it is a load.
+>>>>>>> REPLACE
+  Returned feedback for THIS turn:
+No source was changed: SEARCH was not found exactly in the original source excerpt.
+Return exact SEARCH/REPLACE blocks against the original excerpt.

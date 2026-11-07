@@ -1,0 +1,255 @@
+{
+  "bug_id": "173784",
+  "condition": "raw-structured",
+  "model": "gemini-3.1-flash-lite",
+  "max_iterations": 4,
+  "trial": 2,
+  "totals": {
+    "iterations": 2,
+    "fixed": false,
+    "prompt_tokens_est": 465.0,
+    "oracle_calls": 0.0,
+    "reduction_seconds": 0.0,
+    "feedback_refresh_calls": 0.0,
+    "feedback_refresh_seconds": 0.0,
+    "feedback_refresh_tool_failures": 0.0,
+    "reduction_and_refresh_calls": 0.0,
+    "reduction_and_refresh_seconds": 0.0,
+    "llm_prompt_tokens": 5806,
+    "llm_completion_tokens": 15653,
+    "wall_seconds": 137.037
+  },
+  "iterations": [
+    {
+      "index": 0,
+      "condition": "raw-structured",
+      "fixed": false,
+      "patch": "truncated",
+      "seconds": 26.517,
+      "feedback": {
+        "condition": "raw-structured",
+        "prompt_chars": 1857,
+        "prompt_tokens_est": 465,
+        "shown_lines": 13,
+        "shown_instructions": 7,
+        "shown_blocks": 2,
+        "shown_values": 9,
+        "shown_chars": 416,
+        "original_lines": 13,
+        "original_instructions": 7,
+        "original_blocks": 2,
+        "original_values": 9,
+        "original_chars": 416,
+        "verifier_args": [],
+        "feedback_refresh_calls": 0,
+        "feedback_refresh_seconds": 0.0,
+        "feedback_refresh_tool_failures": 0,
+        "reduction_fallback": false,
+        "displayed_pair_changed": false,
+        "counterexample": true,
+        "failed_test": "test_explicit_poison_leaves"
+      },
+      "llm": {
+        "prompt_tokens": 2116,
+        "completion_tokens": 8188,
+        "finish_reason": "length",
+        "response_model": "gemini-3.1-flash-lite",
+        "response_id": "9Sbrau34M5zRi9sPoOSOwAk",
+        "system_fingerprint": null,
+        "provider": "google-vertex-ai",
+        "reasoning_tokens": 7860,
+        "cached_prompt_tokens": null,
+        "provider_reported_cost": null,
+        "counted_prompt_tokens": 2116,
+        "reserved_micro_usd": 18432,
+        "cumulative_reserved_micro_usd": 6524928
+      },
+      "validation": {
+        "stage": "no_patch",
+        "passed": false,
+        "failure_kind": "output_limit"
+      }
+    },
+    {
+      "index": 1,
+      "condition": "raw-structured",
+      "fixed": false,
+      "patch": "applied",
+      "seconds": 60.722,
+      "feedback": {
+        "condition": "raw-structured",
+        "counterexample": false,
+        "prompt_chars": 90
+      },
+      "llm": {
+        "prompt_tokens": 3690,
+        "completion_tokens": 7465,
+        "finish_reason": "stop",
+        "response_model": "gemini-3.1-flash-lite",
+        "response_id": "ECfraqiMA4nQi9sPzYK86AQ",
+        "system_fingerprint": null,
+        "provider": "google-vertex-ai",
+        "reasoning_tokens": 7238,
+        "cached_prompt_tokens": null,
+        "provider_reported_cost": null,
+        "counted_prompt_tokens": 3690,
+        "reserved_micro_usd": 18432,
+        "cumulative_reserved_micro_usd": 6543360
+      },
+      "validation": {
+        "stage": "reproducer",
+        "passed": false,
+        "reproducer_pass": false,
+        "failure_kind": "error"
+      }
+    }
+  ],
+  "certificate": {
+    "wall_time": 77.38374423980713,
+    "knowledge": [
+      [
+        "base_model",
+        "2023-12-31+0000"
+      ],
+      [
+        "is_single_func_fix",
+        "2025-12-28+0000"
+      ],
+      [
+        "hint:components",
+        "2025-12-28+0000"
+      ],
+      [
+        "alive2",
+        "2025-12-28+0000"
+      ],
+      [
+        "hint:line_level_bug_locations",
+        "2025-12-28+0000"
+      ],
+      [
+        "hint:issue",
+        "2025-12-28+0000"
+      ]
+    ],
+    "build_count": 2,
+    "build_failure_count": 0,
+    "fast_check_count": 1,
+    "full_check_count": 1,
+    "fast_check_pass": false,
+    "full_check_pass": false,
+    "last_validation": {
+      "stage": "reproducer",
+      "passed": false,
+      "reproducer_pass": false,
+      "failure_kind": "error"
+    },
+    "patch": "",
+    "log": {
+      "model": "gemini-3.1-flash-lite",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an LLVM maintainer.\nYou are fixing a middle-end bug in the LLVM project.\nMake the smallest targeted change that addresses the reported failure. Preserve unrelated optimizations and IR invariants. A valid repair must pass both the reproducer and the existing regression tests. When tests fail, use their specific diagnostics to produce a complete revised patch against the original excerpt, including earlier changes you wish to retain. The checkout is reset before each attempt: previous additions are absent. do not disable the optimization wholesale or weaken the tests.\nReturn only the smallest targeted edits in this exact format:\n<<<<<<< SEARCH\nexact existing lines from the ORIGINAL source excerpt\n=======\nreplacement lines\n>>>>>>> REPLACE\nYou may return multiple non-overlapping blocks. SEARCH must match exactly once\nin the original excerpt, including indentation. Include enough unchanged context\nto make each SEARCH unique. Every turn edits the ORIGINAL code, not your previous\nreply. The excerpt may start or end inside a function; never replace the whole\nexcerpt with a complete function. Do not return explanations, Markdown fences,\nellipsis placeholders, an unchanged block, or comment-only/format-only edits.\n"
+        },
+        {
+          "role": "user",
+          "content": "This is a miscompilation bug in SLPVectorizer.\nIssue title: [SLP] Miscompilation when vectorizing boolean selects with poison\nDetailed information:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @test_explicit_poison_leaves -- Target is more poisonous than source\n\nVIOLATED PROPERTY:\n    poison refinement\n\nSOURCE (pre-transformation IR):\ndefine i1 @test_explicit_poison_leaves(i1 %a, i1 %b) {\n  %op1 = select i1 %a, i1 true, i1 poison\n  %op2 = select i1 %b, i1 true, i1 poison\n  %res = select i1 %op1, i1 true, i1 %op2\n  ret i1 %res\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @test_explicit_poison_leaves(i1 %a, i1 %b) {\n  %op.rdx = select i1 %a, i1 true, i1 poison\n  %op.rdx1 = select i1 %b, i1 true, i1 %op.rdx\n  ret i1 %op.rdx1\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %op.rdx: %op.rdx = select i1 %a, i1 true, i1 poison\n    %op.rdx1: %op.rdx1 = select i1 %b, i1 true, i1 %op.rdx\n  only in source:\n    %op1: %op1 = select i1 %a, i1 true, i1 poison\n    %op2: %op2 = select i1 %b, i1 true, i1 poison\n    %res: %res = select i1 %op1, i1 true, i1 %op2\n\nCRITICAL VALUES:\n    %op.rdx\n    %op.rdx1\n    %op1\n    %op2\n    %res\n\nDEPENDENCY CHAIN (source):\n    %op1 = select i1 %a, i1 true, i1 poison\n    %op2 = select i1 %b, i1 true, i1 poison\n    %res = select i1 %op1, i1 true, i1 %op2\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i1 %a = #x1 (1)\n    i1 %b = poison\n\nDIVERGENCE (source vs target on that input):\n    %op.rdx: source = (not computed)   target = #x1 (1)\n    %op.rdx1: source = (not computed)   target = poison\n\nINTERPRETATION:\n    A transformation may only make a program *less* poisonous. Wherever the source produces a well-defined value, the target must produce the same value -- it may not produce poison.\n    On the input above the source yields #x1 (1) while the target yields poison.\n    The earliest reported divergence is at %op.rdx.\n\nPlease modify the following code in llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp to fix the bug:\n```cpp\n    if (!VectorizedTree) {\n      if (!CheckForReusedReductionOps) {\n        for (ReductionOpsType &RdxOps : ReductionOps)\n          for (Value *RdxOp : RdxOps)\n            V.analyzedReductionRoot(cast<Instruction>(RdxOp));\n      }\n      return nullptr;\n    }\n\n    // Reorder operands of bool logical op in the natural order to avoid\n    // possible problem with poison propagation. If not possible to reorder\n    // (both operands are originally RHS), emit an extra freeze instruction\n    // for the LHS operand.\n    // I.e., if we have original code like this:\n    // RedOp1 = select i1 ?, i1 LHS, i1 false\n    // RedOp2 = select i1 RHS, i1 ?, i1 false\n\n    // Then, we swap LHS/RHS to create a new op that matches the poison\n    // semantics of the original code.\n\n    // If we have original code like this and both values could be poison:\n    // RedOp1 = select i1 ?, i1 LHS, i1 false\n    // RedOp2 = select i1 ?, i1 RHS, i1 false\n\n    // Then, we must freeze LHS in the new op.\n    auto FixBoolLogicalOps =\n        [&, VectorizedTree](Value *&LHS, Value *&RHS, Instruction *RedOp1,\n                            Instruction *RedOp2, bool InitStep) {\n          if (!AnyBoolLogicOp)\n            return;\n          if (isBoolLogicOp(RedOp1) && ((!InitStep && LHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp1, 0) == LHS ||\n                                        isGuaranteedNotToBePoison(LHS, AC)))\n            return;\n          if (isBoolLogicOp(RedOp2) && ((!InitStep && RHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp2, 0) == RHS ||\n                                        isGuaranteedNotToBePoison(RHS, AC))) {\n            std::swap(LHS, RHS);\n            return;\n          }\n          if (LHS != VectorizedTree)\n            LHS = Builder.CreateFreeze(LHS);\n        };\n    // Finish the reduction.\n    // Need to add extra arguments and not vectorized possible reduction values.\n    // Try to avoid dependencies between the scalar remainders after reductions.\n    auto FinalGen = [&](ArrayRef<std::pair<Instruction *, Value *>> InstVals,\n                        bool InitStep) {\n      unsigned Sz = InstVals.size();\n      SmallVector<std::pair<Instruction *, Value *>> ExtraReds(Sz / 2 + Sz % 2);\n      for (unsigned I = 0, E = (Sz / 2) * 2; I < E; I += 2) {\n        Instruction *RedOp = InstVals[I + 1].first;\n        Builder.SetCurrentDebugLocation(RedOp->getDebugLoc());\n        Value *RdxVal1 = InstVals[I].second;\n        Value *StableRdxVal1 = RdxVal1;\n        auto It1 = TrackedVals.find(RdxVal1);\n        if (It1 != TrackedVals.end())\n          StableRdxVal1 = It1->second;\n        Value *RdxVal2 = InstVals[I + 1].second;\n        Value *StableRdxVal2 = RdxVal2;\n        auto It2 = TrackedVals.find(RdxVal2);\n        if (It2 != TrackedVals.end())\n          StableRdxVal2 = It2->second;\n        // To prevent poison from leaking across what used to be sequential,\n        // safe, scalar boolean logic operations, the reduction operand must be\n        // frozen.\n        FixBoolLogicalOps(StableRdxVal1, StableRdxVal2, InstVals[I].first,\n                          RedOp, InitStep);\n        Value *ExtraRed = createOp(Builder, RdxKind, StableRdxVal1,\n                                   StableRdxVal2, \"op.rdx\", ReductionOps);\n        ExtraReds[I / 2] = std::make_pair(InstVals[I].first, ExtraRed);\n      }\n      if (Sz % 2 == 1)\n        ExtraReds[Sz / 2] = InstVals.back();\n      return ExtraReds;\n    };\n```\n\nReturn only the smallest targeted edits in this exact format:\n<<<<<<< SEARCH\nexact existing lines from the ORIGINAL source excerpt\n=======\nreplacement lines\n>>>>>>> REPLACE\nYou may return multiple non-overlapping blocks. SEARCH must match exactly once\nin the original excerpt, including indentation. Include enough unchanged context\nto make each SEARCH unique. Every turn edits the ORIGINAL code, not your previous\nreply. The excerpt may start or end inside a function; never replace the whole\nexcerpt with a complete function. Do not return explanations, Markdown fences,\nellipsis placeholders, an unchanged block, or comment-only/format-only edits.\n"
+        },
+        {
+          "role": "assistant",
+          "content": "The issue is that `FixBoolLogicalOps` prematurely assumes that if an operand (`LHS` or `RHS`) is the condition of the original `select` (`isBoolLogicOp`), it is safe from causing poison-related miscompilations. This assumption is incorrect because even if it was the condition of the original `select`, using it as the condition of a *new* `select` created during vectorization can introduce poison if that condition is itself poison and the transformation relies on it being defined. The correct criterion for skipping the `freeze` operation is whether the value is `isGuaranteedNotToBePoison`.\n\nThe fix removes the incorrect checks that rely solely on the operand being the condition of the original `select` instruction, ensuring that we only skip freezing if the value is known to be safe or if it is the reduction root.\n\n<<<<<<< SEARCH\n          if (isBoolLogicOp(RedOp1) && ((!InitStep && LHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp1, 0) == LHS ||\n                                        isGuaranteedNotToBePoison(LHS, AC)))\n            return;\n          if (isBoolLogicOp(RedOp2) && ((!InitStep && RHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp2, 0) == RHS ||\n                                        isGuaranteedNotToBePoison(RHS, AC))) {\n            std::swap(LHS, RHS);\n            return;\n          }\n=======\n          if (isBool"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nYour reply hit the output limit and was not applied. Return smaller SEARCH/REPLACE blocks.\nPlease adjust code according to the feedback.\nThe checkout has been RESET to the original code below. Your previous patch is not present. Return the complete revised edit against this original, incorporating any earlier changes you retain; do not search for code that only appeared in an earlier reply.\nPlease modify the following code in llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp to fix the bug:\n```cpp\n    if (!VectorizedTree) {\n      if (!CheckForReusedReductionOps) {\n        for (ReductionOpsType &RdxOps : ReductionOps)\n          for (Value *RdxOp : RdxOps)\n            V.analyzedReductionRoot(cast<Instruction>(RdxOp));\n      }\n      return nullptr;\n    }\n\n    // Reorder operands of bool logical op in the natural order to avoid\n    // possible problem with poison propagation. If not possible to reorder\n    // (both operands are originally RHS), emit an extra freeze instruction\n    // for the LHS operand.\n    // I.e., if we have original code like this:\n    // RedOp1 = select i1 ?, i1 LHS, i1 false\n    // RedOp2 = select i1 RHS, i1 ?, i1 false\n\n    // Then, we swap LHS/RHS to create a new op that matches the poison\n    // semantics of the original code.\n\n    // If we have original code like this and both values could be poison:\n    // RedOp1 = select i1 ?, i1 LHS, i1 false\n    // RedOp2 = select i1 ?, i1 RHS, i1 false\n\n    // Then, we must freeze LHS in the new op.\n    auto FixBoolLogicalOps =\n        [&, VectorizedTree](Value *&LHS, Value *&RHS, Instruction *RedOp1,\n                            Instruction *RedOp2, bool InitStep) {\n          if (!AnyBoolLogicOp)\n            return;\n          if (isBoolLogicOp(RedOp1) && ((!InitStep && LHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp1, 0) == LHS ||\n                                        isGuaranteedNotToBePoison(LHS, AC)))\n            return;\n          if (isBoolLogicOp(RedOp2) && ((!InitStep && RHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp2, 0) == RHS ||\n                                        isGuaranteedNotToBePoison(RHS, AC))) {\n            std::swap(LHS, RHS);\n            return;\n          }\n          if (LHS != VectorizedTree)\n            LHS = Builder.CreateFreeze(LHS);\n        };\n    // Finish the reduction.\n    // Need to add extra arguments and not vectorized possible reduction values.\n    // Try to avoid dependencies between the scalar remainders after reductions.\n    auto FinalGen = [&](ArrayRef<std::pair<Instruction *, Value *>> InstVals,\n                        bool InitStep) {\n      unsigned Sz = InstVals.size();\n      SmallVector<std::pair<Instruction *, Value *>> ExtraReds(Sz / 2 + Sz % 2);\n      for (unsigned I = 0, E = (Sz / 2) * 2; I < E; I += 2) {\n        Instruction *RedOp = InstVals[I + 1].first;\n        Builder.SetCurrentDebugLocation(RedOp->getDebugLoc());\n        Value *RdxVal1 = InstVals[I].second;\n        Value *StableRdxVal1 = RdxVal1;\n        auto It1 = TrackedVals.find(RdxVal1);\n        if (It1 != TrackedVals.end())\n          StableRdxVal1 = It1->second;\n        Value *RdxVal2 = InstVals[I + 1].second;\n        Value *StableRdxVal2 = RdxVal2;\n        auto It2 = TrackedVals.find(RdxVal2);\n        if (It2 != TrackedVals.end())\n          StableRdxVal2 = It2->second;\n        // To prevent poison from leaking across what used to be sequential,\n        // safe, scalar boolean logic operations, the reduction operand must be\n        // frozen.\n        FixBoolLogicalOps(StableRdxVal1, StableRdxVal2, InstVals[I].first,\n                          RedOp, InitStep);\n        Value *ExtraRed = createOp(Builder, RdxKind, StableRdxVal1,\n                                   StableRdxVal2, \"op.rdx\", ReductionOps);\n        ExtraReds[I / 2] = std::make_pair(InstVals[I].first, ExtraRed);\n      }\n      if (Sz % 2 == 1)\n        ExtraReds[Sz / 2] = InstVals.back();\n      return ExtraReds;\n    };\n```\n\nReturn only the smallest targeted edits in this exact format:\n<<<<<<< SEARCH\nexact existing lines from the ORIGINAL source excerpt\n=======\nreplacement lines\n>>>>>>> REPLACE\nYou may return multiple non-overlapping blocks. SEARCH must match exactly once\nin the original excerpt, including indentation. Include enough unchanged context\nto make each SEARCH unique. Every turn edits the ORIGINAL code, not your previous\nreply. The excerpt may start or end inside a function; never replace the whole\nexcerpt with a complete function. Do not return explanations, Markdown fences,\nellipsis placeholders, an unchanged block, or comment-only/format-only edits.\n"
+        },
+        {
+          "role": "assistant",
+          "content": "<<<<<<< SEARCH\n          if (isBoolLogicOp(RedOp1) && ((!InitStep && LHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp1, 0) == LHS ||\n                                        isGuaranteedNotToBePoison(LHS, AC)))\n            return;\n          if (isBoolLogicOp(RedOp2) && ((!InitStep && RHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp2, 0) == RHS ||\n                                        isGuaranteedNotToBePoison(RHS, AC))) {\n            std::swap(LHS, RHS);\n            return;\n          }\n=======\n          if (isBoolLogicOp(RedOp1) && isGuaranteedNotToBePoison(LHS, AC))\n            return;\n          if (isBoolLogicOp(RedOp2) && isGuaranteedNotToBePoison(RHS, AC)) {\n            std::swap(LHS, RHS);\n            return;\n          }\n>>>>>>> REPLACE"
+        },
+        {
+          "role": "user",
+          "content": "Feedback:\nBUG TYPE:\n    miscompilation\n\nVERIFICATION RESULT:\n    Invalid refinement in @test_explicit_poison_leaves -- Target is more poisonous than source\n\nVIOLATED PROPERTY:\n    poison refinement\n\nSOURCE (pre-transformation IR):\ndefine i1 @test_explicit_poison_leaves(i1 %a, i1 %b) {\n  %op1 = select i1 %a, i1 true, i1 poison\n  %op2 = select i1 %b, i1 true, i1 poison\n  %res = select i1 %op1, i1 true, i1 %op2\n  ret i1 %res\n}\n\nTARGET (post-transformation IR):\n; ModuleID = '<stdin>'\nsource_filename = \"<stdin>\"\n\ndefine i1 @test_explicit_poison_leaves(i1 %a, i1 %b) {\n  %op.rdx = select i1 poison, i1 true, i1 %a\n  %1 = freeze i1 %op.rdx\n  %op.rdx1 = select i1 %1, i1 true, i1 %b\n  ret i1 %op.rdx1\n}\n\nWHAT THE TRANSFORMATION CHANGED:\n  only in target:\n    %op.rdx: %op.rdx = select i1 poison, i1 true, i1 %a\n    %1: %1 = freeze i1 %op.rdx\n    %op.rdx1: %op.rdx1 = select i1 %1, i1 true, i1 %b\n  only in source:\n    %op1: %op1 = select i1 %a, i1 true, i1 poison\n    %op2: %op2 = select i1 %b, i1 true, i1 poison\n    %res: %res = select i1 %op1, i1 true, i1 %op2\n\nCRITICAL VALUES:\n    %op.rdx\n    %op.rdx1\n    %op1\n    %op2\n    %res\n\nDEPENDENCY CHAIN (source):\n    %op1 = select i1 %a, i1 true, i1 poison\n    %op2 = select i1 %b, i1 true, i1 poison\n    %res = select i1 %op1, i1 true, i1 %op2\n\nCONTROL FLOW (blocks entered by the failing execution):\n    (none)\n\nCOUNTEREXAMPLE INPUT:\n    i1 %a = #x1 (1)\n    i1 %b = poison\n\nDIVERGENCE (source vs target on that input):\n    %op.rdx: source = (not computed)   target = poison\n    %op.rdx1: source = (not computed)   target = poison\n\nINTERPRETATION:\n    A transformation may only make a program *less* poisonous. Wherever the source produces a well-defined value, the target must produce the same value -- it may not produce poison.\n    On the input above the source yields #x1 (1) while the target yields poison.\n    The earliest reported divergence is at %op.rdx.\n\nPlease adjust code according to the feedback.\nThe checkout has been RESET to the original code below. Your previous patch is not present. Return the complete revised edit against this original, incorporating any earlier changes you retain; do not search for code that only appeared in an earlier reply.\nPlease modify the following code in llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp to fix the bug:\n```cpp\n    if (!VectorizedTree) {\n      if (!CheckForReusedReductionOps) {\n        for (ReductionOpsType &RdxOps : ReductionOps)\n          for (Value *RdxOp : RdxOps)\n            V.analyzedReductionRoot(cast<Instruction>(RdxOp));\n      }\n      return nullptr;\n    }\n\n    // Reorder operands of bool logical op in the natural order to avoid\n    // possible problem with poison propagation. If not possible to reorder\n    // (both operands are originally RHS), emit an extra freeze instruction\n    // for the LHS operand.\n    // I.e., if we have original code like this:\n    // RedOp1 = select i1 ?, i1 LHS, i1 false\n    // RedOp2 = select i1 RHS, i1 ?, i1 false\n\n    // Then, we swap LHS/RHS to create a new op that matches the poison\n    // semantics of the original code.\n\n    // If we have original code like this and both values could be poison:\n    // RedOp1 = select i1 ?, i1 LHS, i1 false\n    // RedOp2 = select i1 ?, i1 RHS, i1 false\n\n    // Then, we must freeze LHS in the new op.\n    auto FixBoolLogicalOps =\n        [&, VectorizedTree](Value *&LHS, Value *&RHS, Instruction *RedOp1,\n                            Instruction *RedOp2, bool InitStep) {\n          if (!AnyBoolLogicOp)\n            return;\n          if (isBoolLogicOp(RedOp1) && ((!InitStep && LHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp1, 0) == LHS ||\n                                        isGuaranteedNotToBePoison(LHS, AC)))\n            return;\n          if (isBoolLogicOp(RedOp2) && ((!InitStep && RHS == VectorizedTree) ||\n                                        getRdxOperand(RedOp2, 0) == RHS ||\n                                        isGuaranteedNotToBePoison(RHS, AC))) {\n            std::swap(LHS, RHS);\n            return;\n          }\n          if (LHS != VectorizedTree)\n            LHS = Builder.CreateFreeze(LHS);\n        };\n    // Finish the reduction.\n    // Need to add extra arguments and not vectorized possible reduction values.\n    // Try to avoid dependencies between the scalar remainders after reductions.\n    auto FinalGen = [&](ArrayRef<std::pair<Instruction *, Value *>> InstVals,\n                        bool InitStep) {\n      unsigned Sz = InstVals.size();\n      SmallVector<std::pair<Instruction *, Value *>> ExtraReds(Sz / 2 + Sz % 2);\n      for (unsigned I = 0, E = (Sz / 2) * 2; I < E; I += 2) {\n        Instruction *RedOp = InstVals[I + 1].first;\n        Builder.SetCurrentDebugLocation(RedOp->getDebugLoc());\n        Value *RdxVal1 = InstVals[I].second;\n        Value *StableRdxVal1 = RdxVal1;\n        auto It1 = TrackedVals.find(RdxVal1);\n        if (It1 != TrackedVals.end())\n          StableRdxVal1 = It1->second;\n        Value *RdxVal2 = InstVals[I + 1].second;\n        Value *StableRdxVal2 = RdxVal2;\n        auto It2 = TrackedVals.find(RdxVal2);\n        if (It2 != TrackedVals.end())\n          StableRdxVal2 = It2->second;\n        // To prevent poison from leaking across what used to be sequential,\n        // safe, scalar boolean logic operations, the reduction operand must be\n        // frozen.\n        FixBoolLogicalOps(StableRdxVal1, StableRdxVal2, InstVals[I].first,\n                          RedOp, InitStep);\n        Value *ExtraRed = createOp(Builder, RdxKind, StableRdxVal1,\n                                   StableRdxVal2, \"op.rdx\", ReductionOps);\n        ExtraReds[I / 2] = std::make_pair(InstVals[I].first, ExtraRed);\n      }\n      if (Sz % 2 == 1)\n        ExtraReds[Sz / 2] = InstVals.back();\n      return ExtraReds;\n    };\n```\n\nReturn only the smallest targeted edits in this exact format:\n<<<<<<< SEARCH\nexact existing lines from the ORIGINAL source excerpt\n=======\nreplacement lines\n>>>>>>> REPLACE\nYou may return multiple non-overlapping blocks. SEARCH must match exactly once\nin the original excerpt, including indentation. Include enough unchanged context\nto make each SEARCH unique. Every turn edits the ORIGINAL code, not your previous\nreply. The excerpt may start or end inside a function; never replace the whole\nexcerpt with a complete function. Do not return explanations, Markdown fences,\nellipsis placeholders, an unchanged block, or comment-only/format-only edits.\n"
+        }
+      ]
+    }
+  },
+  "notes": {
+    "bug_type": "miscompilation",
+    "components": [
+      "SLPVectorizer"
+    ],
+    "oracle_budget": 400,
+    "oracle_strictness": "error_class",
+    "allow_promotion": true,
+    "temperature": 0.8,
+    "trial": 2,
+    "experiment_config": {
+      "model": "gemini-3.1-flash-lite",
+      "llm_backend": "vertex",
+      "vertex_project": "better-compiler",
+      "vertex_location": "global",
+      "endpoint_url": "https://aiplatform.googleapis.com/v1/projects/better-compiler/locations/global/publishers/google/models",
+      "request_options": {
+        "thinking_level": "LOW"
+      },
+      "api_limits": {
+        "max_prompt_tokens": 24576,
+        "max_output_tokens": 8192,
+        "max_usd": 18.0,
+        "input_usd_per_million": 0.25,
+        "output_usd_per_million": 1.5
+      },
+      "base_model_cutoff": "2023-12-31Z",
+      "temperature": 0.8,
+      "max_iterations": 4,
+      "oracle_budget": 400,
+      "oracle_strictness": "error_class",
+      "harness_version": "repair-v3",
+      "prompt_hash": "827218b3f3182a4c7b784cfbe0349b483707661a56095a4f1c8e3ed074fbfe41",
+      "patch_format": "search-replace-v1",
+      "revision_context": "original-excerpt-per-turn-v1",
+      "max_completion_tokens": 8192,
+      "harness_code_hash": "186d2ae536f45ab74d49ba1cd5d807a66b593cba7af2d995137ec51dbf0d0d7b",
+      "protocol_id": "repair-v3c-vertex-low-reanchor-eligibility-2026-11-03-resolved-3b0afec438",
+      "protocol_sha256": "3e1610da76bdb00835936f08b9bb690feedb90e9a5fb4318f67bf586db991712",
+      "model_repository": null,
+      "model_revision": null,
+      "serving_identity": "vertex-project:better-compiler:global:native-rest",
+      "dataset_identity": {
+        "sha256": "fb7e7937d78de0fdb8ce03da0d68c5335fff7016e111b409b39cc34c0daf183f",
+        "records": {
+          "112350": "de1c657d1b18a90c2641b949d9851a7a190d8f8d3e6b6d701bad005825925df7",
+          "114738": "5cdbaaabef920d1307c0ef0ada414c1edf0104285b359217ce0d7a84384d008c",
+          "114879": "82e88c6c8612b1e1268e2888c915ca43c4a4a7aae102abe1e77b30658736c20c",
+          "114901": "dfe34f0cc383c0e9e4c86f007deea19a7624c6a8fd9019650daa1b377706f131",
+          "115149": "b7d2d9d27fe0ee113a3af9ce3cb1d39f3edb9bc781fb3036ae45cbcafbd4f8d3",
+          "116553": "b0673886b5f635269e0ec614d740034386d4e5f217b4ff1d19347868f71b19be",
+          "118467": "ed1c7b867fede6dc57575d1438eea49a4767b2b8d9013a1daf5a0247f27e41bb",
+          "161492": "8786d1fa798ac44268ca947425c0bf5d046892724795361e8ca2c8d17a900704",
+          "167627": "51d2206eb0b1452969b1182905888c00250b8da24e296598fbc0184a3ef747de",
+          "173784": "606c9ef8210b70ba678b4d217bcda941e03b846cadef4948b9a84ec033e7ae31",
+          "180870": "f012fe5667ab1baba6f6e1603b61e9966a8515ad51f6c0c5d5a765965bf72a10",
+          "78621": "ea4f34c3a78c563ea6728a0c7874d65aed196f54c9c1498ee046b90a9f92432e",
+          "82884": "3538ae81cd10e2b29d6c3b2de098706b5400f2b5a8da9ff75ca6cbac7eb184f6",
+          "89672": "48334379f2f6ba3c752572131104ec696466d7fa14ff5e29c7b1bfb2a87614c8",
+          "91177": "1f12ce95a321e154dfdbaf6bfa70a340243c020416ca8c22705a8ea0bbc2280b",
+          "91957": "b851586d7ba59c5ee60090e1e4703a32e4f8b6761d9d63a08d1508c9aba63b96"
+        }
+      },
+      "condition_order": "rotate-by-bug-and-trial-v1",
+      "require_semantic_baseline": true
+    },
+    "build_jobs": 8,
+    "parallel_link_jobs": "1",
+    "source_commit": "62b0abf2e740ad9bfdd09d1ca6c8d2581dc561f1",
+    "baseline_validation": {
+      "semantic_failure_confirmed": true,
+      "function": "@test_explicit_poison_leaves",
+      "error_class": "Target is more poisonous than source"
+    },
+    "llm_error": "Prompt token counter failed (URLError: <urlopen error [Errno -3] Temporary failure in name resolution>); generation withheld",
+    "api_budget_error": "Prompt token counter failed (URLError: <urlopen error [Errno -3] Temporary failure in name resolution>); generation withheld"
+  }
+}

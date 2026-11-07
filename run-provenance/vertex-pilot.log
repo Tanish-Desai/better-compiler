@@ -1,0 +1,14 @@
+[1/4] [115575] already done under raw-plain t1
+[2/4] [115575] already done under raw-structured t1
+[3/4] [115575/llvmreduce-structured/t1] starting
+[115575/llvmreduce-structured/t1] iteration 1: not fixed (build: error)
+[115575/llvmreduce-structured/t1] iteration 2: not fixed (reproducer: error)
+[115575/llvmreduce-structured/t1] iteration 3: not fixed (reproducer: error)
+[115575/llvmreduce-structured/t1] iteration 4: not fixed (reproducer: error)
+[115575] -> results-vertex-v3-pilot/115575.llvmreduce-structured.json
+[4/4] [115575/iraware-structured/t1] starting
+[115575/iraware-structured/t1] iteration 1: not fixed (build: error)
+[115575/iraware-structured/t1] iteration 2: not fixed (regression: test_failure)
+[115575/iraware-structured/t1] iteration 3: invalid_format
+[115575/iraware-structured/t1] iteration 4: not fixed (regression: test_failure)
+[115575] -> results-vertex-v3-pilot/115575.iraware-structured.json

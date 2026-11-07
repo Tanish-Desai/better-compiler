@@ -1,0 +1,607 @@
+[1/192] [115149/raw-plain/t1] starting
+[115149/raw-plain/t1] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.raw-plain.json
+[2/192] [115149/raw-structured/t1] starting
+[115149/raw-structured/t1] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.raw-structured.json
+[3/192] [115149/llvmreduce-structured/t1] starting
+[115149/llvmreduce-structured/t1] iteration 1: not fixed (reproducer: error)
+[115149/llvmreduce-structured/t1] iteration 2: truncated
+[115149/llvmreduce-structured/t1] iteration 3: truncated
+[115149/llvmreduce-structured/t1] iteration 4: truncated
+[115149] -> results-vertex-v3b/115149.llvmreduce-structured.json
+[4/192] [115149/iraware-structured/t1] starting
+[115149/iraware-structured/t1] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.iraware-structured.json
+[5/192] [115149/raw-structured/t2] starting
+[115149/raw-structured/t2] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.raw-structured.t2.json
+[6/192] [115149/llvmreduce-structured/t2] starting
+[115149/llvmreduce-structured/t2] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.llvmreduce-structured.t2.json
+[7/192] [115149/iraware-structured/t2] starting
+[115149/iraware-structured/t2] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.iraware-structured.t2.json
+[8/192] [115149/raw-plain/t2] starting
+[115149/raw-plain/t2] iteration 1: not fixed (regression: test_failure)
+[115149/raw-plain/t2] iteration 2: truncated
+[115149/raw-plain/t2] iteration 3: truncated
+[115149/raw-plain/t2] iteration 4: not fixed (regression: test_failure)
+[115149] -> results-vertex-v3b/115149.raw-plain.t2.json
+[9/192] [115149/llvmreduce-structured/t3] starting
+[115149/llvmreduce-structured/t3] iteration 1: not fixed (reproducer: error)
+[115149/llvmreduce-structured/t3] iteration 2: FIXED
+[115149] -> results-vertex-v3b/115149.llvmreduce-structured.t3.json
+[10/192] [115149/iraware-structured/t3] starting
+[115149/iraware-structured/t3] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.iraware-structured.t3.json
+[11/192] [115149/raw-plain/t3] starting
+[115149/raw-plain/t3] iteration 1: truncated
+[115149/raw-plain/t3] iteration 2: not fixed (regression: test_failure)
+[115149/raw-plain/t3] iteration 3: truncated
+[115149/raw-plain/t3] iteration 4: truncated
+[115149] -> results-vertex-v3b/115149.raw-plain.t3.json
+[12/192] [115149/raw-structured/t3] starting
+[115149/raw-structured/t3] iteration 1: FIXED
+[115149] -> results-vertex-v3b/115149.raw-structured.t3.json
+[13/192] [114879/raw-structured/t1] starting
+[114879/raw-structured/t1] iteration 1: not fixed (reproducer: error)
+[114879/raw-structured/t1] iteration 2: not fixed (reproducer: error)
+[114879/raw-structured/t1] iteration 3: not fixed (regression: test_failure)
+[114879/raw-structured/t1] iteration 4: not fixed (regression: test_failure)
+[114879] -> results-vertex-v3b/114879.raw-structured.json
+[14/192] [114879/llvmreduce-structured/t1] starting
+[114879/llvmreduce-structured/t1] iteration 1: not fixed (reproducer: error)
+[114879/llvmreduce-structured/t1] iteration 2: not fixed (regression: test_failure)
+[114879/llvmreduce-structured/t1] iteration 3: not fixed (reproducer: error)
+[114879/llvmreduce-structured/t1] iteration 4: not fixed (reproducer: error)
+[114879] -> results-vertex-v3b/114879.llvmreduce-structured.json
+[15/192] [114879/iraware-structured/t1] starting
+[114879/iraware-structured/t1] iteration 1: truncated
+[114879/iraware-structured/t1] iteration 2: not fixed (reproducer: error)
+[114879/iraware-structured/t1] iteration 3: truncated
+[114879/iraware-structured/t1] iteration 4: not fixed (build: error)
+[114879] -> results-vertex-v3b/114879.iraware-structured.json
+[16/192] [114879/raw-plain/t1] starting
+[114879/raw-plain/t1] iteration 1: not fixed (reproducer: error)
+[114879/raw-plain/t1] iteration 2: not fixed (reproducer: error)
+[114879/raw-plain/t1] iteration 3: truncated
+[114879/raw-plain/t1] iteration 4: not fixed (reproducer: error)
+[114879] -> results-vertex-v3b/114879.raw-plain.json
+[17/192] [114879/llvmreduce-structured/t2] starting
+[114879/llvmreduce-structured/t2] iteration 1: not fixed (regression: test_failure)
+[114879/llvmreduce-structured/t2] iteration 2: not fixed (regression: test_failure)
+[114879/llvmreduce-structured/t2] iteration 3: not fixed (reproducer: error)
+[114879/llvmreduce-structured/t2] iteration 4: not fixed (reproducer: error)
+[114879] -> results-vertex-v3b/114879.llvmreduce-structured.t2.json
+[18/192] [114879/iraware-structured/t2] starting
+[114879/iraware-structured/t2] iteration 1: not fixed (regression: test_failure)
+[114879/iraware-structured/t2] iteration 2: not fixed (regression: test_failure)
+[114879/iraware-structured/t2] iteration 3: not fixed (reproducer: error)
+[114879/iraware-structured/t2] iteration 4: not fixed (regression: test_failure)
+[114879] -> results-vertex-v3b/114879.iraware-structured.t2.json
+[19/192] [114879/raw-plain/t2] starting
+[114879/raw-plain/t2] iteration 1: not fixed (build: error)
+[114879/raw-plain/t2] iteration 2: truncated
+[114879/raw-plain/t2] iteration 3: not fixed (regression: test_failure)
+[114879/raw-plain/t2] iteration 4: not fixed (regression: test_failure)
+[114879] -> results-vertex-v3b/114879.raw-plain.t2.json
+[20/192] [114879/raw-structured/t2] starting
+[114879/raw-structured/t2] iteration 1: not fixed (reproducer: error)
+[114879/raw-structured/t2] iteration 2: truncated
+[114879/raw-structured/t2] iteration 3: not fixed (build: error)
+[114879/raw-structured/t2] iteration 4: not fixed (build: error)
+[114879] -> results-vertex-v3b/114879.raw-structured.t2.json
+[21/192] [114879/iraware-structured/t3] starting
+[114879/iraware-structured/t3] iteration 1: truncated
+[114879/iraware-structured/t3] iteration 2: not fixed (reproducer: error)
+[114879/iraware-structured/t3] iteration 3: truncated
+[114879/iraware-structured/t3] iteration 4: not fixed (reproducer: error)
+[114879] -> results-vertex-v3b/114879.iraware-structured.t3.json
+[22/192] [114879/raw-plain/t3] starting
+[114879/raw-plain/t3] iteration 1: not fixed (regression: test_failure)
+[114879/raw-plain/t3] iteration 2: truncated
+[114879/raw-plain/t3] iteration 3: truncated
+[114879/raw-plain/t3] iteration 4: truncated
+[114879] -> results-vertex-v3b/114879.raw-plain.t3.json
+[23/192] [114879/raw-structured/t3] starting
+[114879/raw-structured/t3] iteration 1: not fixed (regression: test_failure)
+[114879/raw-structured/t3] iteration 2: not fixed (reproducer: error)
+[114879/raw-structured/t3] iteration 3: not fixed (regression: test_failure)
+[114879/raw-structured/t3] iteration 4: not fixed (regression: test_failure)
+[114879] -> results-vertex-v3b/114879.raw-structured.t3.json
+[24/192] [114879/llvmreduce-structured/t3] starting
+[114879/llvmreduce-structured/t3] iteration 1: not fixed (build: error)
+[114879/llvmreduce-structured/t3] iteration 2: not fixed (reproducer: error)
+[114879/llvmreduce-structured/t3] iteration 3: not fixed (reproducer: error)
+[114879/llvmreduce-structured/t3] iteration 4: not fixed (regression: test_failure)
+[114879] -> results-vertex-v3b/114879.llvmreduce-structured.t3.json
+[25/192] [118467/llvmreduce-structured/t1] starting
+[118467/llvmreduce-structured/t1] iteration 1: truncated
+[118467/llvmreduce-structured/t1] iteration 2: truncated
+[118467/llvmreduce-structured/t1] iteration 3: not fixed (reproducer: error)
+[118467/llvmreduce-structured/t1] iteration 4: not fixed (regression: test_failure)
+[118467] -> results-vertex-v3b/118467.llvmreduce-structured.json
+[26/192] [118467/iraware-structured/t1] starting
+[118467/iraware-structured/t1] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.iraware-structured.json
+[27/192] [118467/raw-plain/t1] starting
+[118467/raw-plain/t1] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.raw-plain.json
+[28/192] [118467/raw-structured/t1] starting
+[118467/raw-structured/t1] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.raw-structured.json
+[29/192] [118467/iraware-structured/t2] starting
+[118467/iraware-structured/t2] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.iraware-structured.t2.json
+[30/192] [118467/raw-plain/t2] starting
+[118467/raw-plain/t2] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.raw-plain.t2.json[91369] stopping sweep: Unpatched Alive2 failure is not a clean semantic violation; no model reply was requested. Inspect the verifier/toolchain.
+iv.next#18, %loop#18 ]
+  %gep#19 = gep inbounds ptr %dst, 2 x i64 %iv#19
+  store i16 %g.16, ptr %gep#19, align 2
+  %iv.next#19 = add nsw nuw i64 %iv#19, %g.64
+  %cmp#19 = icmp ult i64 %iv.next#19, 16
+  br i1 %cmp#19, label %loop#20, label %exit
+
+loop#20:
+  %iv#20 = phi i64 [ %iv.next#19, %loop#19 ]
+  %gep#20 = gep inbounds ptr %dst, 2 x i64 %iv#20
+  store i16 %g.16, ptr %gep#20, align 2
+  %iv.next#20 = add nsw nuw i64 %iv#20, %g.64
+  %cmp#20 = icmp ult i64 %iv.next#20, 16
+  br i1 %cmp#20, label %loop#21, label %exit
+
+loop#21:
+  %iv#21 = phi i64 [ %iv.next#20, %loop#20 ]
+  %gep#21 = gep inbounds ptr %dst, 2 x i64 %iv#21
+  store i16 %g.16, ptr %gep#21, align 2
+  %iv.next#21 = add nsw nuw i64 %iv#21, %g.64
+  %cmp#21 = icmp ult i64 %iv.next#21, 16
+  br i1 %cmp#21, label %loop#22, label %exit
+
+loop#22:
+  %iv#22 = phi i64 [ %iv.next#21, %loop#21 ]
+  %gep#22 = gep inbounds ptr %dst, 2 x i64 %iv#22
+  store i16 %g.16, ptr %gep#22, align 2
+  %iv.next#22 = add nsw nuw i64 %iv#22, %g.64
+  %cmp#22 = icmp ult i64 %iv.next#22, 16
+  br i1 %cmp#22, label %loop#23, label %exit
+
+loop#23:
+  %iv#23 = phi i64 [ %iv.next#22, %loop#22 ]
+  %gep#23 = gep inbounds ptr %dst, 2 x i64 %iv#23
+  store i16 %g.16, ptr %gep#23, align 2
+  %iv.next#23 = add nsw nuw i64 %iv#23, %g.64
+  %cmp#23 = icmp ult i64 %iv.next#23, 16
+  br i1 %cmp#23, label %loop#24, label %exit
+
+loop#24:
+  %iv#24 = phi i64 [ %iv.next#23, %loop#23 ]
+  %gep#24 = gep inbounds ptr %dst, 2 x i64 %iv#24
+  store i16 %g.16, ptr %gep#24, align 2
+  %iv.next#24 = add nsw nuw i64 %iv#24, %g.64
+  %cmp#24 = icmp ult i64 %iv.next#24, 16
+  br i1 %cmp#24, label %loop#25, label %exit
+
+loop#25:
+  %iv#25 = phi i64 [ %iv.next#24, %loop#24 ]
+  %gep#25 = gep inbounds ptr %dst, 2 x i64 %iv#25
+  store i16 %g.16, ptr %gep#25, align 2
+  %iv.next#25 = add nsw nuw i64 %iv#25, %g.64
+  %cmp#25 = icmp ult i64 %iv.next#25, 16
+  br i1 %cmp#25, label %loop#26, label %exit
+
+loop#26:
+  %iv#26 = phi i64 [ %iv.next#25, %loop#25 ]
+  %gep#26 = gep inbounds ptr %dst, 2 x i64 %iv#26
+  store i16 %g.16, ptr %gep#26, align 2
+  %iv.next#26 = add nsw nuw i64 %iv#26, %g.64
+  %cmp#26 = icmp ult i64 %iv.next#26, 16
+  br i1 %cmp#26, label %loop#27, label %exit
+
+loop#27:
+  %iv#27 = phi i64 [ %iv.next#26, %loop#26 ]
+  %gep#27 = gep inbounds ptr %dst, 2 x i64 %iv#27
+  store i16 %g.16, ptr %gep#27, align 2
+  %iv.next#27 = add nsw nuw i64 %iv#27, %g.64
+  %cmp#27 = icmp ult i64 %iv.next#27, 16
+  br i1 %cmp#27, label %loop#28, label %exit
+
+loop#28:
+  %iv#28 = phi i64 [ %iv.next#27, %loop#27 ]
+  %gep#28 = gep inbounds ptr %dst, 2 x i64 %iv#28
+  store i16 %g.16, ptr %gep#28, align 2
+  %iv.next#28 = add nsw nuw i64 %iv#28, %g.64
+  %cmp#28 = icmp ult i64 %iv.next#28, 16
+  br i1 %cmp#28, label %loop#29, label %exit
+
+loop#29:
+  %iv#29 = phi i64 [ %iv.next#28, %loop#28 ]
+  %gep#29 = gep inbounds ptr %dst, 2 x i64 %iv#29
+  store i16 %g.16, ptr %gep#29, align 2
+  %iv.next#29 = add nsw nuw i64 %iv#29, %g.64
+  %cmp#29 = icmp ult i64 %iv.next#29, 16
+  br i1 %cmp#29, label %loop#30, label %exit
+
+loop#30:
+  %iv#30 = phi i64 [ %iv.next#29, %loop#29 ]
+  %gep#30 = gep inbounds ptr %dst, 2 x i64 %iv#30
+  store i16 %g.16, ptr %gep#30, align 2
+  %iv.next#30 = add nsw nuw i64 %iv#30, %g.64
+  %cmp#30 = icmp ult i64 %iv.next#30, 16
+  br i1 %cmp#30, label %loop#31, label %exit
+
+loop#31:
+  %iv#31 = phi i64 [ %iv.next#30, %loop#30 ]
+  %gep#31 = gep inbounds ptr %dst, 2 x i64 %iv#31
+  store i16 %g.16, ptr %gep#31, align 2
+  %iv.next#31 = add nsw nuw i64 %iv#31, %g.64
+  %cmp#31 = icmp ult i64 %iv.next#31, 16
+  br i1 %cmp#31, label %loop#32, label %exit
+
+loop#32:
+  %iv#32 = phi i64 [ %iv.next#31, %loop#31 ]
+  %gep#32 = gep inbounds ptr %dst, 2 x i64 %iv#32
+  store i16 %g.16, ptr %gep#32, align 2
+  %iv.next#32 = add nsw nuw i64 %iv#32, %g.64
+  %cmp#32 = icmp ult i64 %iv.next#32, 16
+  br i1 %cmp#32, label #sink, label %exit
+
+exit:
+  ret void
+}
+ERROR: Timeout
+
+Summary:
+  0 correct transformations
+  0 incorrect transformations
+  1 failed-to-prove transformations
+  0 Alive2 errors
+
+
+[31/192] [118467/raw-structured/t2] starting
+[118467/raw-structured/t2] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.raw-structured.t2.json
+[32/192] [118467/llvmreduce-structured/t2] starting
+[118467/llvmreduce-structured/t2] iteration 1: truncated
+[118467/llvmreduce-structured/t2] iteration 2: not fixed (build: error)
+[118467/llvmreduce-structured/t2] iteration 3: not fixed (build: error)
+[118467/llvmreduce-structured/t2] iteration 4: not fixed (reproducer: error)
+[118467] -> results-vertex-v3b/118467.llvmreduce-structured.t2.json
+[33/192] [118467/raw-plain/t3] starting
+[118467/raw-plain/t3] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.raw-plain.t3.json
+[34/192] [118467/raw-structured/t3] starting
+[118467/raw-structured/t3] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.raw-structured.t3.json
+[35/192] [118467/llvmreduce-structured/t3] starting
+[118467/llvmreduce-structured/t3] iteration 1: not fixed (regression: test_failure)
+[118467/llvmreduce-structured/t3] iteration 2: truncated
+[118467/llvmreduce-structured/t3] iteration 3: not fixed (reproducer: error)
+[118467/llvmreduce-structured/t3] iteration 4: truncated
+[118467] -> results-vertex-v3b/118467.llvmreduce-structured.t3.json
+[36/192] [118467/iraware-structured/t3] starting
+[118467/iraware-structured/t3] iteration 1: FIXED
+[118467] -> results-vertex-v3b/118467.iraware-structured.t3.json
+[37/192] [91369/iraware-structured/t1] starting
+[1/192] [115149] already done under raw-plain t1
+[2/192] [115149] already done under raw-structured t1
+[3/192] [115149] already done under llvmreduce-structured t1
+[4/192] [115149] already done under iraware-structured t1
+[5/192] [115149] already done under raw-structured t2
+[6/192] [115149] already done under llvmreduce-structured t2
+[7/192] [115149] already done under iraware-structured t2
+[8/192] [115149] already done under raw-plain t2
+[9/192] [115149] already done under llvmreduce-structured t3
+[10/192] [115149] already done under iraware-structured t3
+[11/192] [115149] already done under raw-plain t3
+[12/192] [115149] already done under raw-structured t3
+[13/192] [114879] already done under raw-structured t1
+[14/192] [114879] already done under llvmreduce-structured t1
+[15/192] [114879] already done under iraware-structured t1
+[16/192] [114879] already done under raw-plain t1
+[17/192] [114879] already done under llvmreduce-structured t2
+[18/192] [114879] already done under iraware-structured t2
+[19/192] [114879] already done under raw-plain t2
+[20/192] [114879] already done under raw-structured t2
+[21/192] [114879] already done under iraware-structured t3
+[22/192] [114879] already done under raw-plain t3
+[23/192] [114879] already done under raw-structured t3
+[24/192] [114879] already done under llvmreduce-structured t3
+[25/192] [118467] already done under llvmreduce-structured t1
+[26/192] [118467] already done under iraware-structured t1
+[27/192] [118467] already done under raw-plain t1
+[28/192] [118467] already done under raw-structured t1
+[29/192] [118467] already done under iraware-structured t2
+[30/192] [118467] already done under raw-plain t2
+[31/192] [118467] already done under raw-structured t2
+[32/192] [118467] already done under llvmreduce-structured t2
+[33/192] [118467] already done under raw-plain t3
+[34/192] [118467] already done under raw-structured t3
+[35/192] [118467] already done under llvmreduce-structured t3
+[36/192] [118467] already done under iraware-structured t3
+[37/192] [91369/iraware-structured/t1] starting
+[91369] stopping sweep: Unpatched Alive2 failure is not a clean semantic violation; no model reply was requested. Inspect the verifier/toolchain.
+iv.next#18, %loop#18 ]
+  %gep#19 = gep inbounds ptr %dst, 2 x i64 %iv#19
+  store i16 %g.16, ptr %gep#19, align 2
+  %iv.next#19 = add nsw nuw i64 %iv#19, %g.64
+  %cmp#19 = icmp ult i64 %iv.next#19, 16
+  br i1 %cmp#19, label %loop#20, label %exit
+
+loop#20:
+  %iv#20 = phi i64 [ %iv.next#19, %loop#19 ]
+  %gep#20 = gep inbounds ptr %dst, 2 x i64 %iv#20
+  store i16 %g.16, ptr %gep#20, align 2
+  %iv.next#20 = add nsw nuw i64 %iv#20, %g.64
+  %cmp#20 = icmp ult i64 %iv.next#20, 16
+  br i1 %cmp#20, label %loop#21, label %exit
+
+loop#21:
+  %iv#21 = phi i64 [ %iv.next#20, %loop#20 ]
+  %gep#21 = gep inbounds ptr %dst, 2 x i64 %iv#21
+  store i16 %g.16, ptr %gep#21, align 2
+  %iv.next#21 = add nsw nuw i64 %iv#21, %g.64
+  %cmp#21 = icmp ult i64 %iv.next#21, 16
+  br i1 %cmp#21, label %loop#22, label %exit
+
+loop#22:
+  %iv#22 = phi i64 [ %iv.next#21, %loop#21 ]
+  %gep#22 = gep inbounds ptr %dst, 2 x i64 %iv#22
+  store i16 %g.16, ptr %gep#22, align 2
+  %iv.next#22 = add nsw nuw i64 %iv#22, %g.64
+  %cmp#22 = icmp ult i64 %iv.next#22, 16
+  br i1 %cmp#22, label %loop#23, label %exit
+
+loop#23:
+  %iv#23 = phi i64 [ %iv.next#22, %loop#22 ]
+  %gep#23 = gep inbounds ptr %dst, 2 x i64 %iv#23
+  store i16 %g.16, ptr %gep#23, align 2
+  %iv.next#23 = add nsw nuw i64 %iv#23, %g.64
+  %cmp#23 = icmp ult i64 %iv.next#23, 16
+  br i1 %cmp#23, label %loop#24, label %exit
+
+loop#24:
+  %iv#24 = phi i64 [ %iv.next#23, %loop#23 ]
+  %gep#24 = gep inbounds ptr %dst, 2 x i64 %iv#24
+  store i16 %g.16, ptr %gep#24, align 2
+  %iv.next#24 = add nsw nuw i64 %iv#24, %g.64
+  %cmp#24 = icmp ult i64 %iv.next#24, 16
+  br i1 %cmp#24, label %loop#25, label %exit
+
+loop#25:
+  %iv#25 = phi i64 [ %iv.next#24, %loop#24 ]
+  %gep#25 = gep inbounds ptr %dst, 2 x i64 %iv#25
+  store i16 %g.16, ptr %gep#25, align 2
+  %iv.next#25 = add nsw nuw i64 %iv#25, %g.64
+  %cmp#25 = icmp ult i64 %iv.next#25, 16
+  br i1 %cmp#25, label %loop#26, label %exit
+
+loop#26:
+  %iv#26 = phi i64 [ %iv.next#25, %loop#25 ]
+  %gep#26 = gep inbounds ptr %dst, 2 x i64 %iv#26
+  store i16 %g.16, ptr %gep#26, align 2
+  %iv.next#26 = add nsw nuw i64 %iv#26, %g.64
+  %cmp#26 = icmp ult i64 %iv.next#26, 16
+  br i1 %cmp#26, label %loop#27, label %exit
+
+loop#27:
+  %iv#27 = phi i64 [ %iv.next#26, %loop#26 ]
+  %gep#27 = gep inbounds ptr %dst, 2 x i64 %iv#27
+  store i16 %g.16, ptr %gep#27, align 2
+  %iv.next#27 = add nsw nuw i64 %iv#27, %g.64
+  %cmp#27 = icmp ult i64 %iv.next#27, 16
+  br i1 %cmp#27, label %loop#28, label %exit
+
+loop#28:
+  %iv#28 = phi i64 [ %iv.next#27, %loop#27 ]
+  %gep#28 = gep inbounds ptr %dst, 2 x i64 %iv#28
+  store i16 %g.16, ptr %gep#28, align 2
+  %iv.next#28 = add nsw nuw i64 %iv#28, %g.64
+  %cmp#28 = icmp ult i64 %iv.next#28, 16
+  br i1 %cmp#28, label %loop#29, label %exit
+
+loop#29:
+  %iv#29 = phi i64 [ %iv.next#28, %loop#28 ]
+  %gep#29 = gep inbounds ptr %dst, 2 x i64 %iv#29
+  store i16 %g.16, ptr %gep#29, align 2
+  %iv.next#29 = add nsw nuw i64 %iv#29, %g.64
+  %cmp#29 = icmp ult i64 %iv.next#29, 16
+  br i1 %cmp#29, label %loop#30, label %exit
+
+loop#30:
+  %iv#30 = phi i64 [ %iv.next#29, %loop#29 ]
+  %gep#30 = gep inbounds ptr %dst, 2 x i64 %iv#30
+  store i16 %g.16, ptr %gep#30, align 2
+  %iv.next#30 = add nsw nuw i64 %iv#30, %g.64
+  %cmp#30 = icmp ult i64 %iv.next#30, 16
+  br i1 %cmp#30, label %loop#31, label %exit
+
+loop#31:
+  %iv#31 = phi i64 [ %iv.next#30, %loop#30 ]
+  %gep#31 = gep inbounds ptr %dst, 2 x i64 %iv#31
+  store i16 %g.16, ptr %gep#31, align 2
+  %iv.next#31 = add nsw nuw i64 %iv#31, %g.64
+  %cmp#31 = icmp ult i64 %iv.next#31, 16
+  br i1 %cmp#31, label %loop#32, label %exit
+
+loop#32:
+  %iv#32 = phi i64 [ %iv.next#31, %loop#31 ]
+  %gep#32 = gep inbounds ptr %dst, 2 x i64 %iv#32
+  store i16 %g.16, ptr %gep#32, align 2
+  %iv.next#32 = add nsw nuw i64 %iv#32, %g.64
+  %cmp#32 = icmp ult i64 %iv.next#32, 16
+  br i1 %cmp#32, label #sink, label %exit
+
+exit:
+  ret void
+}
+ERROR: Timeout
+
+Summary:
+  0 correct transformations
+  0 incorrect transformations
+  1 failed-to-prove transformations
+  0 Alive2 errors
+
+[1/192] [115149] already done under raw-plain t1
+[2/192] [115149] already done under raw-structured t1
+[3/192] [115149] already done under llvmreduce-structured t1
+[4/192] [115149] already done under iraware-structured t1
+[5/192] [115149] already done under raw-structured t2
+[6/192] [115149] already done under llvmreduce-structured t2
+[7/192] [115149] already done under iraware-structured t2
+[8/192] [115149] already done under raw-plain t2
+[9/192] [115149] already done under llvmreduce-structured t3
+[10/192] [115149] already done under iraware-structured t3
+[11/192] [115149] already done under raw-plain t3
+[12/192] [115149] already done under raw-structured t3
+[13/192] [114879] already done under raw-structured t1
+[14/192] [114879] already done under llvmreduce-structured t1
+[15/192] [114879] already done under iraware-structured t1
+[16/192] [114879] already done under raw-plain t1
+[17/192] [114879] already done under llvmreduce-structured t2
+[18/192] [114879] already done under iraware-structured t2
+[19/192] [114879] already done under raw-plain t2
+[20/192] [114879] already done under raw-structured t2
+[21/192] [114879] already done under iraware-structured t3
+[22/192] [114879] already done under raw-plain t3
+[23/192] [114879] already done under raw-structured t3
+[24/192] [114879] already done under llvmreduce-structured t3
+[25/192] [118467] already done under llvmreduce-structured t1
+[26/192] [118467] already done under iraware-structured t1
+[27/192] [118467] already done under raw-plain t1
+[28/192] [118467] already done under raw-structured t1
+[29/192] [118467] already done under iraware-structured t2
+[30/192] [118467] already done under raw-plain t2
+[31/192] [118467] already done under raw-structured t2
+[32/192] [118467] already done under llvmreduce-structured t2
+[33/192] [118467] already done under raw-plain t3
+[34/192] [118467] already done under raw-structured t3
+[35/192] [118467] already done under llvmreduce-structured t3
+[36/192] [118467] already done under iraware-structured t3
+[37/192] [91369/iraware-structured/t1] starting
+[91369] stopping sweep: Unpatched Alive2 failure is not a clean semantic violation; no model reply was requested. Inspect the verifier/toolchain.
+iv.next#18, %loop#18 ]
+  %gep#19 = gep inbounds ptr %dst, 2 x i64 %iv#19
+  store i16 %g.16, ptr %gep#19, align 2
+  %iv.next#19 = add nsw nuw i64 %iv#19, %g.64
+  %cmp#19 = icmp ult i64 %iv.next#19, 16
+  br i1 %cmp#19, label %loop#20, label %exit
+
+loop#20:
+  %iv#20 = phi i64 [ %iv.next#19, %loop#19 ]
+  %gep#20 = gep inbounds ptr %dst, 2 x i64 %iv#20
+  store i16 %g.16, ptr %gep#20, align 2
+  %iv.next#20 = add nsw nuw i64 %iv#20, %g.64
+  %cmp#20 = icmp ult i64 %iv.next#20, 16
+  br i1 %cmp#20, label %loop#21, label %exit
+
+loop#21:
+  %iv#21 = phi i64 [ %iv.next#20, %loop#20 ]
+  %gep#21 = gep inbounds ptr %dst, 2 x i64 %iv#21
+  store i16 %g.16, ptr %gep#21, align 2
+  %iv.next#21 = add nsw nuw i64 %iv#21, %g.64
+  %cmp#21 = icmp ult i64 %iv.next#21, 16
+  br i1 %cmp#21, label %loop#22, label %exit
+
+loop#22:
+  %iv#22 = phi i64 [ %iv.next#21, %loop#21 ]
+  %gep#22 = gep inbounds ptr %dst, 2 x i64 %iv#22
+  store i16 %g.16, ptr %gep#22, align 2
+  %iv.next#22 = add nsw nuw i64 %iv#22, %g.64
+  %cmp#22 = icmp ult i64 %iv.next#22, 16
+  br i1 %cmp#22, label %loop#23, label %exit
+
+loop#23:
+  %iv#23 = phi i64 [ %iv.next#22, %loop#22 ]
+  %gep#23 = gep inbounds ptr %dst, 2 x i64 %iv#23
+  store i16 %g.16, ptr %gep#23, align 2
+  %iv.next#23 = add nsw nuw i64 %iv#23, %g.64
+  %cmp#23 = icmp ult i64 %iv.next#23, 16
+  br i1 %cmp#23, label %loop#24, label %exit
+
+loop#24:
+  %iv#24 = phi i64 [ %iv.next#23, %loop#23 ]
+  %gep#24 = gep inbounds ptr %dst, 2 x i64 %iv#24
+  store i16 %g.16, ptr %gep#24, align 2
+  %iv.next#24 = add nsw nuw i64 %iv#24, %g.64
+  %cmp#24 = icmp ult i64 %iv.next#24, 16
+  br i1 %cmp#24, label %loop#25, label %exit
+
+loop#25:
+  %iv#25 = phi i64 [ %iv.next#24, %loop#24 ]
+  %gep#25 = gep inbounds ptr %dst, 2 x i64 %iv#25
+  store i16 %g.16, ptr %gep#25, align 2
+  %iv.next#25 = add nsw nuw i64 %iv#25, %g.64
+  %cmp#25 = icmp ult i64 %iv.next#25, 16
+  br i1 %cmp#25, label %loop#26, label %exit
+
+loop#26:
+  %iv#26 = phi i64 [ %iv.next#25, %loop#25 ]
+  %gep#26 = gep inbounds ptr %dst, 2 x i64 %iv#26
+  store i16 %g.16, ptr %gep#26, align 2
+  %iv.next#26 = add nsw nuw i64 %iv#26, %g.64
+  %cmp#26 = icmp ult i64 %iv.next#26, 16
+  br i1 %cmp#26, label %loop#27, label %exit
+
+loop#27:
+  %iv#27 = phi i64 [ %iv.next#26, %loop#26 ]
+  %gep#27 = gep inbounds ptr %dst, 2 x i64 %iv#27
+  store i16 %g.16, ptr %gep#27, align 2
+  %iv.next#27 = add nsw nuw i64 %iv#27, %g.64
+  %cmp#27 = icmp ult i64 %iv.next#27, 16
+  br i1 %cmp#27, label %loop#28, label %exit
+
+loop#28:
+  %iv#28 = phi i64 [ %iv.next#27, %loop#27 ]
+  %gep#28 = gep inbounds ptr %dst, 2 x i64 %iv#28
+  store i16 %g.16, ptr %gep#28, align 2
+  %iv.next#28 = add nsw nuw i64 %iv#28, %g.64
+  %cmp#28 = icmp ult i64 %iv.next#28, 16
+  br i1 %cmp#28, label %loop#29, label %exit
+
+loop#29:
+  %iv#29 = phi i64 [ %iv.next#28, %loop#28 ]
+  %gep#29 = gep inbounds ptr %dst, 2 x i64 %iv#29
+  store i16 %g.16, ptr %gep#29, align 2
+  %iv.next#29 = add nsw nuw i64 %iv#29, %g.64
+  %cmp#29 = icmp ult i64 %iv.next#29, 16
+  br i1 %cmp#29, label %loop#30, label %exit
+
+loop#30:
+  %iv#30 = phi i64 [ %iv.next#29, %loop#29 ]
+  %gep#30 = gep inbounds ptr %dst, 2 x i64 %iv#30
+  store i16 %g.16, ptr %gep#30, align 2
+  %iv.next#30 = add nsw nuw i64 %iv#30, %g.64
+  %cmp#30 = icmp ult i64 %iv.next#30, 16
+  br i1 %cmp#30, label %loop#31, label %exit
+
+loop#31:
+  %iv#31 = phi i64 [ %iv.next#30, %loop#30 ]
+  %gep#31 = gep inbounds ptr %dst, 2 x i64 %iv#31
+  store i16 %g.16, ptr %gep#31, align 2
+  %iv.next#31 = add nsw nuw i64 %iv#31, %g.64
+  %cmp#31 = icmp ult i64 %iv.next#31, 16
+  br i1 %cmp#31, label %loop#32, label %exit
+
+loop#32:
+  %iv#32 = phi i64 [ %iv.next#31, %loop#31 ]
+  %gep#32 = gep inbounds ptr %dst, 2 x i64 %iv#32
+  store i16 %g.16, ptr %gep#32, align 2
+  %iv.next#32 = add nsw nuw i64 %iv#32, %g.64
+  %cmp#32 = icmp ult i64 %iv.next#32, 16
+  br i1 %cmp#32, label #sink, label %exit
+
+exit:
+  ret void
+}
+ERROR: Timeout
+
+Summary:
+  0 correct transformations
+  0 incorrect transformations
+  1 failed-to-prove transformations
+  0 Alive2 errors
+

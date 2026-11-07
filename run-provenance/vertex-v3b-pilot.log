@@ -1,0 +1,18 @@
+[1/4] [115575/raw-plain/t1] starting
+[115575/raw-plain/t1] iteration 1: not fixed (regression: test_failure)
+[115575/raw-plain/t1] iteration 2: FIXED
+[115575] -> results-vertex-v3b-pilot/115575.raw-plain.json
+[2/4] [115575/raw-structured/t1] starting
+[115575/raw-structured/t1] iteration 1: truncated
+[115575/raw-structured/t1] iteration 2: FIXED
+[115575] -> results-vertex-v3b-pilot/115575.raw-structured.json
+[3/4] [115575/llvmreduce-structured/t1] starting
+[115575/llvmreduce-structured/t1] iteration 1: not fixed (reproducer: error)
+[115575/llvmreduce-structured/t1] iteration 2: truncated
+[115575/llvmreduce-structured/t1] iteration 3: not fixed (build: error)
+[115575/llvmreduce-structured/t1] iteration 4: not fixed (regression: test_failure)
+[115575] -> results-vertex-v3b-pilot/115575.llvmreduce-structured.json
+[4/4] [115575/iraware-structured/t1] starting
+[115575/iraware-structured/t1] iteration 1: not fixed (regression: test_failure)
+[115575/iraware-structured/t1] iteration 2: FIXED
+[115575] -> results-vertex-v3b-pilot/115575.iraware-structured.json

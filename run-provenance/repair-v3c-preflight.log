@@ -1,0 +1,17 @@
+[medium] 78621: ELIGIBLE — clean unpatched Alive2 semantic violation
+[medium] 114738: ELIGIBLE — clean unpatched Alive2 semantic violation
+[medium] 167627: ELIGIBLE — clean unpatched Alive2 semantic violation
+[medium] 91177: ELIGIBLE — clean unpatched Alive2 semantic violation
+[medium] 82884: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 112350: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 173784: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 161492: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 179613: EXCLUDE — Unpatched failure is not an Alive2 witness; no model reply was requested.
+[hard] 180870: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 89672: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 91957: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard] 114901: ELIGIBLE — clean unpatched Alive2 semantic violation
+[hard reserve for 179613] 116553: ELIGIBLE — clean unpatched Alive2 semantic violation
+Wrote frozen eligible protocol: run-provenance/repair_v3c_vertex_resolved.json
+Eligible cohort: 16 bugs, 192 cells
+Preflight report: run-provenance/repair_v3c_preflight.json

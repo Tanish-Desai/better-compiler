@@ -1,0 +1,3102 @@
+{
+  "directory": "results-vertex-v3c",
+  "expected_repeat": 3,
+  "conditions": [
+    "raw-plain",
+    "raw-structured",
+    "llvmreduce-structured",
+    "iraware-structured"
+  ],
+  "scope": "observed bugs only",
+  "bugs": [
+    "112350",
+    "114738",
+    "114879",
+    "114901",
+    "115149",
+    "116553",
+    "118467",
+    "161492",
+    "167627",
+    "173784",
+    "180870",
+    "78621",
+    "82884",
+    "89672",
+    "91177",
+    "91957"
+  ],
+  "outside_sample_bugs": [],
+  "record_count": 192,
+  "unreadable_json": [],
+  "invalid_trial_records": [],
+  "duplicate_identities": [],
+  "complete_all_condition_bugs": [
+    "112350",
+    "114738",
+    "114879",
+    "114901",
+    "115149",
+    "116553",
+    "118467",
+    "161492",
+    "167627",
+    "173784",
+    "180870",
+    "78621",
+    "82884",
+    "89672",
+    "91177",
+    "91957"
+  ],
+  "planned_runs": 192,
+  "usable_planned_trial_records": 192,
+  "by_condition": {
+    "raw-plain": {
+      "records": 48,
+      "fixed_records": 13,
+      "finished_records": 48,
+      "incomplete_records": 0,
+      "turns": 161,
+      "no_op_replies": 0,
+      "recorded_build_attempts": 106,
+      "recorded_build_failures": 5,
+      "recorded_reproducer_passed_turns": 40,
+      "full_pass_turns": 13,
+      "suspected_infrastructure_records": 0,
+      "validation_timeout_records": 2,
+      "complete_bug_cells": 16,
+      "fixed_bugs": [
+        "114901",
+        "115149",
+        "116553",
+        "118467",
+        "82884",
+        "89672",
+        "91177"
+      ],
+      "pass_at_k": 0.4375,
+      "pass_at_1": 0.2708333333333333,
+      "common_panel_fixed_bugs": [
+        "114901",
+        "115149",
+        "116553",
+        "118467",
+        "82884",
+        "89672",
+        "91177"
+      ]
+    },
+    "raw-structured": {
+      "records": 48,
+      "fixed_records": 22,
+      "finished_records": 48,
+      "incomplete_records": 0,
+      "turns": 138,
+      "no_op_replies": 0,
+      "recorded_build_attempts": 92,
+      "recorded_build_failures": 13,
+      "recorded_reproducer_passed_turns": 44,
+      "full_pass_turns": 22,
+      "suspected_infrastructure_records": 0,
+      "validation_timeout_records": 0,
+      "complete_bug_cells": 16,
+      "fixed_bugs": [
+        "114738",
+        "114901",
+        "115149",
+        "116553",
+        "118467",
+        "180870",
+        "82884",
+        "89672",
+        "91177"
+      ],
+      "pass_at_k": 0.5625,
+      "pass_at_1": 0.4583333333333333,
+      "common_panel_fixed_bugs": [
+        "114738",
+        "114901",
+        "115149",
+        "116553",
+        "118467",
+        "180870",
+        "82884",
+        "89672",
+        "91177"
+      ]
+    },
+    "llvmreduce-structured": {
+      "records": 48,
+      "fixed_records": 11,
+      "finished_records": 48,
+      "incomplete_records": 0,
+      "turns": 168,
+      "no_op_replies": 0,
+      "recorded_build_attempts": 119,
+      "recorded_build_failures": 11,
+      "recorded_reproducer_passed_turns": 32,
+      "full_pass_turns": 11,
+      "suspected_infrastructure_records": 0,
+      "validation_timeout_records": 0,
+      "complete_bug_cells": 16,
+      "fixed_bugs": [
+        "114738",
+        "115149",
+        "116553",
+        "78621",
+        "89672",
+        "91177"
+      ],
+      "pass_at_k": 0.375,
+      "pass_at_1": 0.22916666666666666,
+      "common_panel_fixed_bugs": [
+        "114738",
+        "115149",
+        "116553",
+        "78621",
+        "89672",
+        "91177"
+      ]
+    },
+    "iraware-structured": {
+      "records": 48,
+      "fixed_records": 16,
+      "finished_records": 48,
+      "incomplete_records": 0,
+      "turns": 153,
+      "no_op_replies": 0,
+      "recorded_build_attempts": 107,
+      "recorded_build_failures": 13,
+      "recorded_reproducer_passed_turns": 37,
+      "full_pass_turns": 16,
+      "suspected_infrastructure_records": 0,
+      "validation_timeout_records": 0,
+      "complete_bug_cells": 16,
+      "fixed_bugs": [
+        "114738",
+        "114901",
+        "115149",
+        "118467",
+        "180870",
+        "82884",
+        "89672",
+        "91177"
+      ],
+      "pass_at_k": 0.5,
+      "pass_at_1": 0.3333333333333333,
+      "common_panel_fixed_bugs": [
+        "114738",
+        "114901",
+        "115149",
+        "118467",
+        "180870",
+        "82884",
+        "89672",
+        "91177"
+      ]
+    }
+  },
+  "by_bug": {
+    "112350": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "114738": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 2,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "114879": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "114901": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 2,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "115149": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 2,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "116553": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "118467": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "161492": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "167627": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "173784": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "180870": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "78621": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "82884": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 2,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 2,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "89672": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 2,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 1,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "91177": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": true,
+        "fixed_trials": 3,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    },
+    "91957": {
+      "raw-plain": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "raw-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "llvmreduce-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      },
+      "iraware-structured": {
+        "complete": true,
+        "fixed": false,
+        "fixed_trials": 0,
+        "missing_trials": [],
+        "incomplete_trials": [],
+        "review_required_trials": [],
+        "duplicate_trials": []
+      }
+    }
+  },
+  "turns": {
+    "total": 620,
+    "patch_truncated": 189,
+    "no_patch_failed": 196,
+    "patch_applied": 424,
+    "build_failed": 42,
+    "reproducer_failed": 229,
+    "regression_failed": 91,
+    "patch_invalid_format": 7,
+    "regression_passed": 62
+  },
+  "feedback_exposure": {
+    "initial": {
+      "turns": 192,
+      "alive2_routed_feedback": 192,
+      "baseline_witness_suppressed": 0,
+      "witness_eligible_feedback": 192,
+      "metadata_missing": 0
+    },
+    "subsequent": {
+      "turns": 428,
+      "alive2_routed_feedback": 168,
+      "baseline_witness_suppressed": 0,
+      "witness_eligible_feedback": 159,
+      "metadata_missing": 0
+    }
+  },
+  "reduction_by_bug": {
+    "112350": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 9,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            7,
+            7,
+            7
+          ],
+          "original_chars": [
+            452,
+            452,
+            452
+          ],
+          "shown_chars": [
+            427,
+            427,
+            427
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 9,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            7,
+            7,
+            7
+          ],
+          "original_chars": [
+            452,
+            452,
+            452
+          ],
+          "shown_chars": [
+            427,
+            427,
+            427
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1089,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            452,
+            452,
+            452
+          ],
+          "shown_chars": [
+            250,
+            250,
+            250
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 2,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 726,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7
+          ],
+          "shown_instructions": [
+            3,
+            3
+          ],
+          "original_chars": [
+            450,
+            450
+          ],
+          "shown_chars": [
+            241,
+            241
+          ]
+        }
+      }
+    },
+    "114738": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 3,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            16,
+            16,
+            16
+          ],
+          "shown_instructions": [
+            16,
+            16,
+            16
+          ],
+          "original_chars": [
+            1010,
+            1010,
+            1010
+          ],
+          "shown_chars": [
+            994,
+            994,
+            994
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 2,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 2,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 2,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            16,
+            16
+          ],
+          "shown_instructions": [
+            16,
+            16
+          ],
+          "original_chars": [
+            1010,
+            1010
+          ],
+          "shown_chars": [
+            994,
+            994
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1200,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            16,
+            16,
+            16
+          ],
+          "shown_instructions": [
+            5,
+            5,
+            5
+          ],
+          "original_chars": [
+            1010,
+            1010,
+            1010
+          ],
+          "shown_chars": [
+            283,
+            283,
+            283
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1200,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            16,
+            16,
+            16
+          ],
+          "shown_instructions": [
+            5,
+            5,
+            5
+          ],
+          "original_chars": [
+            1010,
+            1010,
+            1010
+          ],
+          "shown_chars": [
+            283,
+            283,
+            283
+          ]
+        }
+      }
+    },
+    "114879": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 15,
+          "oracle_tool_failures": 6,
+          "original_instructions": [
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            20,
+            20,
+            20
+          ],
+          "original_chars": [
+            2731,
+            2731,
+            2731
+          ],
+          "shown_chars": [
+            2272,
+            2272,
+            2272
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 15,
+          "oracle_tool_failures": 6,
+          "original_instructions": [
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            20,
+            20,
+            20
+          ],
+          "original_chars": [
+            2731,
+            2731,
+            2731
+          ],
+          "shown_chars": [
+            2272,
+            2272,
+            2272
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 708,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            2731,
+            2731,
+            2731
+          ],
+          "shown_chars": [
+            135,
+            135,
+            135
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 5,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1180,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            2731,
+            2731,
+            2731,
+            2731,
+            2731
+          ],
+          "shown_chars": [
+            135,
+            135,
+            135,
+            135,
+            135
+          ]
+        }
+      }
+    },
+    "114901": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 3,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 3,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            11,
+            11,
+            11
+          ],
+          "original_chars": [
+            917,
+            917,
+            917
+          ],
+          "shown_chars": [
+            917,
+            917,
+            917
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 1,
+          "no_accepted_pass": 1,
+          "no_instruction_shrink": 1,
+          "no_character_shrink": 1,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            12
+          ],
+          "shown_instructions": [
+            12
+          ],
+          "original_chars": [
+            943
+          ],
+          "shown_chars": [
+            943
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 780,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            917,
+            917,
+            917
+          ],
+          "shown_chars": [
+            459,
+            459,
+            459
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1115,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            11,
+            11,
+            11,
+            12
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4,
+            2
+          ],
+          "original_chars": [
+            917,
+            917,
+            917,
+            943
+          ],
+          "shown_chars": [
+            459,
+            459,
+            459,
+            395
+          ]
+        }
+      }
+    },
+    "115149": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 12,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            15,
+            15,
+            15
+          ],
+          "shown_instructions": [
+            15,
+            15,
+            15
+          ],
+          "original_chars": [
+            1392,
+            1392,
+            1392
+          ],
+          "shown_chars": [
+            1375,
+            1375,
+            1375
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 720,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            15,
+            15,
+            15
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            1392,
+            1392,
+            1392
+          ],
+          "shown_chars": [
+            508,
+            508,
+            508
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 2,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 480,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            15,
+            15
+          ],
+          "shown_instructions": [
+            3,
+            3
+          ],
+          "original_chars": [
+            1392,
+            1392
+          ],
+          "shown_chars": [
+            508,
+            508
+          ]
+        }
+      }
+    },
+    "116553": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 18,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            23,
+            23,
+            23
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            1580,
+            1580,
+            1580
+          ],
+          "shown_chars": [
+            216,
+            216,
+            216
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 6,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 36,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            23,
+            23,
+            23,
+            23,
+            23,
+            23
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            1580,
+            1580,
+            1580,
+            1580,
+            1580,
+            1580
+          ],
+          "shown_chars": [
+            216,
+            216,
+            216,
+            216,
+            216,
+            216
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 813,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            23,
+            23,
+            23
+          ],
+          "shown_instructions": [
+            5,
+            5,
+            5
+          ],
+          "original_chars": [
+            1580,
+            1580,
+            1580
+          ],
+          "shown_chars": [
+            369,
+            369,
+            369
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1084,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            23,
+            23,
+            23,
+            23
+          ],
+          "shown_instructions": [
+            5,
+            5,
+            5,
+            5
+          ],
+          "original_chars": [
+            1580,
+            1580,
+            1580,
+            1580
+          ],
+          "shown_chars": [
+            369,
+            369,
+            369,
+            369
+          ]
+        }
+      }
+    },
+    "118467": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 6,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            13,
+            13,
+            13
+          ],
+          "shown_instructions": [
+            13,
+            13,
+            13
+          ],
+          "original_chars": [
+            886,
+            886,
+            886
+          ],
+          "shown_chars": [
+            847,
+            847,
+            847
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 699,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            13,
+            13,
+            13
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            886,
+            886,
+            886
+          ],
+          "shown_chars": [
+            337,
+            337,
+            337
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 2,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 466,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            13,
+            13
+          ],
+          "shown_instructions": [
+            3,
+            3
+          ],
+          "original_chars": [
+            886,
+            886
+          ],
+          "shown_chars": [
+            337,
+            337
+          ]
+        }
+      }
+    },
+    "161492": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 3,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 3,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            227,
+            227,
+            227
+          ],
+          "shown_chars": [
+            227,
+            227,
+            227
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 1,
+          "no_accepted_pass": 1,
+          "no_instruction_shrink": 1,
+          "no_character_shrink": 1,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4
+          ],
+          "shown_instructions": [
+            4
+          ],
+          "original_chars": [
+            227
+          ],
+          "shown_chars": [
+            227
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 465,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            227,
+            227,
+            227
+          ],
+          "shown_chars": [
+            105,
+            105,
+            105
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 2,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 310,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4
+          ],
+          "shown_instructions": [
+            2,
+            2
+          ],
+          "original_chars": [
+            227,
+            227
+          ],
+          "shown_chars": [
+            105,
+            105
+          ]
+        }
+      }
+    },
+    "167627": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 3,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 3,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            251,
+            251,
+            251
+          ],
+          "shown_chars": [
+            251,
+            251,
+            251
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 4,
+          "no_instruction_shrink": 4,
+          "no_character_shrink": 4,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            251,
+            251,
+            251,
+            251
+          ],
+          "shown_chars": [
+            251,
+            251,
+            251,
+            251
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 456,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            251,
+            251,
+            251
+          ],
+          "shown_chars": [
+            97,
+            97,
+            97
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 6,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 912,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            251,
+            251,
+            251,
+            251,
+            251,
+            251
+          ],
+          "shown_chars": [
+            97,
+            97,
+            97,
+            97,
+            97,
+            97
+          ]
+        }
+      }
+    },
+    "173784": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 3,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 3,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            7,
+            7,
+            7
+          ],
+          "original_chars": [
+            416,
+            416,
+            416
+          ],
+          "shown_chars": [
+            416,
+            416,
+            416
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 4,
+          "no_instruction_shrink": 4,
+          "no_character_shrink": 4,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "original_chars": [
+            416,
+            416,
+            416,
+            416
+          ],
+          "shown_chars": [
+            416,
+            416,
+            416,
+            416
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 666,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            416,
+            416,
+            416
+          ],
+          "shown_chars": [
+            140,
+            140,
+            140
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 7,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1554,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            7,
+            7,
+            8,
+            8,
+            8,
+            7,
+            7
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            416,
+            416,
+            436,
+            436,
+            436,
+            416,
+            416
+          ],
+          "shown_chars": [
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140
+          ]
+        }
+      }
+    },
+    "180870": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 81,
+          "oracle_tool_failures": 12,
+          "original_instructions": [
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            21,
+            21,
+            21
+          ],
+          "original_chars": [
+            1813,
+            1813,
+            1813
+          ],
+          "shown_chars": [
+            1592,
+            1592,
+            1592
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 1,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 27,
+          "oracle_tool_failures": 4,
+          "original_instructions": [
+            25
+          ],
+          "shown_instructions": [
+            21
+          ],
+          "original_chars": [
+            1813
+          ],
+          "shown_chars": [
+            1592
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1122,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            1813,
+            1813,
+            1813
+          ],
+          "shown_chars": [
+            532,
+            532,
+            532
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1496,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            25,
+            25,
+            25,
+            25
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            1813,
+            1813,
+            1813,
+            1813
+          ],
+          "shown_chars": [
+            532,
+            532,
+            532,
+            532
+          ]
+        }
+      }
+    },
+    "78621": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 3,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            839,
+            839,
+            839
+          ],
+          "shown_chars": [
+            607,
+            607,
+            607
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 5,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 5,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "original_chars": [
+            839,
+            839,
+            839,
+            839,
+            839
+          ],
+          "shown_chars": [
+            607,
+            607,
+            607,
+            607,
+            607
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 963,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            839,
+            839,
+            839
+          ],
+          "shown_chars": [
+            109,
+            109,
+            109
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 1,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 321,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9
+          ],
+          "shown_instructions": [
+            2
+          ],
+          "original_chars": [
+            839
+          ],
+          "shown_chars": [
+            109
+          ]
+        }
+      }
+    },
+    "82884": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 69,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            9,
+            9,
+            9
+          ],
+          "original_chars": [
+            959,
+            959,
+            959
+          ],
+          "shown_chars": [
+            951,
+            951,
+            951
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 4,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 92,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "original_chars": [
+            959,
+            959,
+            959,
+            959
+          ],
+          "shown_chars": [
+            951,
+            951,
+            951,
+            951
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1200,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            6,
+            6,
+            6
+          ],
+          "original_chars": [
+            959,
+            959,
+            959
+          ],
+          "shown_chars": [
+            249,
+            249,
+            249
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 5,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 2000,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            9,
+            9,
+            9,
+            9,
+            9
+          ],
+          "shown_instructions": [
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "original_chars": [
+            959,
+            959,
+            959,
+            959,
+            959
+          ],
+          "shown_chars": [
+            249,
+            249,
+            249,
+            249,
+            249
+          ]
+        }
+      }
+    },
+    "89672": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 15,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            6,
+            6,
+            6
+          ],
+          "original_chars": [
+            689,
+            689,
+            689
+          ],
+          "shown_chars": [
+            402,
+            402,
+            402
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 24,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            13,
+            13,
+            13,
+            13
+          ],
+          "shown_instructions": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "original_chars": [
+            711,
+            711,
+            711,
+            711
+          ],
+          "shown_chars": [
+            392,
+            392,
+            392,
+            392
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 969,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            689,
+            689,
+            689
+          ],
+          "shown_chars": [
+            175,
+            175,
+            175
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 4,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1007,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            13,
+            13,
+            11,
+            13
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            711,
+            711,
+            689,
+            711
+          ],
+          "shown_chars": [
+            141,
+            141,
+            175,
+            141
+          ]
+        }
+      }
+    },
+    "91177": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 3,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 3,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 0,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            4,
+            4,
+            4
+          ],
+          "original_chars": [
+            594,
+            594,
+            594
+          ],
+          "shown_chars": [
+            594,
+            594,
+            594
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 660,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            4,
+            4,
+            4
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            594,
+            594,
+            594
+          ],
+          "shown_chars": [
+            262,
+            262,
+            262
+          ]
+        }
+      }
+    },
+    "91957": {
+      "iraware-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 3,
+          "no_instruction_shrink": 3,
+          "no_character_shrink": 3,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 3,
+          "oracle_tool_failures": 3,
+          "original_instructions": [
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            11,
+            11,
+            11
+          ],
+          "original_chars": [
+            802,
+            802,
+            802
+          ],
+          "shown_chars": [
+            802,
+            802,
+            802
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 2,
+          "no_accepted_pass": 2,
+          "no_instruction_shrink": 2,
+          "no_character_shrink": 2,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 2,
+          "oracle_tool_failures": 2,
+          "original_instructions": [
+            11,
+            11
+          ],
+          "shown_instructions": [
+            11,
+            11
+          ],
+          "original_chars": [
+            802,
+            802
+          ],
+          "shown_chars": [
+            802,
+            802
+          ]
+        }
+      },
+      "llvmreduce-structured": {
+        "initial": {
+          "feedbacks": 3,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 612,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            802,
+            802,
+            802
+          ],
+          "shown_chars": [
+            86,
+            86,
+            86
+          ]
+        },
+        "subsequent": {
+          "feedbacks": 6,
+          "no_accepted_pass": 0,
+          "no_instruction_shrink": 0,
+          "no_character_shrink": 0,
+          "size_metadata_missing": 0,
+          "fallback_errors": {},
+          "oracle_calls": 1234,
+          "oracle_tool_failures": 0,
+          "original_instructions": [
+            19,
+            11,
+            11,
+            11,
+            11,
+            11
+          ],
+          "shown_instructions": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "original_chars": [
+            1098,
+            802,
+            803,
+            803,
+            802,
+            802
+          ],
+          "shown_chars": [
+            86,
+            86,
+            86,
+            86,
+            86,
+            86
+          ]
+        }
+      }
+    }
+  },
+  "build_diagnostics": [
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018const class llvm::ICmpInst\u2019 has no member named \u2018isSameSign\u2019; did you mean \u2018llvm::ICmpInst::<unnamed enum> llvm::ICmpInst::SameSign\u2019? (not accessible from this context)",
+      "turns": 8,
+      "examples": [
+        "112350.iraware-structured.json:turn3",
+        "112350.iraware-structured.t2.json:turn1",
+        "112350.raw-structured.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: inconsistent types \u2018std::nullptr_t\u2019 and \u2018llvm::Value*\u2019 deduced for lambda return type",
+      "turns": 6,
+      "examples": [
+        "161492.iraware-structured.t2.json:turn3",
+        "161492.llvmreduce-structured.json:turn4",
+        "161492.llvmreduce-structured.t2.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018OverflowBinaryOperator\u2019 was not declared in this scope",
+      "turns": 2,
+      "examples": [
+        "82884.raw-plain.json:turn2",
+        "82884.raw-plain.t3.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isSameSignPredicate\u2019 is not a member of \u2018llvm::CmpInst\u2019",
+      "turns": 1,
+      "examples": [
+        "112350.llvmreduce-structured.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018const class llvm::ICmpInst\u2019 has no member named \u2018getRawPredicate\u2019; did you mean \u2018getPredicate\u2019?",
+      "turns": 1,
+      "examples": [
+        "112350.raw-structured.t2.json:turn4"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018const class llvm::ICmpInst\u2019 has no member named \u2018getRawSubclassData\u2019; did you mean \u2018getSubclassData\u2019?",
+      "turns": 1,
+      "examples": [
+        "112350.raw-structured.t3.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: no matching function for call to \u2018llvm::ICmpInst::getSubclassData() const\u2019",
+      "turns": 1,
+      "examples": [
+        "112350.raw-structured.t3.json:turn3"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018const class llvm::ICmpInst\u2019 has no member named \u2018getSubclassDataFromInstruction\u2019; did you mean \u2018getSubclassDataFromValue\u2019?",
+      "turns": 1,
+      "examples": [
+        "112350.raw-structured.t3.json:turn4"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isReductionIntrinsic\u2019 was not declared in this scope",
+      "turns": 1,
+      "examples": [
+        "114738.llvmreduce-structured.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018class llvm::PHINode\u2019 has no member named \u2018incoming_blocks\u2019; did you mean \u2018incoming_values\u2019?",
+      "turns": 1,
+      "examples": [
+        "114879.iraware-structured.json:turn4"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isLoopHeader\u2019 was not declared in this scope",
+      "turns": 1,
+      "examples": [
+        "114879.llvmreduce-structured.t3.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: no matching function for call to \u2018dominates(llvm::Value*, llvm::BasicBlock*)\u2019",
+      "turns": 1,
+      "examples": [
+        "114879.raw-plain.t2.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018getLoopFor\u2019 was not declared in this scope",
+      "turns": 1,
+      "examples": [
+        "114879.raw-structured.t2.json:turn3"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isLoopHeaderPHI\u2019 was not declared in this scope; did you mean \u2018isIntegerLoopHeaderPHI\u2019?",
+      "turns": 1,
+      "examples": [
+        "114879.raw-structured.t2.json:turn4"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018class llvm::BasicBlock\u2019 has no member named \u2018predecessors\u2019; did you mean \u2018hasNPredecessors\u2019?",
+      "turns": 1,
+      "examples": [
+        "116553.llvmreduce-structured.t3.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isDereferenceableAndAlignedPointer\u2019 was not declared in this scope",
+      "turns": 1,
+      "examples": [
+        "118467.llvmreduce-structured.t2.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isDereferenceableAndAlignedPointer\u2019 is not a member of \u2018llvm\u2019",
+      "turns": 1,
+      "examples": [
+        "118467.llvmreduce-structured.t2.json:turn3"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018I\u2019 is not captured",
+      "turns": 1,
+      "examples": [
+        "161492.iraware-structured.json:turn3"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: inconsistent types \u2018llvm::UndefValue*\u2019 and \u2018llvm::Value*\u2019 deduced for lambda return type",
+      "turns": 1,
+      "examples": [
+        "161492.iraware-structured.t2.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: no matching function for call to \u2018llvm::FCmpInst::isUnordered()\u2019",
+      "turns": 1,
+      "examples": [
+        "167627.raw-plain.json:turn4"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: no match for \u2018operator==\u2019 (operand types are \u2018llvm::RecurKind\u2019 and \u2018llvm::Instruction::OtherOps\u2019)",
+      "turns": 1,
+      "examples": [
+        "173784.iraware-structured.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018Select\u2019 is not a member of \u2018llvm::RecurKind\u2019",
+      "turns": 1,
+      "examples": [
+        "173784.iraware-structured.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isSameSign\u2019 is not a member of \u2018llvm::ICmpInst\u2019",
+      "turns": 1,
+      "examples": [
+        "180870.iraware-structured.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018class llvm::CmpPredicate\u2019 has no member named \u2018isSameSign\u2019; did you mean \u2018bool llvm::CmpPredicate::HasSameSign\u2019? (accessible via \u2018bool llvm::CmpPredicate::hasSameSign() const\u2019)",
+      "turns": 1,
+      "examples": [
+        "180870.iraware-structured.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018const class llvm::CmpInst\u2019 has no member named \u2018isSameSign\u2019",
+      "turns": 1,
+      "examples": [
+        "180870.iraware-structured.t2.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018isKnownZero\u2019 was not declared in this scope; did you mean \u2018isKnownNonZero\u2019?",
+      "turns": 1,
+      "examples": [
+        "180870.iraware-structured.t3.json:turn2"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018Start\u2019 was not declared in this scope",
+      "turns": 1,
+      "examples": [
+        "180870.raw-structured.json:turn1"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: invalid conversion from \u2018llvm::Instruction*\u2019 to \u2018llvm::CallInst*\u2019 [-fpermissive]",
+      "turns": 1,
+      "examples": [
+        "78621.llvmreduce-structured.t3.json:turn3"
+      ]
+    },
+    {
+      "category": "compiler_diagnostic",
+      "signature": "error: \u2018class llvm::BasicBlock\u2019 has no member named \u2018getDataLayout\u2019",
+      "turns": 1,
+      "examples": [
+        "78621.raw-structured.t2.json:turn4"
+      ]
+    }
+  ],
+  "regression_test_failures": {
+    "LLVM :: Transforms/Float2Int/basic.ll (3 of 6)": 5,
+    "LLVM :: Transforms/Float2Int/basic.ll (5 of 6)": 5,
+    "LLVM :: Transforms/LICM/expr-reassociate-int.ll (48 of 140)": 4,
+    "LLVM :: Transforms/IndVarSimplify/X86/loop-invariant-conditions.ll (57 of 1546)": 3,
+    "LLVM :: Transforms/IndVarSimplify/X86/loop-invariant-conditions.ll (58 of 1546)": 3,
+    "LLVM :: Transforms/IndVarSimplify/X86/loop-invariant-conditions.ll (59 of 1546)": 3,
+    "LLVM :: Transforms/ConstraintElimination/induction-condition-in-loop-exit.ll (40 of 105)": 3,
+    "LLVM :: Transforms/Float2Int/basic.ll (2 of 6)": 3,
+    "LLVM :: Transforms/SLPVectorizer/X86/extracts-non-extendable.ll (401 of 871)": 3,
+    "LLVM :: Transforms/IndVarSimplify/AArch64/widen-loop-comp.ll (45 of 263)": 3,
+    "LLVM :: Transforms/IndVarSimplify/AArch64/widen-loop-comp.ll (50 of 263)": 3,
+    "LLVM :: Transforms/ConstraintElimination/minmax.ll (49 of 99)": 3,
+    "LLVM :: Transforms/InstCombine/select-cmp.ll (1249 of 1637)": 2,
+    "LLVM :: Transforms/InstCombine/select-cmp.ll (1248 of 1637)": 2,
+    "LLVM :: Transforms/SLPVectorizer/RISCV/reductions.ll (132 of 682)": 2,
+    "LLVM :: Transforms/VectorCombine/X86/pr114901.ll (33 of 51)": 2,
+    "LLVM :: Transforms/InstCombine/gepphigep.ll (722 of 1645)": 2,
+    "LLVM :: Transforms/ConstraintElimination/induction-condition-in-loop-exit.ll (39 of 105)": 2,
+    "LLVM :: Transforms/ConstraintElimination/minmax.ll (50 of 99)": 2,
+    "LLVM :: Transforms/ConstraintElimination/minmax.ll (48 of 99)": 2,
+    "LLVM :: Transforms/SimplifyCFG/preserve-store-alignment.ll (224 of 286)": 2,
+    "LLVM :: Transforms/LICM/expr-reassociate-int.ll (47 of 140)": 2,
+    "LLVM :: Transforms/InstCombine/select-cmp.ll (1254 of 1637)": 1,
+    "LLVM :: Transforms/InstCombine/select-cmp.ll (1251 of 1637)": 1,
+    "LLVM :: Transforms/InstCombine/select-cmp.ll (1252 of 1637)": 1,
+    "LLVM :: Transforms/InstCombine/select-cmp.ll (1255 of 1637)": 1,
+    "LLVM :: Transforms/SLPVectorizer/RISCV/reductions.ll (131 of 682)": 1,
+    "LLVM :: Transforms/SLPVectorizer/RISCV/reductions.ll (130 of 682)": 1,
+    "LLVM :: Transforms/IndVarSimplify/X86/loop-invariant-conditions.ll (62 of 1546)": 1,
+    "LLVM :: Transforms/IndVarSimplify/invalidate-modified-lcssa-phi.ll (121 of 1546)": 1,
+    "LLVM :: Transforms/IndVarSimplify/invalidate-modified-lcssa-phi.ll (126 of 1546)": 1,
+    "LLVM :: Transforms/IndVarSimplify/lftr-pr20680.ll (139 of 1546)": 1,
+    "LLVM :: Transforms/IndVarSimplify/invalidate-modified-lcssa-phi.ll (129 of 1546)": 1,
+    "LLVM :: Transforms/IndVarSimplify/elim-extend.ll (112 of 1546)": 1,
+    "LLVM :: Transforms/VectorCombine/X86/extract-cmp-binop.ll (20 of 51)": 1,
+    "LLVM :: Transforms/VectorCombine/X86/pr114901.ll (34 of 51)": 1,
+    "LLVM :: Transforms/InstCombine/gepphigep.ll (721 of 1645)": 1,
+    "LLVM :: Transforms/AggressiveInstCombine/AArch64/or-load.ll (5 of 36)": 1,
+    "LLVM :: Transforms/AggressiveInstCombine/X86/or-load.ll (4 of 36)": 1,
+    "LLVM :: Transforms/AggressiveInstCombine/AArch64/or-load.ll (6 of 36)": 1,
+    "LLVM :: Transforms/Float2Int/basic.ll (4 of 6)": 1,
+    "LLVM :: Transforms/SLPVectorizer/X86/extractelement-single-use-many-nodes.ll (398 of 871)": 1,
+    "LLVM :: Transforms/SLPVectorizer/X86/reduction-logical.ll (607 of 871)": 1,
+    "LLVM :: Transforms/SLPVectorizer/X86/reduction-logical.ll (602 of 871)": 1,
+    "LLVM :: Transforms/SLPVectorizer/X86/reduction-bool-logic-op-inside.ll (600 of 871)": 1,
+    "LLVM :: Transforms/SLPVectorizer/X86/extracts-non-extendable.ll (399 of 871)": 1,
+    "LLVM :: Transforms/IndVarSimplify/AArch64/widen-loop-comp.ll (49 of 263)": 1,
+    "LLVM :: Transforms/IndVarSimplify/AArch64/widen-loop-comp.ll (44 of 263)": 1,
+    "LLVM :: Transforms/ConstraintElimination/minmax.ll (51 of 99)": 1,
+    "LLVM :: Transforms/ConstraintElimination/abs.ll (4 of 99)": 1,
+    "LLVM :: Transforms/ConstraintElimination/minmax.ll (47 of 99)": 1,
+    "LLVM :: Transforms/GVN/PRE/phi-translate-add.ll (49 of 202)": 1,
+    "LLVM :: Transforms/LICM/expr-reassociate.ll (51 of 140)": 1,
+    "LLVM :: Transforms/LICM/expr-reassociate.ll (52 of 140)": 1,
+    "LLVM :: Transforms/LICM/expr-reassociate-int.ll (46 of 140)": 1,
+    "LLVM :: Transforms/LICM/expr-reassociate-int.ll (51 of 140)": 1
+  },
+  "primary_pairs_descriptive": [],
+  "timing": {
+    "records_with_wall_seconds": 192,
+    "sum_recorded_wall_seconds": 51731.521,
+    "median_recorded_wall_seconds": 240.995,
+    "eta": null,
+    "note": "Run JSON stores durations, not start/end timestamps. No timestamp-based ETA; later LLVM revisions may cost more."
+  },
+  "interpretation": [
+    "Interim descriptive audit. Do not stop or select conditions because a p-value crosses a threshold.",
+    "Each comparison uses the same bugs with all requested trial IDs completed in both arms.",
+    "Condition-specific rates can have different bug denominators; compare the common panel or paired counts.",
+    "Infrastructure flags are diagnostic leads, not causal attribution. Completed outcomes remain in paired counts until a documented review decides otherwise.",
+    "No-edit source replies differ from counterexample reductions that remove nothing.",
+    "Feedback metadata describes the input shown to a proposal, not the outcome of that proposal.",
+    "counterexample=True records Alive2 routing, even for baseline. Witness-eligible counts exclude baseline, tool errors, and verified outputs; inspect saved prompts to establish literal content.",
+    "Timeouts are reported separately, not automatically excluded: a candidate patch can itself cause a timeout."
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "captured_at_utc": "2026-11-01T16:24:54.990736+00:00",
+  "effective_cpus": 32,
+  "available_ram_gib": 126.02,
+  "host_available_ram_gib": 933.47,
+  "cgroup_limits": {
+    "cpu": {
+      "location": {
+        "version": 2,
+        "membership": "/",
+        "mount_root": "/",
+        "mount_point": "/sys/fs/cgroup",
+        "paths": [
+          "/sys/fs/cgroup"
+        ]
+      },
+      "checks": [
+        {
+          "path": "/sys/fs/cgroup",
+          "quota": "3200000 100000"
+        }
+      ],
+      "known": true
+    },
+    "memory": {
+      "location": {
+        "version": 2,
+        "membership": "/",
+        "mount_root": "/",
+        "mount_point": "/sys/fs/cgroup",
+        "paths": [
+          "/sys/fs/cgroup"
+        ]
+      },
+      "checks": [
+        {
+          "path": "/sys/fs/cgroup",
+          "maximum": "137438953472",
+          "current": "2128916480"
+        }
+      ],
+      "known": true
+    }
+  },
+  "warnings": [],
+  "recommended_build_jobs": 8,
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-d93f49e9-f0cf-3545-98b9-f4d95c547b63",
+      "name": "NVIDIA H100 PCIe",
+      "total_mib": 81559,
+      "free_mib": 21261,
+      "budget_mib": 17127,
+      "gpu_memory_utilization": 0.21,
+      "reserve_mib": 4096,
+      "offload20_profile_memory_gate": true
+    }
+  ],
+  "cuda_visible_devices": null,
+  "note": "Read-only snapshot. Memory/CPU availability can change; no resource reservation is made.",
+  "selected_gpu": {
+    "index": 0,
+    "uuid": "GPU-d93f49e9-f0cf-3545-98b9-f4d95c547b63",
+    "name": "NVIDIA H100 PCIe",
+    "total_mib": 81559,
+    "free_mib": 21261,
+    "budget_mib": 17127,
+    "gpu_memory_utilization": 0.21,
+    "reserve_mib": 4096,
+    "offload20_profile_memory_gate": true
+  },
+  "gpu_selection": {
+    "requested": "0",
+    "cuda_visible_devices": null,
+    "cuda_mapping_verified": false,
+    "warnings": [
+      "Launch with CUDA_VISIBLE_DEVICES=GPU-d93f49e9-f0cf-3545-98b9-f4d95c547b63 to bind the server to this exact GPU; no environment variable was changed."
+    ],
+    "physical_index": 0,
+    "uuid": "GPU-d93f49e9-f0cf-3545-98b9-f4d95c547b63",
+    "recommended_cuda_visible_devices": "GPU-d93f49e9-f0cf-3545-98b9-f4d95c547b63"
+  }
+}

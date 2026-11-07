@@ -1,0 +1,972 @@
+== better-compiler native setup ==
+install root: /root/better-compiler-runtime
+repo root:    /root/24BCE5561/better-compiler
+Ubuntu:       noble; Alive2 build jobs: 4
+
+-- checking environment --
+apt-get: available
+GPU: visible (nvidia-smi works) -- vLLM can run in this same container
+
+Filesystem      Size  Used Avail Use% Mounted on
+overlay          26T   24T  1.2T  96% /
+               total        used        free      shared  buff/cache   available
+Mem:           1.0Ti        71Gi        16Gi       2.7Gi       927Gi       935Gi
+Swap:          8.0Gi        51Mi       7.9Gi
+/sys/fs/cgroup/memory.max: 137438953472
+/sys/fs/cgroup/memory.current: 2124275712
+-- installing system packages --
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1741 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2172 kB]
+Fetched 4040 kB in 3s (1317 kB/s)
+Reading package lists...
+W: Download is performed unsandboxed as root as file '/var/lib/apt/lists/partial/archive.ubuntu.com_ubuntu_dists_noble_InRelease' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+ca-certificates is already the newest version (20260816ubuntu0.24.04.1).
+ca-certificates set to manually installed.
+curl is already the newest version (8.5.0-2ubuntu10.16).
+The following additional packages will be installed:
+  dirmngr gnupg-utils gpg gpg-agent gpgconf gpgsm gpgv keyboxd libksba8
+  pinentry-curses
+Suggested packages:
+  pinentry-gnome3 tor parcimonie xloadimage gpg-wks-server scdaemon
+  pinentry-doc
+Recommended packages:
+  gnupg-l10n gpg-wks-client
+The following NEW packages will be installed:
+  dirmngr gnupg gnupg-utils gpg gpg-agent gpgconf gpgsm keyboxd libksba8
+  pinentry-curses
+The following packages will be upgraded:
+  gpgv
+1 upgraded, 10 newly installed, 0 to remove and 75 not upgraded.
+Need to get 2313 kB of archives.
+After this operation, 4909 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gpgv amd64 2.4.4-2ubuntu17.6 [158 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gpgconf amd64 2.4.4-2ubuntu17.6 [104 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 libksba8 amd64 1.6.6-1build1 [122 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 dirmngr amd64 2.4.4-2ubuntu17.6 [323 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gnupg-utils amd64 2.4.4-2ubuntu17.6 [109 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gpg amd64 2.4.4-2ubuntu17.6 [565 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 pinentry-curses amd64 1.2.1-3ubuntu5 [35.2 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gpg-agent amd64 2.4.4-2ubuntu17.6 [227 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gpgsm amd64 2.4.4-2ubuntu17.6 [232 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 keyboxd amd64 2.4.4-2ubuntu17.6 [78.3 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gnupg all 2.4.4-2ubuntu17.6 [359 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 2313 kB in 4s (592 kB/s)
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15090 files and directories currently installed.)
+Preparing to unpack .../gpgv_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking gpgv (2.4.4-2ubuntu17.6) over (2.4.4-2ubuntu17) ...
+Setting up gpgv (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package gpgconf.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15090 files and directories currently installed.)
+Preparing to unpack .../0-gpgconf_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking gpgconf (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package libksba8:amd64.
+Preparing to unpack .../1-libksba8_1.6.6-1build1_amd64.deb ...
+Unpacking libksba8:amd64 (1.6.6-1build1) ...
+Selecting previously unselected package dirmngr.
+Preparing to unpack .../2-dirmngr_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking dirmngr (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package gnupg-utils.
+Preparing to unpack .../3-gnupg-utils_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking gnupg-utils (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package gpg.
+Preparing to unpack .../4-gpg_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking gpg (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package pinentry-curses.
+Preparing to unpack .../5-pinentry-curses_1.2.1-3ubuntu5_amd64.deb ...
+Unpacking pinentry-curses (1.2.1-3ubuntu5) ...
+Selecting previously unselected package gpg-agent.
+Preparing to unpack .../6-gpg-agent_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking gpg-agent (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package gpgsm.
+Preparing to unpack .../7-gpgsm_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking gpgsm (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package keyboxd.
+Preparing to unpack .../8-keyboxd_2.4.4-2ubuntu17.6_amd64.deb ...
+Unpacking keyboxd (2.4.4-2ubuntu17.6) ...
+Selecting previously unselected package gnupg.
+Preparing to unpack .../9-gnupg_2.4.4-2ubuntu17.6_all.deb ...
+Unpacking gnupg (2.4.4-2ubuntu17.6) ...
+Setting up libksba8:amd64 (1.6.6-1build1) ...
+Setting up pinentry-curses (1.2.1-3ubuntu5) ...
+Setting up gpgconf (2.4.4-2ubuntu17.6) ...
+Setting up gpg (2.4.4-2ubuntu17.6) ...
+Setting up gnupg-utils (2.4.4-2ubuntu17.6) ...
+Setting up gpg-agent (2.4.4-2ubuntu17.6) ...
+Created symlink /etc/systemd/user/sockets.target.wants/gpg-agent.socket → /usr/lib/systemd/user/gpg-agent.socket.
+Created symlink /etc/systemd/user/sockets.target.wants/gpg-agent-ssh.socket → /usr/lib/systemd/user/gpg-agent-ssh.socket.
+Created symlink /etc/systemd/user/sockets.target.wants/gpg-agent-extra.socket → /usr/lib/systemd/user/gpg-agent-extra.socket.
+Created symlink /etc/systemd/user/sockets.target.wants/gpg-agent-browser.socket → /usr/lib/systemd/user/gpg-agent-browser.socket.
+Setting up gpgsm (2.4.4-2ubuntu17.6) ...
+Setting up dirmngr (2.4.4-2ubuntu17.6) ...
+Created symlink /etc/systemd/user/sockets.target.wants/dirmngr.socket → /usr/lib/systemd/user/dirmngr.socket.
+Setting up keyboxd (2.4.4-2ubuntu17.6) ...
+Created symlink /etc/systemd/user/sockets.target.wants/keyboxd.socket → /usr/lib/systemd/user/keyboxd.socket.
+Setting up gnupg (2.4.4-2ubuntu17.6) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.3) ...
+W: Download is performed unsandboxed as root as file '/var/cache/apt/archives/partial/gpgv_2.4.4-2ubuntu17.6_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 https://apt.llvm.org/noble llvm-toolchain-noble-21 InRelease [5557 B]
+Get:6 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 Packages [13.4 kB]
+Fetched 19.0 kB in 1s (18.8 kB/s)
+Reading package lists...
+W: Download is performed unsandboxed as root as file '/var/lib/apt/lists/partial/apt.llvm.org_noble_dists_llvm-toolchain-noble-21_InRelease' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+git is already the newest version (1:2.43.0-1ubuntu7.4).
+python3 is already the newest version (3.12.3-0ubuntu2.1).
+python3-venv is already the newest version (3.12.3-0ubuntu2.1).
+tmux is already the newest version (3.4-1ubuntu0.2).
+The following additional packages will be installed:
+  binutils binutils-common binutils-x86-64-linux-gnu bzip2 cmake-data cpp
+  cpp-13 cpp-13-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg dpkg-dev g++
+  g++-13-x86-64-linux-gnu g++-x86-64-linux-gnu gcc gcc-13-base
+  gcc-13-x86-64-linux-gnu gcc-14-base gcc-x86-64-linux-gnu icu-devtools
+  libarchive13t64 libasan8 libatomic1 libbinutils libbz2-1.0 libc-bin
+  libc-dev-bin libc6 libc6-dev libcc1-0 libclang-cpp21 libcrypt-dev
+  libctf-nobfd0 libctf0 libdpkg-perl libffi-dev libgcc-13-dev libgcc-s1
+  libgomp1 libgprofng0 libhiredis1.1.0 libhwasan0 libicu-dev libisl23 libitm1
+  libjansson4 libjsoncpp25 liblld-21 libllvm21 liblsan0 liblzma5 libmpc3
+  libmpfr6 libncurses-dev libncurses6 libncursesw6 libpfm4 libproc2-0
+  libquadmath0 librhash0 libsframe1 libstdc++-13-dev libstdc++6 libtinfo6
+  libtsan2 libubsan1 libuv1t64 libxml2 libxml2-dev libyaml-0-2 libz3-4
+  libzstd-dev linux-libc-dev lld-21 llvm-21-linker-tools llvm-21-runtime
+  llvm-21-tools lto-disabled-list make ncurses-base ncurses-bin ncurses-term
+  python3-pygments python3-setuptools python3-wheel python3-yaml rpcsvc-proto
+  xz-utils zlib1g
+Suggested packages:
+  binutils-doc gprofng-gui bzip2-doc distcc | icecc cmake-doc cmake-format
+  elpa-cmake-mode cpp-doc gcc-13-locales cpp-13-doc debsig-verify
+  debian-keyring g++-multilib g++-13-multilib gcc-13-doc gcc-multilib
+  manpages-dev autoconf automake libtool flex bison gdb gcc-doc
+  gcc-13-multilib gdb-x86-64-linux-gnu lrzip manpages glibc-doc locales
+  libnss-nis libnss-nisplus bzr icu-doc ncurses-doc libstdc++-13-doc
+  pkg-config llvm-21-doc make-doc python-pygments-doc ttf-bitstream-vera
+  python-setuptools-doc
+Recommended packages:
+  fakeroot libalgorithm-merge-perl manpages manpages-dev libc-devtools
+  libfile-fcntllock-perl liblocale-gettext-perl libgpm2 psmisc python3-dev
+The following NEW packages will be installed:
+  binutils binutils-common binutils-x86-64-linux-gnu build-essential bzip2
+  ccache cmake cmake-data cpp cpp-13 cpp-13-x86-64-linux-gnu
+  cpp-x86-64-linux-gnu dpkg-dev g++ g++-13 g++-13-x86-64-linux-gnu
+  g++-x86-64-linux-gnu gcc gcc-13 gcc-13-base gcc-13-x86-64-linux-gnu
+  gcc-x86-64-linux-gnu icu-devtools libarchive13t64 libasan8 libatomic1
+  libbinutils libc-dev-bin libc6-dev libcc1-0 libclang-cpp21 libcrypt-dev
+  libctf-nobfd0 libctf0 libdpkg-perl libffi-dev libgcc-13-dev libgomp1
+  libgprofng0 libhiredis1.1.0 libhwasan0 libicu-dev libisl23 libitm1
+  libjansson4 libjsoncpp25 liblld-21 liblld-21-dev libllvm21 liblsan0 libmpc3
+  libmpfr6 libncurses-dev libncurses6 libpfm4 libquadmath0 librhash0
+  libsframe1 libstdc++-13-dev libtsan2 libubsan1 libuv1t64 libxml2-dev
+  libyaml-0-2 libz3-4 libz3-dev libzstd-dev linux-libc-dev lld-21 llvm-21
+  llvm-21-dev llvm-21-linker-tools llvm-21-runtime llvm-21-tools
+  lto-disabled-list make ninja-build python3-pip python3-pygments
+  python3-setuptools python3-wheel python3-yaml re2c rpcsvc-proto xz-utils z3
+  zlib1g-dev
+The following packages will be upgraded:
+  dpkg gcc-14-base libbz2-1.0 libc-bin libc6 libgcc-s1 liblzma5 libncursesw6
+  libproc2-0 libstdc++6 libtinfo6 libxml2 ncurses-base ncurses-bin
+  ncurses-term procps zlib1g
+17 upgraded, 87 newly installed, 0 to remove and 58 not upgraded.
+Need to get 252 MB of archives.
+After this operation, 1140 MB of additional disk space will be used.
+Get:1 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 libllvm21 amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [30.9 MB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 dpkg amd64 1.22.6ubuntu6.6 [1282 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 ncurses-bin amd64 6.4+20240113-1ubuntu2.2 [188 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-14-base amd64 14.2.0-4ubuntu2~24.04.1 [51.0 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgcc-s1 amd64 14.2.0-4ubuntu2~24.04.1 [78.4 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libstdc++6 amd64 14.2.0-4ubuntu2~24.04.1 [792 kB]
+Get:7 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 libclang-cpp21 amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [13.9 MB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libc6 amd64 2.39-0ubuntu8.9 [3264 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libc-bin amd64 2.39-0ubuntu8.9 [682 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 ncurses-base all 6.4+20240113-1ubuntu2.2 [25.8 kB]
+Get:11 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 liblld-21 amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [2028 kB]
+Get:12 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 lld-21 amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [1577 kB]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 ncurses-term all 6.4+20240113-1ubuntu2.2 [275 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libbz2-1.0 amd64 1.0.8-5.1ubuntu0.1 [34.6 kB]
+Get:15 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 liblld-21-dev amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [66.6 kB]
+Get:16 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 llvm-21-runtime amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [612 kB]
+Get:17 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 llvm-21-linker-tools amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [1384 kB]
+Get:18 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 llvm-21 amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [20.1 MB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblzma5 amd64 5.6.1+really5.4.5-1ubuntu0.4 [128 kB]
+Get:20 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libncursesw6 amd64 6.4+20240113-1ubuntu2.2 [148 kB]
+Get:21 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtinfo6 amd64 6.4+20240113-1ubuntu2.2 [108 kB]
+Get:22 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 zlib1g amd64 1:1.3.dfsg-3.1ubuntu2.3 [63.2 kB]
+Get:23 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 llvm-21-tools amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [593 kB]
+Get:24 https://apt.llvm.org/noble llvm-toolchain-noble-21/main amd64 llvm-21-dev amd64 1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70 [55.9 MB]
+Get:25 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libproc2-0 amd64 2:4.0.4-4ubuntu3.3 [58.9 kB]
+Get:26 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 procps amd64 2:4.0.4-4ubuntu3.3 [707 kB]
+Get:27 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libxml2 amd64 2.9.14+dfsg-1.3ubuntu3.10 [764 kB]
+Get:28 http://archive.ubuntu.com/ubuntu noble/main amd64 libyaml-0-2 amd64 0.2.5-1build1 [51.5 kB]
+Get:29 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-pygments all 2.17.2+dfsg-1 [819 kB]
+Get:30 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-yaml amd64 6.0.1-2build2 [123 kB]
+Get:31 http://archive.ubuntu.com/ubuntu noble/main amd64 libjansson4 amd64 2.14-2build2 [32.8 kB]
+Get:32 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libncurses6 amd64 6.4+20240113-1ubuntu2.2 [112 kB]
+Get:33 http://archive.ubuntu.com/ubuntu noble/main amd64 libuv1t64 amd64 1.48.0-1.1build1 [97.3 kB]
+Get:34 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 xz-utils amd64 5.6.1+really5.4.5-1ubuntu0.4 [267 kB]
+Get:35 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 binutils-common amd64 2.42-4ubuntu2.10 [240 kB]
+Get:36 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsframe1 amd64 2.42-4ubuntu2.10 [15.7 kB]
+Get:37 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libbinutils amd64 2.42-4ubuntu2.10 [577 kB]
+Get:38 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libctf-nobfd0 amd64 2.42-4ubuntu2.10 [98.0 kB]
+Get:39 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libctf0 amd64 2.42-4ubuntu2.10 [94.5 kB]
+Get:40 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgprofng0 amd64 2.42-4ubuntu2.10 [849 kB]
+Get:41 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 binutils-x86-64-linux-gnu amd64 2.42-4ubuntu2.10 [2463 kB]
+Get:42 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 binutils amd64 2.42-4ubuntu2.10 [18.2 kB]
+Get:43 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libc-dev-bin amd64 2.39-0ubuntu8.9 [20.4 kB]
+Get:44 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 linux-libc-dev amd64 6.8.0-147.147 [1595 kB]
+Get:45 http://archive.ubuntu.com/ubuntu noble/main amd64 libcrypt-dev amd64 1:4.4.36-4build1 [112 kB]
+Get:46 http://archive.ubuntu.com/ubuntu noble/main amd64 rpcsvc-proto amd64 1.4.2-0ubuntu7 [67.4 kB]
+Get:47 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libc6-dev amd64 2.39-0ubuntu8.9 [2126 kB]
+Get:48 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-13-base amd64 13.3.0-6ubuntu2~24.04.1 [51.6 kB]
+Get:49 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libisl23 amd64 0.26-3build1.1 [680 kB]
+Get:50 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libmpfr6 amd64 4.2.1-1build1.1 [353 kB]
+Get:51 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libmpc3 amd64 1.3.1-1build1.1 [54.6 kB]
+Get:52 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cpp-13-x86-64-linux-gnu amd64 13.3.0-6ubuntu2~24.04.1 [10.7 MB]
+Get:53 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cpp-13 amd64 13.3.0-6ubuntu2~24.04.1 [1042 B]
+Get:54 http://archive.ubuntu.com/ubuntu noble/main amd64 cpp-x86-64-linux-gnu amd64 4:13.2.0-7ubuntu1 [5326 B]
+Get:55 http://archive.ubuntu.com/ubuntu noble/main amd64 cpp amd64 4:13.2.0-7ubuntu1 [22.4 kB]
+Get:56 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcc1-0 amd64 14.2.0-4ubuntu2~24.04.1 [48.0 kB]
+Get:57 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgomp1 amd64 14.2.0-4ubuntu2~24.04.1 [148 kB]
+Get:58 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libitm1 amd64 14.2.0-4ubuntu2~24.04.1 [29.7 kB]
+Get:59 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libatomic1 amd64 14.2.0-4ubuntu2~24.04.1 [10.5 kB]
+Get:60 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libasan8 amd64 14.2.0-4ubuntu2~24.04.1 [3027 kB]
+Get:61 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblsan0 amd64 14.2.0-4ubuntu2~24.04.1 [1322 kB]
+Get:62 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtsan2 amd64 14.2.0-4ubuntu2~24.04.1 [2772 kB]
+Get:63 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libubsan1 amd64 14.2.0-4ubuntu2~24.04.1 [1184 kB]
+Get:64 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libhwasan0 amd64 14.2.0-4ubuntu2~24.04.1 [1641 kB]
+Get:65 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libquadmath0 amd64 14.2.0-4ubuntu2~24.04.1 [153 kB]
+Get:66 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgcc-13-dev amd64 13.3.0-6ubuntu2~24.04.1 [2681 kB]
+Get:67 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-13-x86-64-linux-gnu amd64 13.3.0-6ubuntu2~24.04.1 [21.1 MB]
+Get:68 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gcc-13 amd64 13.3.0-6ubuntu2~24.04.1 [494 kB]
+Get:69 http://archive.ubuntu.com/ubuntu noble/main amd64 gcc-x86-64-linux-gnu amd64 4:13.2.0-7ubuntu1 [1212 B]
+Get:70 http://archive.ubuntu.com/ubuntu noble/main amd64 gcc amd64 4:13.2.0-7ubuntu1 [5018 B]
+Get:71 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libstdc++-13-dev amd64 13.3.0-6ubuntu2~24.04.1 [2420 kB]
+Get:72 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 g++-13-x86-64-linux-gnu amd64 13.3.0-6ubuntu2~24.04.1 [12.2 MB]
+Get:73 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 g++-13 amd64 13.3.0-6ubuntu2~24.04.1 [16.0 kB]
+Get:74 http://archive.ubuntu.com/ubuntu noble/main amd64 g++-x86-64-linux-gnu amd64 4:13.2.0-7ubuntu1 [964 B]
+Get:75 http://archive.ubuntu.com/ubuntu noble/main amd64 g++ amd64 4:13.2.0-7ubuntu1 [1100 B]
+Get:76 http://archive.ubuntu.com/ubuntu noble/main amd64 make amd64 4.3-4.1build2 [180 kB]
+Get:77 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libdpkg-perl all 1.22.6ubuntu6.6 [268 kB]
+Get:78 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 bzip2 amd64 1.0.8-5.1ubuntu0.1 [34.6 kB]
+Get:79 http://archive.ubuntu.com/ubuntu noble/main amd64 lto-disabled-list all 47 [12.4 kB]
+Get:80 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 dpkg-dev all 1.22.6ubuntu6.6 [1074 kB]
+Get:81 http://archive.ubuntu.com/ubuntu noble/main amd64 build-essential amd64 12.10ubuntu1 [4928 B]
+Get:82 http://archive.ubuntu.com/ubuntu noble/universe amd64 libhiredis1.1.0 amd64 1.2.0-6ubuntu3 [41.4 kB]
+Get:83 http://archive.ubuntu.com/ubuntu noble/universe amd64 ccache amd64 4.9.1-1 [592 kB]
+Get:84 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libarchive13t64 amd64 3.7.2-2ubuntu0.9 [383 kB]
+Get:85 http://archive.ubuntu.com/ubuntu noble/main amd64 libjsoncpp25 amd64 1.9.5-6build1 [82.8 kB]
+Get:86 http://archive.ubuntu.com/ubuntu noble/main amd64 librhash0 amd64 1.4.3-3build1 [129 kB]
+Get:87 http://archive.ubuntu.com/ubuntu noble/main amd64 cmake-data all 3.28.3-1build7 [2155 kB]
+Get:88 http://archive.ubuntu.com/ubuntu noble/main amd64 cmake amd64 3.28.3-1build7 [11.2 MB]
+Get:89 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 icu-devtools amd64 74.2-1ubuntu3.1 [212 kB]
+Get:90 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libicu-dev amd64 74.2-1ubuntu3.1 [11.9 MB]
+Get:91 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libzstd-dev amd64 1.5.5+dfsg2-2build1.1 [364 kB]
+Get:92 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 zlib1g-dev amd64 1:1.3.dfsg-3.1ubuntu2.3 [894 kB]
+Get:93 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libncurses-dev amd64 6.4+20240113-1ubuntu2.2 [384 kB]
+Get:94 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libxml2-dev amd64 2.9.14+dfsg-1.3ubuntu3.10 [781 kB]
+Get:95 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 libpfm4 amd64 4.13.0+git32-g0d4ed0e-1ubuntu0.1 [408 kB]
+Get:96 http://archive.ubuntu.com/ubuntu noble/main amd64 libffi-dev amd64 3.4.6-1build1 [62.8 kB]
+Get:97 http://archive.ubuntu.com/ubuntu noble/universe amd64 ninja-build amd64 1.11.1-2 [129 kB]
+Get:98 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3-setuptools all 68.1.2-2ubuntu1.2 [397 kB]
+Get:99 http://archive.ubuntu.com/ubuntu noble/universe amd64 python3-wheel all 0.42.0-2 [53.1 kB]
+Get:100 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 python3-pip all 24.0+dfsg-1ubuntu1.3 [1320 kB]
+Get:101 http://archive.ubuntu.com/ubuntu noble/main amd64 re2c amd64 3.1-1build1 [456 kB]
+Get:102 http://archive.ubuntu.com/ubuntu noble/universe amd64 libz3-4 amd64 4.8.12-3.1build1 [5836 kB]
+Get:103 http://archive.ubuntu.com/ubuntu noble/universe amd64 libz3-dev amd64 4.8.12-3.1build1 [72.2 kB]
+Get:104 http://archive.ubuntu.com/ubuntu noble/universe amd64 z3 amd64 4.8.12-3.1build1 [5911 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 252 MB in 29s (8820 kB/s)
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15241 files and directories currently installed.)
+Preparing to unpack .../dpkg_1.22.6ubuntu6.6_amd64.deb ...
+Unpacking dpkg (1.22.6ubuntu6.6) over (1.22.6ubuntu6.1) ...
+Setting up dpkg (1.22.6ubuntu6.6) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15241 files and directories currently installed.)
+Preparing to unpack .../ncurses-bin_6.4+20240113-1ubuntu2.2_amd64.deb ...
+Unpacking ncurses-bin (6.4+20240113-1ubuntu2.2) over (6.4+20240113-1ubuntu2.1) ...
+Setting up ncurses-bin (6.4+20240113-1ubuntu2.2) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15241 files and directories currently installed.)
+Preparing to unpack .../gcc-14-base_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking gcc-14-base:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+Setting up gcc-14-base:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15241 files and directories currently installed.)
+Preparing to unpack .../libgcc-s1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libgcc-s1:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+Setting up libgcc-s1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15241 files and directories currently installed.)
+Preparing to unpack .../libstdc++6_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libstdc++6:amd64 (14.2.0-4ubuntu2~24.04.1) over (14.2.0-4ubuntu2~24.04) ...
+Setting up libstdc++6:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15241 files and directories currently installed.)
+Preparing to unpack .../libc6_2.39-0ubuntu8.9_amd64.deb ...
+Unpacking libc6:amd64 (2.39-0ubuntu8.9) over (2.39-0ubuntu8.3) ...
+Setting up libc6:amd64 (2.39-0ubuntu8.9) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15240 files and directories currently installed.)
+Preparing to unpack .../libc-bin_2.39-0ubuntu8.9_amd64.deb ...
+Unpacking libc-bin (2.39-0ubuntu8.9) over (2.39-0ubuntu8.3) ...
+Setting up libc-bin (2.39-0ubuntu8.9) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15239 files and directories currently installed.)
+Preparing to unpack .../ncurses-base_6.4+20240113-1ubuntu2.2_all.deb ...
+Unpacking ncurses-base (6.4+20240113-1ubuntu2.2) over (6.4+20240113-1ubuntu2.1) ...
+Setting up ncurses-base (6.4+20240113-1ubuntu2.2) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15239 files and directories currently installed.)
+Preparing to unpack .../ncurses-term_6.4+20240113-1ubuntu2.2_all.deb ...
+Unpacking ncurses-term (6.4+20240113-1ubuntu2.2) over (6.4+20240113-1ubuntu2.1) ...
+Preparing to unpack .../libbz2-1.0_1.0.8-5.1ubuntu0.1_amd64.deb ...
+Unpacking libbz2-1.0:amd64 (1.0.8-5.1ubuntu0.1) over (1.0.8-5.1build0.1) ...
+Setting up libbz2-1.0:amd64 (1.0.8-5.1ubuntu0.1) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15239 files and directories currently installed.)
+Preparing to unpack .../liblzma5_5.6.1+really5.4.5-1ubuntu0.4_amd64.deb ...
+Unpacking liblzma5:amd64 (5.6.1+really5.4.5-1ubuntu0.4) over (5.6.1+really5.4.5-1build0.1) ...
+Setting up liblzma5:amd64 (5.6.1+really5.4.5-1ubuntu0.4) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15239 files and directories currently installed.)
+Preparing to unpack .../libncursesw6_6.4+20240113-1ubuntu2.2_amd64.deb ...
+Unpacking libncursesw6:amd64 (6.4+20240113-1ubuntu2.2) over (6.4+20240113-1ubuntu2.1) ...
+Preparing to unpack .../libtinfo6_6.4+20240113-1ubuntu2.2_amd64.deb ...
+Unpacking libtinfo6:amd64 (6.4+20240113-1ubuntu2.2) over (6.4+20240113-1ubuntu2.1) ...
+Setting up libtinfo6:amd64 (6.4+20240113-1ubuntu2.2) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15239 files and directories currently installed.)
+Preparing to unpack .../zlib1g_1%3a1.3.dfsg-3.1ubuntu2.3_amd64.deb ...
+Unpacking zlib1g:amd64 (1:1.3.dfsg-3.1ubuntu2.3) over (1:1.3.dfsg-3.1ubuntu2.1) ...
+Setting up zlib1g:amd64 (1:1.3.dfsg-3.1ubuntu2.3) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 15239 files and directories currently installed.)
+Preparing to unpack .../00-libproc2-0_2%3a4.0.4-4ubuntu3.3_amd64.deb ...
+Unpacking libproc2-0:amd64 (2:4.0.4-4ubuntu3.3) over (2:4.0.4-4ubuntu3.2) ...
+Preparing to unpack .../01-procps_2%3a4.0.4-4ubuntu3.3_amd64.deb ...
+Unpacking procps (2:4.0.4-4ubuntu3.3) over (2:4.0.4-4ubuntu3.2) ...
+Preparing to unpack .../02-libxml2_2.9.14+dfsg-1.3ubuntu3.10_amd64.deb ...
+Unpacking libxml2:amd64 (2.9.14+dfsg-1.3ubuntu3.10) over (2.9.14+dfsg-1.3ubuntu3.8) ...
+Selecting previously unselected package libyaml-0-2:amd64.
+Preparing to unpack .../03-libyaml-0-2_0.2.5-1build1_amd64.deb ...
+Unpacking libyaml-0-2:amd64 (0.2.5-1build1) ...
+Selecting previously unselected package python3-pygments.
+Preparing to unpack .../04-python3-pygments_2.17.2+dfsg-1_all.deb ...
+Unpacking python3-pygments (2.17.2+dfsg-1) ...
+Selecting previously unselected package python3-yaml.
+Preparing to unpack .../05-python3-yaml_6.0.1-2build2_amd64.deb ...
+Unpacking python3-yaml (6.0.1-2build2) ...
+Selecting previously unselected package libjansson4:amd64.
+Preparing to unpack .../06-libjansson4_2.14-2build2_amd64.deb ...
+Unpacking libjansson4:amd64 (2.14-2build2) ...
+Selecting previously unselected package libncurses6:amd64.
+Preparing to unpack .../07-libncurses6_6.4+20240113-1ubuntu2.2_amd64.deb ...
+Unpacking libncurses6:amd64 (6.4+20240113-1ubuntu2.2) ...
+Selecting previously unselected package libuv1t64:amd64.
+Preparing to unpack .../08-libuv1t64_1.48.0-1.1build1_amd64.deb ...
+Unpacking libuv1t64:amd64 (1.48.0-1.1build1) ...
+Selecting previously unselected package xz-utils.
+Preparing to unpack .../09-xz-utils_5.6.1+really5.4.5-1ubuntu0.4_amd64.deb ...
+Unpacking xz-utils (5.6.1+really5.4.5-1ubuntu0.4) ...
+Selecting previously unselected package binutils-common:amd64.
+Preparing to unpack .../10-binutils-common_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking binutils-common:amd64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libsframe1:amd64.
+Preparing to unpack .../11-libsframe1_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking libsframe1:amd64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libbinutils:amd64.
+Preparing to unpack .../12-libbinutils_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking libbinutils:amd64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libctf-nobfd0:amd64.
+Preparing to unpack .../13-libctf-nobfd0_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking libctf-nobfd0:amd64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libctf0:amd64.
+Preparing to unpack .../14-libctf0_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking libctf0:amd64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libgprofng0:amd64.
+Preparing to unpack .../15-libgprofng0_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking libgprofng0:amd64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package binutils-x86-64-linux-gnu.
+Preparing to unpack .../16-binutils-x86-64-linux-gnu_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking binutils-x86-64-linux-gnu (2.42-4ubuntu2.10) ...
+Selecting previously unselected package binutils.
+Preparing to unpack .../17-binutils_2.42-4ubuntu2.10_amd64.deb ...
+Unpacking binutils (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libc-dev-bin.
+Preparing to unpack .../18-libc-dev-bin_2.39-0ubuntu8.9_amd64.deb ...
+Unpacking libc-dev-bin (2.39-0ubuntu8.9) ...
+Selecting previously unselected package linux-libc-dev:amd64.
+Preparing to unpack .../19-linux-libc-dev_6.8.0-147.147_amd64.deb ...
+Unpacking linux-libc-dev:amd64 (6.8.0-147.147) ...
+Selecting previously unselected package libcrypt-dev:amd64.
+Preparing to unpack .../20-libcrypt-dev_1%3a4.4.36-4build1_amd64.deb ...
+Unpacking libcrypt-dev:amd64 (1:4.4.36-4build1) ...
+Selecting previously unselected package rpcsvc-proto.
+Preparing to unpack .../21-rpcsvc-proto_1.4.2-0ubuntu7_amd64.deb ...
+Unpacking rpcsvc-proto (1.4.2-0ubuntu7) ...
+Selecting previously unselected package libc6-dev:amd64.
+Preparing to unpack .../22-libc6-dev_2.39-0ubuntu8.9_amd64.deb ...
+Unpacking libc6-dev:amd64 (2.39-0ubuntu8.9) ...
+Selecting previously unselected package gcc-13-base:amd64.
+Preparing to unpack .../23-gcc-13-base_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking gcc-13-base:amd64 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package libisl23:amd64.
+Preparing to unpack .../24-libisl23_0.26-3build1.1_amd64.deb ...
+Unpacking libisl23:amd64 (0.26-3build1.1) ...
+Selecting previously unselected package libmpfr6:amd64.
+Preparing to unpack .../25-libmpfr6_4.2.1-1build1.1_amd64.deb ...
+Unpacking libmpfr6:amd64 (4.2.1-1build1.1) ...
+Selecting previously unselected package libmpc3:amd64.
+Preparing to unpack .../26-libmpc3_1.3.1-1build1.1_amd64.deb ...
+Unpacking libmpc3:amd64 (1.3.1-1build1.1) ...
+Selecting previously unselected package cpp-13-x86-64-linux-gnu.
+Preparing to unpack .../27-cpp-13-x86-64-linux-gnu_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking cpp-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package cpp-13.
+Preparing to unpack .../28-cpp-13_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking cpp-13 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package cpp-x86-64-linux-gnu.
+Preparing to unpack .../29-cpp-x86-64-linux-gnu_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking cpp-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package cpp.
+Preparing to unpack .../30-cpp_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking cpp (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package libcc1-0:amd64.
+Preparing to unpack .../31-libcc1-0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libcc1-0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libgomp1:amd64.
+Preparing to unpack .../32-libgomp1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libgomp1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libitm1:amd64.
+Preparing to unpack .../33-libitm1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libitm1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libatomic1:amd64.
+Preparing to unpack .../34-libatomic1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libatomic1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libasan8:amd64.
+Preparing to unpack .../35-libasan8_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libasan8:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package liblsan0:amd64.
+Preparing to unpack .../36-liblsan0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking liblsan0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libtsan2:amd64.
+Preparing to unpack .../37-libtsan2_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libtsan2:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libubsan1:amd64.
+Preparing to unpack .../38-libubsan1_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libubsan1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libhwasan0:amd64.
+Preparing to unpack .../39-libhwasan0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libhwasan0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libquadmath0:amd64.
+Preparing to unpack .../40-libquadmath0_14.2.0-4ubuntu2~24.04.1_amd64.deb ...
+Unpacking libquadmath0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libgcc-13-dev:amd64.
+Preparing to unpack .../41-libgcc-13-dev_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking libgcc-13-dev:amd64 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package gcc-13-x86-64-linux-gnu.
+Preparing to unpack .../42-gcc-13-x86-64-linux-gnu_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking gcc-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package gcc-13.
+Preparing to unpack .../43-gcc-13_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking gcc-13 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package gcc-x86-64-linux-gnu.
+Preparing to unpack .../44-gcc-x86-64-linux-gnu_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking gcc-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package gcc.
+Preparing to unpack .../45-gcc_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking gcc (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package libstdc++-13-dev:amd64.
+Preparing to unpack .../46-libstdc++-13-dev_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking libstdc++-13-dev:amd64 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package g++-13-x86-64-linux-gnu.
+Preparing to unpack .../47-g++-13-x86-64-linux-gnu_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking g++-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package g++-13.
+Preparing to unpack .../48-g++-13_13.3.0-6ubuntu2~24.04.1_amd64.deb ...
+Unpacking g++-13 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package g++-x86-64-linux-gnu.
+Preparing to unpack .../49-g++-x86-64-linux-gnu_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking g++-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package g++.
+Preparing to unpack .../50-g++_4%3a13.2.0-7ubuntu1_amd64.deb ...
+Unpacking g++ (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package make.
+Preparing to unpack .../51-make_4.3-4.1build2_amd64.deb ...
+Unpacking make (4.3-4.1build2) ...
+Selecting previously unselected package libdpkg-perl.
+Preparing to unpack .../52-libdpkg-perl_1.22.6ubuntu6.6_all.deb ...
+Unpacking libdpkg-perl (1.22.6ubuntu6.6) ...
+Selecting previously unselected package bzip2.
+Preparing to unpack .../53-bzip2_1.0.8-5.1ubuntu0.1_amd64.deb ...
+Unpacking bzip2 (1.0.8-5.1ubuntu0.1) ...
+Selecting previously unselected package lto-disabled-list.
+Preparing to unpack .../54-lto-disabled-list_47_all.deb ...
+Unpacking lto-disabled-list (47) ...
+Selecting previously unselected package dpkg-dev.
+Preparing to unpack .../55-dpkg-dev_1.22.6ubuntu6.6_all.deb ...
+Unpacking dpkg-dev (1.22.6ubuntu6.6) ...
+Selecting previously unselected package build-essential.
+Preparing to unpack .../56-build-essential_12.10ubuntu1_amd64.deb ...
+Unpacking build-essential (12.10ubuntu1) ...
+Selecting previously unselected package libhiredis1.1.0:amd64.
+Preparing to unpack .../57-libhiredis1.1.0_1.2.0-6ubuntu3_amd64.deb ...
+Unpacking libhiredis1.1.0:amd64 (1.2.0-6ubuntu3) ...
+Selecting previously unselected package ccache.
+Preparing to unpack .../58-ccache_4.9.1-1_amd64.deb ...
+Unpacking ccache (4.9.1-1) ...
+Selecting previously unselected package libarchive13t64:amd64.
+Preparing to unpack .../59-libarchive13t64_3.7.2-2ubuntu0.9_amd64.deb ...
+Unpacking libarchive13t64:amd64 (3.7.2-2ubuntu0.9) ...
+Selecting previously unselected package libjsoncpp25:amd64.
+Preparing to unpack .../60-libjsoncpp25_1.9.5-6build1_amd64.deb ...
+Unpacking libjsoncpp25:amd64 (1.9.5-6build1) ...
+Selecting previously unselected package librhash0:amd64.
+Preparing to unpack .../61-librhash0_1.4.3-3build1_amd64.deb ...
+Unpacking librhash0:amd64 (1.4.3-3build1) ...
+Selecting previously unselected package cmake-data.
+Preparing to unpack .../62-cmake-data_3.28.3-1build7_all.deb ...
+Unpacking cmake-data (3.28.3-1build7) ...
+Selecting previously unselected package cmake.
+Preparing to unpack .../63-cmake_3.28.3-1build7_amd64.deb ...
+Unpacking cmake (3.28.3-1build7) ...
+Selecting previously unselected package icu-devtools.
+Preparing to unpack .../64-icu-devtools_74.2-1ubuntu3.1_amd64.deb ...
+Unpacking icu-devtools (74.2-1ubuntu3.1) ...
+Selecting previously unselected package libllvm21:amd64.
+Preparing to unpack .../65-libllvm21_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking libllvm21:amd64 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package libclang-cpp21.
+Preparing to unpack .../66-libclang-cpp21_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking libclang-cpp21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package libicu-dev:amd64.
+Preparing to unpack .../67-libicu-dev_74.2-1ubuntu3.1_amd64.deb ...
+Unpacking libicu-dev:amd64 (74.2-1ubuntu3.1) ...
+Selecting previously unselected package liblld-21.
+Preparing to unpack .../68-liblld-21_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking liblld-21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package lld-21.
+Preparing to unpack .../69-lld-21_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking lld-21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package libzstd-dev:amd64.
+Preparing to unpack .../70-libzstd-dev_1.5.5+dfsg2-2build1.1_amd64.deb ...
+Unpacking libzstd-dev:amd64 (1.5.5+dfsg2-2build1.1) ...
+Selecting previously unselected package zlib1g-dev:amd64.
+Preparing to unpack .../71-zlib1g-dev_1%3a1.3.dfsg-3.1ubuntu2.3_amd64.deb ...
+Unpacking zlib1g-dev:amd64 (1:1.3.dfsg-3.1ubuntu2.3) ...
+Selecting previously unselected package liblld-21-dev.
+Preparing to unpack .../72-liblld-21-dev_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking liblld-21-dev (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package libncurses-dev:amd64.
+Preparing to unpack .../73-libncurses-dev_6.4+20240113-1ubuntu2.2_amd64.deb ...
+Unpacking libncurses-dev:amd64 (6.4+20240113-1ubuntu2.2) ...
+Selecting previously unselected package libxml2-dev:amd64.
+Preparing to unpack .../74-libxml2-dev_2.9.14+dfsg-1.3ubuntu3.10_amd64.deb ...
+Unpacking libxml2-dev:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+Selecting previously unselected package llvm-21-runtime.
+Preparing to unpack .../75-llvm-21-runtime_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking llvm-21-runtime (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package llvm-21-linker-tools.
+Preparing to unpack .../76-llvm-21-linker-tools_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking llvm-21-linker-tools (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package libpfm4:amd64.
+Preparing to unpack .../77-libpfm4_4.13.0+git32-g0d4ed0e-1ubuntu0.1_amd64.deb ...
+Unpacking libpfm4:amd64 (4.13.0+git32-g0d4ed0e-1ubuntu0.1) ...
+Selecting previously unselected package llvm-21.
+Preparing to unpack .../78-llvm-21_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking llvm-21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package libffi-dev:amd64.
+Preparing to unpack .../79-libffi-dev_3.4.6-1build1_amd64.deb ...
+Unpacking libffi-dev:amd64 (3.4.6-1build1) ...
+Selecting previously unselected package llvm-21-tools.
+Preparing to unpack .../80-llvm-21-tools_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking llvm-21-tools (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package llvm-21-dev.
+Preparing to unpack .../81-llvm-21-dev_1%3a21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70_amd64.deb ...
+Unpacking llvm-21-dev (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Selecting previously unselected package ninja-build.
+Preparing to unpack .../82-ninja-build_1.11.1-2_amd64.deb ...
+Unpacking ninja-build (1.11.1-2) ...
+Selecting previously unselected package python3-setuptools.
+Preparing to unpack .../83-python3-setuptools_68.1.2-2ubuntu1.2_all.deb ...
+Unpacking python3-setuptools (68.1.2-2ubuntu1.2) ...
+Selecting previously unselected package python3-wheel.
+Preparing to unpack .../84-python3-wheel_0.42.0-2_all.deb ...
+Unpacking python3-wheel (0.42.0-2) ...
+Selecting previously unselected package python3-pip.
+Preparing to unpack .../85-python3-pip_24.0+dfsg-1ubuntu1.3_all.deb ...
+Unpacking python3-pip (24.0+dfsg-1ubuntu1.3) ...
+Selecting previously unselected package re2c.
+Preparing to unpack .../86-re2c_3.1-1build1_amd64.deb ...
+Unpacking re2c (3.1-1build1) ...
+Selecting previously unselected package libz3-4:amd64.
+Preparing to unpack .../87-libz3-4_4.8.12-3.1build1_amd64.deb ...
+Unpacking libz3-4:amd64 (4.8.12-3.1build1) ...
+Selecting previously unselected package libz3-dev:amd64.
+Preparing to unpack .../88-libz3-dev_4.8.12-3.1build1_amd64.deb ...
+Unpacking libz3-dev:amd64 (4.8.12-3.1build1) ...
+Selecting previously unselected package z3.
+Preparing to unpack .../89-z3_4.8.12-3.1build1_amd64.deb ...
+Unpacking z3 (4.8.12-3.1build1) ...
+Setting up lto-disabled-list (47) ...
+Setting up libzstd-dev:amd64 (1.5.5+dfsg2-2build1.1) ...
+Setting up python3-setuptools (68.1.2-2ubuntu1.2) ...
+Setting up libyaml-0-2:amd64 (0.2.5-1build1) ...
+Setting up libuv1t64:amd64 (1.48.0-1.1build1) ...
+Setting up binutils-common:amd64 (2.42-4ubuntu2.10) ...
+Setting up linux-libc-dev:amd64 (6.8.0-147.147) ...
+Setting up libctf-nobfd0:amd64 (2.42-4ubuntu2.10) ...
+Setting up python3-yaml (6.0.1-2build2) ...
+Setting up libgomp1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up bzip2 (1.0.8-5.1ubuntu0.1) ...
+Setting up libffi-dev:amd64 (3.4.6-1build1) ...
+Setting up python3-wheel (0.42.0-2) ...
+Setting up z3 (4.8.12-3.1build1) ...
+Setting up libsframe1:amd64 (2.42-4ubuntu2.10) ...
+Setting up ninja-build (1.11.1-2) ...
+Setting up libjansson4:amd64 (2.14-2build2) ...
+Setting up python3-pygments (2.17.2+dfsg-1) ...
+Setting up libz3-4:amd64 (4.8.12-3.1build1) ...
+Setting up libpfm4:amd64 (4.13.0+git32-g0d4ed0e-1ubuntu0.1) ...
+Setting up rpcsvc-proto (1.4.2-0ubuntu7) ...
+Setting up gcc-13-base:amd64 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up make (4.3-4.1build2) ...
+Setting up libmpfr6:amd64 (4.2.1-1build1.1) ...
+Setting up libncurses6:amd64 (6.4+20240113-1ubuntu2.2) ...
+Setting up xz-utils (5.6.1+really5.4.5-1ubuntu0.4) ...
+update-alternatives: using /usr/bin/xz to provide /usr/bin/lzma (lzma) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzma.1.gz because associated file /usr/share/man/man1/xz.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/unlzma.1.gz because associated file /usr/share/man/man1/unxz.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzcat.1.gz because associated file /usr/share/man/man1/xzcat.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzmore.1.gz because associated file /usr/share/man/man1/xzmore.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzless.1.gz because associated file /usr/share/man/man1/xzless.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzdiff.1.gz because associated file /usr/share/man/man1/xzdiff.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzcmp.1.gz because associated file /usr/share/man/man1/xzcmp.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzgrep.1.gz because associated file /usr/share/man/man1/xzgrep.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzegrep.1.gz because associated file /usr/share/man/man1/xzegrep.1.gz (of link group lzma) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/lzfgrep.1.gz because associated file /usr/share/man/man1/xzfgrep.1.gz (of link group lzma) doesn't exist
+Setting up libquadmath0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libproc2-0:amd64 (2:4.0.4-4ubuntu3.3) ...
+Setting up libmpc3:amd64 (1.3.1-1build1.1) ...
+Setting up libatomic1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libjsoncpp25:amd64 (1.9.5-6build1) ...
+Setting up icu-devtools (74.2-1ubuntu3.1) ...
+Setting up python3-pip (24.0+dfsg-1ubuntu1.3) ...
+Setting up libncursesw6:amd64 (6.4+20240113-1ubuntu2.2) ...
+Setting up libdpkg-perl (1.22.6ubuntu6.6) ...
+Setting up libubsan1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libhwasan0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up librhash0:amd64 (1.4.3-3build1) ...
+Setting up libcrypt-dev:amd64 (1:4.4.36-4build1) ...
+Setting up libasan8:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up procps (2:4.0.4-4ubuntu3.3) ...
+Setting up cmake-data (3.28.3-1build7) ...
+Setting up re2c (3.1-1build1) ...
+Setting up libtsan2:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libbinutils:amd64 (2.42-4ubuntu2.10) ...
+Setting up libisl23:amd64 (0.26-3build1.1) ...
+Setting up libc-dev-bin (2.39-0ubuntu8.9) ...
+Setting up libhiredis1.1.0:amd64 (1.2.0-6ubuntu3) ...
+Setting up libxml2:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+Setting up libcc1-0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up liblsan0:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libitm1:amd64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up ncurses-term (6.4+20240113-1ubuntu2.2) ...
+Setting up libctf0:amd64 (2.42-4ubuntu2.10) ...
+Setting up libz3-dev:amd64 (4.8.12-3.1build1) ...
+Setting up cpp-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Setting up ccache (4.9.1-1) ...
+Updating symlinks in /usr/lib/ccache ...
+Setting up libgprofng0:amd64 (2.42-4ubuntu2.10) ...
+Setting up libllvm21:amd64 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up llvm-21-linker-tools (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up libgcc-13-dev:amd64 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up libc6-dev:amd64 (2.39-0ubuntu8.9) ...
+Setting up libarchive13t64:amd64 (3.7.2-2ubuntu0.9) ...
+Setting up libicu-dev:amd64 (74.2-1ubuntu3.1) ...
+Setting up libstdc++-13-dev:amd64 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up binutils-x86-64-linux-gnu (2.42-4ubuntu2.10) ...
+Setting up cpp-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up libncurses-dev:amd64 (6.4+20240113-1ubuntu2.2) ...
+Setting up cpp-13 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up gcc-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Setting up binutils (2.42-4ubuntu2.10) ...
+Setting up liblld-21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up lld-21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up dpkg-dev (1.22.6ubuntu6.6) ...
+Setting up libxml2-dev:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+Setting up libclang-cpp21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up llvm-21-tools (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up llvm-21-runtime (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up gcc-13 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up zlib1g-dev:amd64 (1:1.3.dfsg-3.1ubuntu2.3) ...
+Setting up cpp (4:13.2.0-7ubuntu1) ...
+Setting up cmake (3.28.3-1build7) ...
+Setting up g++-13-x86-64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Setting up gcc-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up liblld-21-dev (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up gcc (4:13.2.0-7ubuntu1) ...
+Setting up llvm-21 (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up g++-x86-64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up g++-13 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up llvm-21-dev (1:21.1.8~++20251221032922+2078da43e25a-1~exp1~20251221153059.70) ...
+Setting up g++ (4:13.2.0-7ubuntu1) ...
+update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/c++.1.gz because associated file /usr/share/man/man1/g++.1.gz (of link group c++) doesn't exist
+Setting up build-essential (12.10ubuntu1) ...
+Processing triggers for systemd (255.4-1ubuntu8.16) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+W: Download is performed unsandboxed as root as file '/var/cache/apt/archives/partial/dpkg_1.22.6ubuntu6.6_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+-- cloning llvm-project (metadata only; blobs fetched on demand) --
+Cloning into 'llvm-project'...
+remote: Enumerating objects: 5019617        remote: Enumerating objects: 5021427, done.        
+remote: Counting objects:   0% (1/1810)        remote: Counting objects:   1% (19/1810)        remote: Counting objects:   2% (37/1810)        remote: Counting objects:   3% (55/1810)        remote: Counting objects:   4% (73/1810)        remote: Counting objects:   5% (91/1810)        remote: Counting objects:   6% (109/1810)        remote: Counting objects:   7% (127/1810)        remote: Counting objects:   8% (145/1810)        remote: Counting objects:   9% (163/1810)        remote: Counting objects:  10% (181/1810)        remote: Counting objects:  11% (200/1810)        remote: Counting objects:  12% (218/1810)        remote: Counting objects:  13% (236/1810)        remote: Counting objects:  14% (254/1810)        remote: Counting objects:  15% (272/1810)        remote: Counting objects:  16% (290/1810)        remote: Counting objects:  17% (308/1810)        remote: Counting objects:  18% (326/1810)        remote: Counting objects:  19% (344/1810)        remote: Counting objects:  20% (362/1810)        remote: Counting objects:  21% (381/1810)        remote: Counting objects:  22% (399/1810)        remote: Counting objects:  23% (417/1810)        remote: Counting objects:  24% (435/1810)        remote: Counting objects:  25% (453/1810)        remote: Counting objects:  26% (471/1810)        remote: Counting objects:  27% (489/1810)        remote: Counting objects:  28% (507/1810)        remote: Counting objects:  29% (525/1810)        remote: Counting objects:  30% (543/1810)        remote: Counting objects:  31% (562/1810)        remote: Counting objects:  32% (580/1810)        remote: Counting objects:  33% (598/1810)        remote: Counting objects:  34% (616/1810)        remote: Counting objects:  35% (634/1810)        remote: Counting objects:  36% (652/1810)        remote: Counting objects:  37% (670/1810)        remote: Counting objects:  38% (688/1810)        remote: Counting objects:  39% (706/1810)        remote: Counting objects:  40% (724/1810)        remote: Counting objects:  41% (743/1810)        remote: Counting objects:  42% (761/1810)        remote: Counting objects:  43% (779/1810)        remote: Counting objects:  44% (797/1810)        remote: Counting objects:  45% (815/1810)        remote: Counting objects:  46% (833/1810)        remote: Counting objects:  47% (851/1810)        remote: Counting objects:  48% (869/1810)        remote: Counting objects:  49% (887/1810)        remote: Counting objects:  50% (905/1810)        remote: Counting objects:  51% (924/1810)        remote: Counting objects:  52% (942/1810)        remote: Counting objects:  53% (960/1810)        remote: Counting objects:  54% (978/1810)        remote: Counting objects:  55% (996/1810)        remote: Counting objects:  56% (1014/1810)        remote: Counting objects:  57% (1032/1810)        remote: Counting objects:  58% (1050/1810)        remote: Counting objects:  59% (1068/1810)        remote: Counting objects:  60% (1086/1810)        remote: Counting objects:  61% (1105/1810)        remote: Counting objects:  62% (1123/1810)        remote: Counting objects:  63% (1141/1810)        remote: Counting objects:  64% (1159/1810)        remote: Counting objects:  65% (1177/1810)        remote: Counting objects:  66% (1195/1810)        remote: Counting objects:  67% (1213/1810)        remote: Counting objects:  68% (1231/1810)        remote: Counting objects:  69% (1249/1810)        remote: Counting objects:  70% (1267/1810)        remote: Counting objects:  71% (1286/1810)        remote: Counting objects:  72% (1304/1810)        remote: Counting objects:  73% (1322/1810)        remote: Counting objects:  74% (1340/1810)        remote: Counting objects:  75% (1358/1810)        remote: Counting objects:  76% (1376/1810)        remote: Counting objects:  77% (1394/1810)        remote: Counting objects:  78% (1412/1810)        remote: Counting objects:  79% (1430/1810)        remote: Counting objects:  80% (1448/1810)        remote: Counting objects:  81% (1467/1810)        remote: Counting objects:  82% (1485/1810)        remote: Counting objects:  83% (1503/1810)        remote: Counting objects:  84% (1521/1810)        remote: Counting objects:  85% (1539/1810)        remote: Counting objects:  86% (1557/1810)        remote: Counting objects:  87% (1575/1810)        remote: Counting objects:  88% (1593/1810)        remote: Counting objects:  89% (1611/1810)        remote: Counting objects:  90% (1629/1810)        remote: Counting objects:  91% (1648/1810)        remote: Counting objects:  92% (1666/1810)        remote: Counting objects:  93% (1684/1810)        remote: Counting objects:  94% (1702/1810)        remote: Counting objects:  95% (1720/1810)        remote: Counting objects:  96% (1738/1810)        remote: Counting objects:  97% (1756/1810)        remote: Counting objects:  98% (1774/1810)        remote: Counting objects:  99% (1792/1810)        remote: Counting objects: 100% (1810/1810)        remote: Counting objects: 100% (1810/1810), done.        
+remote: Compressing objects:   0% (1/558)        remote: Compressing objects:   1% (6/558)        remote: Compressing objects:   2% (12/558)        remote: Compressing objects:   3% (17/558)        remote: Compressing objects:   4% (23/558)        remote: Compressing objects:   5% (28/558)        remote: Compressing objects:   6% (34/558)        remote: Compressing objects:   7% (40/558)        remote: Compressing objects:   8% (45/558)        remote: Compressing objects:   9% (51/558)        remote: Compressing objects:  10% (56/558)        remote: Compressing objects:  11% (62/558)        remote: Compressing objects:  12% (67/558)        remote: Compressing objects:  13% (73/558)        remote: Compressing objects:  14% (79/558)        remote: Compressing objects:  15% (84/558)        remote: Compressing objects:  16% (90/558)        remote: Compressing objects:  17% (95/558)        remote: Compressing objects:  18% (101/558)        remote: Compressing objects:  19% (107/558)        remote: Compressing objects:  20% (112/558)        remote: Compressing objects:  21% (118/558)        remote: Compressing objects:  22% (123/558)        remote: Compressing objects:  23% (129/558)        remote: Compressing objects:  24% (134/558)        remote: Compressing objects:  25% (140/558)        remote: Compressing objects:  26% (146/558)        remote: Compressing objects:  27% (151/558)        remote: Compressing objects:  28% (157/558)        remote: Compressing objects:  29% (162/558)        remote: Compressing objects:  30% (168/558)        remote: Compressing objects:  31% (173/558)        remote: Compressing objects:  32% (179/558)        remote: Compressing objects:  33% (185/558)        remote: Compressing objects:  34% (190/558)        remote: Compressing objects:  35% (196/558)        remote: Compressing objects:  36% (201/558)        remote: Compressing objects:  37% (207/558)        remote: Compressing objects:  38% (213/558)        remote: Compressing objects:  39% (218/558)        remote: Compressing objects:  40% (224/558)        remote: Compressing objects:  41% (229/558)        remote: Compressing objects:  42% (235/558)        remote: Compressing objects:  43% (240/558)        remote: Compressing objects:  44% (246/558)        remote: Compressing objects:  45% (252/558)        remote: Compressing objects:  46% (257/558)        remote: Compressing objects:  47% (263/558)        remote: Compressing objects:  48% (268/558)        remote: Compressing objects:  49% (274/558)        remote: Compressing objects:  50% (279/558)        remote: Compressing objects:  51% (285/558)        remote: Compressing objects:  52% (291/558)        remote: Compressing objects:  53% (296/558)        remote: Compressing objects:  54% (302/558)        remote: Compressing objects:  55% (307/558)        remote: Compressing objects:  56% (313/558)        remote: Compressing objects:  57% (319/558)        remote: Compressing objects:  58% (324/558)        remote: Compressing objects:  59% (330/558)        remote: Compressing objects:  60% (335/558)        remote: Compressing objects:  61% (341/558)        remote: Compressing objects:  62% (346/558)        remote: Compressing objects:  63% (352/558)        remote: Compressing objects:  64% (358/558)        remote: Compressing objects:  65% (363/558)        remote: Compressing objects:  66% (369/558)        remote: Compressing objects:  67% (374/558)        remote: Compressing objects:  68% (380/558)        remote: Compressing objects:  69% (386/558)        remote: Compressing objects:  70% (391/558)        remote: Compressing objects:  71% (397/558)        remote: Compressing objects:  72% (402/558)        remote: Compressing objects:  73% (408/558)        remote: Compressing objects:  74% (413/558)        remote: Compressing objects:  75% (419/558)        remote: Compressing objects:  76% (425/558)        remote: Compressing objects:  77% (430/558)        remote: Compressing objects:  78% (436/558)        remote: Compressing objects:  79% (441/558)        remote: Compressing objects:  80% (447/558)        remote: Compressing objects:  81% (452/558)        remote: Compressing objects:  82% (458/558)        remote: Compressing objects:  83% (464/558)        remote: Compressing objects:  84% (469/558)        remote: Compressing objects:  85% (475/558)        remote: Compressing objects:  86% (480/558)        remote: Compressing objects:  87% (486/558)        remote: Compressing objects:  88% (492/558)        remote: Compressing objects:  89% (497/558)        remote: Compressing objects:  90% (503/558)        remote: Compressing objects:  91% (508/558)        remote: Compressing objects:  92% (514/558)        remote: Compressing objects:  93% (519/558)        remote: Compressing objects:  94% (525/558)        remote: Compressing objects:  95% (531/558)        remote: Compressing objects:  96% (536/558)        remote: Compressing objects:  97% (542/558)        remote: Compressing objects:  98% (547/558)        remote: Compressing objects:  99% (553/558)        remote: Compressing objects: 100% (558/558)        remote: Compressing objects: 100% (558/558), done.        
+Receiving objects:   0% (1/5021427)Receiving objects:   0% (3284/5021427), 540.01 KiB | 868.00 KiB/sReceiving objects:   0% (20046/5021427), 12.11 MiB | 7.37 MiB/s  Receiving objects:   0% (38878/5021427), 30.06 MiB | 11.22 MiB/sReceiving objects:   1% (50215/5021427), 40.00 MiB | 12.58 MiB/sReceiving objects:   1% (59385/5021427), 49.14 MiB | 13.22 MiB/sReceiving objects:   1% (80309/5021427), 68.13 MiB | 14.33 MiB/sReceiving objects:   2% (100429/5021427), 87.71 MiB | 17.89 MiB/sReceiving objects:   2% (103027/5021427), 87.71 MiB | 17.89 MiB/sReceiving objects:   2% (123224/5021427), 103.59 MiB | 17.17 MiB/sReceiving objects:   3% (150643/5021427), 116.71 MiB | 18.40 MiB/sReceiving objects:   3% (172587/5021427), 126.56 MiB | 18.38 MiB/sReceiving objects:   4% (200858/5021427), 136.51 MiB | 18.70 MiB/sReceiving objects:   4% (227342/5021427), 144.88 MiB | 18.19 MiB/sReceiving objects:   5% (251072/5021427), 155.05 MiB | 18.76 MiB/sReceiving objects:   5% (275810/5021427), 163.71 MiB | 18.27 MiB/sReceiving objects:   6% (301286/5021427), 173.57 MiB | 18.69 MiB/sReceiving objects:   6% (333251/5021427), 183.71 MiB | 18.52 MiB/sReceiving objects:   7% (351500/5021427), 183.71 MiB | 18.52 MiB/sReceiving objects:   7% (397253/5021427), 202.19 MiB | 19.00 MiB/sReceiving objects:   8% (401715/5021427), 202.19 MiB | 19.00 MiB/sReceiving objects:   9% (451929/5021427), 218.08 MiB | 18.07 MiB/sReceiving objects:   9% (458785/5021427), 218.08 MiB | 18.07 MiB/sReceiving objects:  10% (502143/5021427), 230.72 MiB | 19.01 MiB/sReceiving objects:  10% (536719/5021427), 238.36 MiB | 18.45 MiB/sReceiving objects:  11% (552357/5021427), 238.36 MiB | 18.45 MiB/sReceiving objects:  12% (602572/5021427), 248.05 MiB | 18.68 MiB/sReceiving objects:  12% (615489/5021427), 256.15 MiB | 18.18 MiB/sReceiving objects:  13% (652786/5021427), 268.42 MiB | 18.56 MiB/sReceiving objects:  13% (669212/5021427), 276.82 MiB | 18.50 MiB/sReceiving objects:  14% (703000/5021427), 287.46 MiB | 18.54 MiB/sReceiving objects:  14% (713284/5021427), 296.12 MiB | 19.01 MiB/sReceiving objects:  15% (753215/5021427), 307.00 MiB | 19.24 MiB/sReceiving objects:  15% (776935/5021427), 315.59 MiB | 18.28 MiB/sReceiving objects:  16% (803429/5021427), 315.59 MiB | 18.28 MiB/sReceiving objects:  17% (853643/5021427), 326.36 MiB | 18.89 MiB/sReceiving objects:  17% (863013/5021427), 326.36 MiB | 18.89 MiB/sReceiving objects:  17% (897291/5021427), 346.08 MiB | 19.27 MiB/sReceiving objects:  18% (903857/5021427), 354.62 MiB | 18.48 MiB/sReceiving objects:  18% (923573/5021427), 365.66 MiB | 19.06 MiB/sReceiving objects:  19% (954072/5021427), 385.21 MiB | 19.12 MiB/sReceiving objects:  19% (957127/5021427), 385.21 MiB | 19.12 MiB/sReceiving objects:  19% (996556/5021427), 404.77 MiB | 19.14 MiB/sReceiving objects:  20% (1004286/5021427), 404.77 MiB | 19.14 MiB/sReceiving objects:  20% (1029642/5021427), 424.35 MiB | 19.14 MiB/sReceiving objects:  21% (1054500/5021427), 433.18 MiB | 18.67 MiB/sReceiving objects:  21% (1062202/5021427), 444.03 MiB | 19.18 MiB/sReceiving objects:  22% (1104714/5021427), 452.86 MiB | 18.69 MiB/sReceiving objects:  22% (1115629/5021427), 463.49 MiB | 19.14 MiB/sReceiving objects:  23% (1154929/5021427), 472.62 MiB | 18.73 MiB/sReceiving objects:  23% (1197629/5021427), 483.19 MiB | 19.15 MiB/sReceiving objects:  24% (1205143/5021427), 483.19 MiB | 19.15 MiB/sReceiving objects:  25% (1255357/5021427), 492.26 MiB | 18.75 MiB/sReceiving objects:  25% (1278981/5021427), 502.84 MiB | 19.14 MiB/sReceiving objects:  26% (1305572/5021427), 512.04 MiB | 18.80 MiB/sReceiving objects:  27% (1355786/5021427), 522.46 MiB | 19.16 MiB/sReceiving objects:  27% (1363874/5021427), 522.46 MiB | 19.16 MiB/sReceiving objects:  28% (1406000/5021427), 531.67 MiB | 18.79 MiB/sReceiving objects:  29% (1456214/5021427), 531.67 MiB | 18.79 MiB/sReceiving objects:  29% (1492868/5021427), 542.10 MiB | 19.14 MiB/sReceiving objects:  30% (1506429/5021427), 542.10 MiB | 19.14 MiB/sReceiving objects:  31% (1556643/5021427), 542.10 MiB | 19.14 MiB/sReceiving objects:  32% (1606857/5021427), 551.39 MiB | 18.84 MiB/sReceiving objects:  32% (1649873/5021427), 561.86 MiB | 19.15 MiB/sReceiving objects:  33% (1657071/5021427), 561.86 MiB | 19.15 MiB/sReceiving objects:  34% (1707286/5021427), 568.10 MiB | 18.28 MiB/sReceiving objects:  34% (1750545/5021427), 580.06 MiB | 18.80 MiB/sReceiving objects:  35% (1757500/5021427), 580.06 MiB | 18.80 MiB/sReceiving objects:  36% (1807714/5021427), 580.06 MiB | 18.80 MiB/sReceiving objects:  37% (1857928/5021427), 590.91 MiB | 18.88 MiB/sReceiving objects:  38% (1908143/5021427), 590.91 MiB | 18.88 MiB/sReceiving objects:  38% (1918911/5021427), 590.91 MiB | 18.88 MiB/sReceiving objects:  39% (1958357/5021427), 599.60 MiB | 18.81 MiB/sReceiving objects:  40% (2008571/5021427), 610.48 MiB | 18.87 MiB/sReceiving objects:  40% (2052406/5021427), 610.48 MiB | 18.87 MiB/sReceiving objects:  41% (2058786/5021427), 610.48 MiB | 18.87 MiB/sReceiving objects:  42% (2109000/5021427), 620.96 MiB | 19.15 MiB/sReceiving objects:  43% (2159214/5021427), 630.25 MiB | 18.91 MiB/sReceiving objects:  43% (2195726/5021427), 630.25 MiB | 18.91 MiB/sReceiving objects:  44% (2209428/5021427), 630.25 MiB | 18.91 MiB/sReceiving objects:  45% (2259643/5021427), 640.79 MiB | 19.17 MiB/sReceiving objects:  46% (2309857/5021427), 640.79 MiB | 19.17 MiB/sReceiving objects:  47% (2360071/5021427), 649.94 MiB | 18.89 MiB/sReceiving objects:  48% (2410285/5021427), 649.94 MiB | 18.89 MiB/sReceiving objects:  48% (2422047/5021427), 649.94 MiB | 18.89 MiB/sReceiving objects:  49% (2460500/5021427), 649.94 MiB | 18.89 MiB/sReceiving objects:  50% (2510714/5021427), 660.61 MiB | 19.76 MiB/sReceiving objects:  51% (2560928/5021427), 660.61 MiB | 19.76 MiB/sReceiving objects:  52% (2611143/5021427), 669.71 MiB | 19.25 MiB/sReceiving objects:  53% (2661357/5021427), 669.71 MiB | 19.25 MiB/sReceiving objects:  53% (2663482/5021427), 669.71 MiB | 19.25 MiB/sReceiving objects:  54% (2711571/5021427), 669.71 MiB | 19.25 MiB/sReceiving objects:  55% (2761785/5021427), 679.93 MiB | 19.17 MiB/sReceiving objects:  56% (2812000/5021427), 679.93 MiB | 19.17 MiB/sReceiving objects:  57% (2862214/5021427), 689.10 MiB | 19.16 MiB/sReceiving objects:  57% (2909375/5021427), 689.10 MiB | 19.16 MiB/sReceiving objects:  58% (2912428/5021427), 689.10 MiB | 19.16 MiB/sReceiving objects:  59% (2962642/5021427), 698.57 MiB | 18.96 MiB/sReceiving objects:  60% (3012857/5021427), 698.57 MiB | 18.96 MiB/sReceiving objects:  61% (3063071/5021427), 698.57 MiB | 18.96 MiB/sReceiving objects:  62% (3113285/5021427), 708.83 MiB | 18.83 MiB/sReceiving objects:  62% (3160620/5021427), 708.83 MiB | 18.83 MiB/sReceiving objects:  63% (3163500/5021427), 708.83 MiB | 18.83 MiB/sReceiving objects:  64% (3213714/5021427), 708.83 MiB | 18.83 MiB/sReceiving objects:  65% (3263928/5021427), 719.73 MiB | 19.17 MiB/sReceiving objects:  66% (3314142/5021427), 719.73 MiB | 19.17 MiB/sReceiving objects:  67% (3364357/5021427), 719.73 MiB | 19.17 MiB/sReceiving objects:  68% (3414571/5021427), 728.69 MiB | 18.84 MiB/sReceiving objects:  68% (3435685/5021427), 728.69 MiB | 18.84 MiB/sReceiving objects:  69% (3464785/5021427), 728.69 MiB | 18.84 MiB/sReceiving objects:  70% (3514999/5021427), 728.69 MiB | 18.84 MiB/sReceiving objects:  71% (3565214/5021427), 739.21 MiB | 19.20 MiB/sReceiving objects:  72% (3615428/5021427), 739.21 MiB | 19.20 MiB/sReceiving objects:  73% (3665642/5021427), 748.56 MiB | 18.85 MiB/sReceiving objects:  74% (3715856/5021427), 748.56 MiB | 18.85 MiB/sReceiving objects:  74% (3722222/5021427), 748.56 MiB | 18.85 MiB/sReceiving objects:  75% (3766071/5021427), 748.56 MiB | 18.85 MiB/sReceiving objects:  76% (3816285/5021427), 748.56 MiB | 18.85 MiB/sReceiving objects:  77% (3866499/5021427), 759.05 MiB | 19.22 MiB/sReceiving objects:  78% (3916714/5021427), 759.05 MiB | 19.22 MiB/sReceiving objects:  79% (3966928/5021427), 768.46 MiB | 18.89 MiB/sReceiving objects:  79% (4005979/5021427), 768.46 MiB | 18.89 MiB/sReceiving objects:  80% (4017142/5021427), 768.46 MiB | 18.89 MiB/sReceiving objects:  81% (4067356/5021427), 768.46 MiB | 18.89 MiB/sReceiving objects:  82% (4117571/5021427), 768.46 MiB | 18.89 MiB/sReceiving objects:  83% (4167785/5021427), 778.74 MiB | 19.28 MiB/sReceiving objects:  84% (4217999/5021427), 778.74 MiB | 19.28 MiB/sReceiving objects:  85% (4268213/5021427), 778.74 MiB | 19.28 MiB/sReceiving objects:  85% (4306321/5021427), 788.14 MiB | 19.13 MiB/sReceiving objects:  86% (4318428/5021427), 788.14 MiB | 19.13 MiB/sReceiving objects:  87% (4368642/5021427), 788.14 MiB | 19.13 MiB/sReceiving objects:  88% (4418856/5021427), 798.33 MiB | 19.27 MiB/sReceiving objects:  89% (4469071/5021427), 798.33 MiB | 19.27 MiB/sReceiving objects:  90% (4519285/5021427), 798.33 MiB | 19.27 MiB/sReceiving objects:  90% (4544756/5021427), 807.96 MiB | 18.92 MiB/sReceiving objects:  91% (4569499/5021427), 807.96 MiB | 18.92 MiB/sReceiving objects:  92% (4619713/5021427), 807.96 MiB | 18.92 MiB/sReceiving objects:  93% (4669928/5021427), 817.96 MiB | 19.21 MiB/sReceiving objects:  93% (4669949/5021427), 827.80 MiB | 18.92 MiB/sReceiving objects:  94% (4720142/5021427), 827.80 MiB | 18.92 MiB/sReceiving objects:  95% (4770356/5021427), 827.80 MiB | 18.92 MiB/sReceiving objects:  96% (4820570/5021427), 837.48 MiB | 19.14 MiB/sReceiving objects:  97% (4870785/5021427), 837.48 MiB | 19.14 MiB/sReceiving objects:  98% (4920999/5021427), 837.48 MiB | 19.14 MiB/sReceiving objects:  98% (4959762/5021427), 847.61 MiB | 18.90 MiB/sReceiving objects:  99% (4971213/5021427), 847.61 MiB | 18.90 MiB/sremote: Total 5021427 (delta 1543), reused 1254 (delta 1251), pack-reused 5019617 (from 4)        
+Receiving objects: 100% (5021427/5021427), 847.61 MiB | 18.90 MiB/sReceiving objects: 100% (5021427/5021427), 853.08 MiB | 18.41 MiB/s, done.
+Resolving deltas:   0% (0/3958851)Resolving deltas:   1% (39589/3958851)Resolving deltas:   1% (76054/3958851)Resolving deltas:   2% (79178/3958851)Resolving deltas:   3% (118767/3958851)Resolving deltas:   4% (158355/3958851)Resolving deltas:   4% (181038/3958851)Resolving deltas:   5% (197943/3958851)Resolving deltas:   6% (237533/3958851)Resolving deltas:   7% (277120/3958851)Resolving deltas:   7% (308168/3958851)Resolving deltas:   8% (316710/3958851)Resolving deltas:   9% (356297/3958851)Resolving deltas:  10% (395886/3958851)Resolving deltas:  11% (435474/3958851)Resolving deltas:  11% (451713/3958851)Resolving deltas:  12% (475063/3958851)Resolving deltas:  13% (514651/3958851)Resolving deltas:  14% (554241/3958851)Resolving deltas:  15% (593828/3958851)Resolving deltas:  15% (627200/3958851)Resolving deltas:  16% (633417/3958851)Resolving deltas:  17% (673005/3958851)Resolving deltas:  18% (712595/3958851)Resolving deltas:  19% (752182/3958851)Resolving deltas:  20% (791771/3958851)Resolving deltas:  20% (804317/3958851)Resolving deltas:  21% (831359/3958851)Resolving deltas:  22% (870950/3958851)Resolving deltas:  23% (910537/3958851)Resolving deltas:  24% (950125/3958851)Resolving deltas:  25% (989715/3958851)Resolving deltas:  25% (993141/3958851)Resolving deltas:  26% (1029303/3958851)Resolving deltas:  27% (1068890/3958851)Resolving deltas:  28% (1108480/3958851)Resolving deltas:  29% (1148067/3958851)Resolving deltas:  30% (1187656/3958851)Resolving deltas:  30% (1197133/3958851)Resolving deltas:  31% (1227245/3958851)Resolving deltas:  32% (1266833/3958851)Resolving deltas:  33% (1306422/3958851)Resolving deltas:  34% (1346014/3958851)Resolving deltas:  35% (1385598/3958851)Resolving deltas:  35% (1392091/3958851)Resolving deltas:  36% (1425187/3958851)Resolving deltas:  37% (1464776/3958851)Resolving deltas:  38% (1504364/3958851)Resolving deltas:  39% (1543958/3958851)Resolving deltas:  40% (1583541/3958851)Resolving deltas:  41% (1623129/3958851)Resolving deltas:  41% (1641322/3958851)Resolving deltas:  42% (1662718/3958851)Resolving deltas:  43% (1702306/3958851)Resolving deltas:  44% (1741895/3958851)Resolving deltas:  45% (1781484/3958851)Resolving deltas:  46% (1821072/3958851)Resolving deltas:  46% (1828276/3958851)Resolving deltas:  47% (1860661/3958851)Resolving deltas:  48% (1900249/3958851)Resolving deltas:  49% (1939837/3958851)Resolving deltas:  49% (1948313/3958851)Resolving deltas:  50% (1979428/3958851)Resolving deltas:  51% (2019015/3958851)Resolving deltas:  51% (2056842/3958851)Resolving deltas:  52% (2058603/3958851)Resolving deltas:  53% (2098192/3958851)Resolving deltas:  54% (2137780/3958851)Resolving deltas:  54% (2144987/3958851)Resolving deltas:  55% (2177370/3958851)Resolving deltas:  56% (2216957/3958851)Resolving deltas:  56% (2235525/3958851)Resolving deltas:  57% (2256546/3958851)Resolving deltas:  58% (2296134/3958851)Resolving deltas:  58% (2332298/3958851)Resolving deltas:  59% (2335723/3958851)Resolving deltas:  60% (2375311/3958851)Resolving deltas:  61% (2414900/3958851)Resolving deltas:  61% (2425124/3958851)Resolving deltas:  62% (2454489/3958851)Resolving deltas:  63% (2494079/3958851)Resolving deltas:  63% (2519602/3958851)Resolving deltas:  64% (2533666/3958851)Resolving deltas:  65% (2573254/3958851)Resolving deltas:  66% (2612843/3958851)Resolving deltas:  66% (2617776/3958851)Resolving deltas:  67% (2652431/3958851)Resolving deltas:  68% (2692020/3958851)Resolving deltas:  68% (2709683/3958851)Resolving deltas:  69% (2731609/3958851)Resolving deltas:  70% (2771196/3958851)Resolving deltas:  70% (2804111/3958851)Resolving deltas:  71% (2810786/3958851)Resolving deltas:  72% (2850373/3958851)Resolving deltas:  73% (2889962/3958851)Resolving deltas:  73% (2907999/3958851)Resolving deltas:  74% (2929551/3958851)Resolving deltas:  75% (2969139/3958851)Resolving deltas:  76% (3008727/3958851)Resolving deltas:  76% (3017748/3958851)Resolving deltas:  77% (3048317/3958851)Resolving deltas:  78% (3087904/3958851)Resolving deltas:  79% (3127495/3958851)Resolving deltas:  79% (3159390/3958851)Resolving deltas:  80% (3167081/3958851)Resolving deltas:  81% (3206671/3958851)Resolving deltas:  82% (3246258/3958851)Resolving deltas:  82% (3270279/3958851)Resolving deltas:  83% (3285848/3958851)Resolving deltas:  84% (3325435/3958851)Resolving deltas:  85% (3365024/3958851)Resolving deltas:  85% (3401435/3958851)Resolving deltas:  86% (3404612/3958851)Resolving deltas:  87% (3444203/3958851)Resolving deltas:  88% (3483790/3958851)Resolving deltas:  89% (3523378/3958851)Resolving deltas:  89% (3538038/3958851)Resolving deltas:  90% (3562966/3958851)Resolving deltas:  91% (3602556/3958851)Resolving deltas:  92% (3642143/3958851)Resolving deltas:  92% (3673613/3958851)Resolving deltas:  93% (3681732/3958851)Resolving deltas:  94% (3721321/3958851)Resolving deltas:  95% (3760909/3958851)Resolving deltas:  96% (3800498/3958851)Resolving deltas:  96% (3802314/3958851)Resolving deltas:  97% (3840086/3958851)Resolving deltas:  98% (3879675/3958851)Resolving deltas:  99% (3919263/3958851)Resolving deltas:  99% (3938789/3958851)Resolving deltas: 100% (3958851/3958851)Resolving deltas: 100% (3958851/3958851), done.
+-- building Alive2 --
+Cloning into '/root/better-compiler-runtime/alive2'...
+Note: switching to 'f9a4f02f'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at f9a4f02f fix #1200: false positive due to not enough bits in the access size
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/gcc-13 - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/g++-13 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Build type: Release
+-- Found Git: /usr/bin/git (found version "2.43.0") 
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+-- Z3: /usr/include /usr/lib/x86_64-linux-gnu/libz3.so
+-- Z3 installed version: 4.8.12
+-- RE2C: /usr/bin/re2c
+-- hiredis: HIREDIS_INCLUDE_DIR-NOTFOUND HIREDIS_LIBRARIES-NOTFOUND
+-- Performing Test HAVE_FFI_CALL
+-- Performing Test HAVE_FFI_CALL - Success
+-- Found FFI: /usr/lib/x86_64-linux-gnu/libffi.so  
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Found zstd: /usr/lib/x86_64-linux-gnu/libzstd.so  
+-- Found LibXml2: /usr/lib/x86_64-linux-gnu/libxml2.so (found version "2.9.14") 
+-- Could NOT find CURL (missing: CURL_LIBRARY CURL_INCLUDE_DIR) 
+-- Found LLVM 21.1.8
+-- CMAKE_PREFIX_PATH: 
+-- Using LLVMConfig.cmake in: /usr/lib/llvm-21/lib/cmake/llvm
+-- Linker detection: GNU ld
+-- Performing Test LLVM_LINKER_SUPPORTS_B_SYMBOLIC_FUNCTIONS
+-- Performing Test LLVM_LINKER_SUPPORTS_B_SYMBOLIC_FUNCTIONS - Success
+-- Compiling translation validation plugin
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /root/better-compiler-runtime/alive2/build
+[1/50] Building CXX object CMakeFiles/ir.dir/ir/fast_math.cpp.o
+[2/50] Building CXX object CMakeFiles/ir.dir/ir/attrs.cpp.o
+[3/50] Building CXX object CMakeFiles/ir.dir/ir/constant.cpp.o
+[4/50] Building CXX object CMakeFiles/ir.dir/ir/functions.cpp.o
+[5/50] Building CXX object CMakeFiles/ir.dir/ir/globals.cpp.o
+[6/50] Building CXX object CMakeFiles/ir.dir/ir/pointer.cpp.o
+[7/50] Building CXX object CMakeFiles/ir.dir/ir/precondition.cpp.o
+[8/50] Building CXX object CMakeFiles/ir.dir/ir/function.cpp.o
+[9/50] Building CXX object CMakeFiles/ir.dir/ir/state_value.cpp.o
+[10/50] Building CXX object CMakeFiles/ir.dir/ir/memory.cpp.o
+[11/50] Building CXX object CMakeFiles/ir.dir/ir/value.cpp.o
+[12/50] Building CXX object CMakeFiles/ir.dir/ir/type.cpp.o
+[13/50] Building CXX object CMakeFiles/ir.dir/ir/x86_intrinsics.cpp.o
+[14/50] Building CXX object CMakeFiles/smt.dir/smt/ctx.cpp.o
+[15/50] Building CXX object CMakeFiles/ir.dir/ir/instr.cpp.o
+[16/50] Building CXX object CMakeFiles/smt.dir/smt/smt.cpp.o
+[17/50] Building CXX object CMakeFiles/smt.dir/smt/exprs.cpp.o
+[18/50] Building CXX object CMakeFiles/smt.dir/smt/solver.cpp.o
+[19/50] Building CXX object CMakeFiles/smt.dir/smt/expr.cpp.o
+[20/50] Linking CXX static library libsmt.a
+[21/50] Building CXX object CMakeFiles/ir.dir/ir/state.cpp.o
+[22/50] Linking CXX static library libir.a
+[23/50] Building CXX object CMakeFiles/llvm_util.dir/llvm_util/compare.cpp.o
+[24/50] Building CXX object CMakeFiles/llvm_util.dir/llvm_util/known_fns.cpp.o
+[25/50] Building CXX object CMakeFiles/tools.dir/tools/transform.cpp.o
+[26/50] Linking CXX static library libtools.a
+[27/50] Generating version_gen.h.tmp
+[28/50] Generating version_gen.h
+[29/50] Building CXX object CMakeFiles/util.dir/util/compiler.cpp.o
+[30/50] Building CXX object CMakeFiles/util.dir/util/config.cpp.o
+[31/50] Building CXX object CMakeFiles/util.dir/util/crc.cpp.o
+[32/50] Building CXX object CMakeFiles/llvm_util.dir/llvm_util/llvm_optimizer.cpp.o
+[33/50] Building CXX object CMakeFiles/util.dir/util/errors.cpp.o
+[34/50] Building CXX object CMakeFiles/util.dir/util/random.cpp.o
+[35/50] Building CXX object CMakeFiles/util.dir/util/file.cpp.o
+[36/50] Building CXX object CMakeFiles/util.dir/util/sort.cpp.o
+[37/50] Building CXX object CMakeFiles/util.dir/util/stopwatch.cpp.o
+[38/50] Building CXX object CMakeFiles/util.dir/util/unionfind.cpp.o
+[39/50] Building CXX object CMakeFiles/util.dir/util/version.cpp.o
+[40/50] Building CXX object CMakeFiles/util.dir/util/symexec.cpp.o
+[41/50] Building CXX object CMakeFiles/llvm_util.dir/llvm_util/utils.cpp.o
+[42/50] Building CXX object CMakeFiles/util.dir/util/parallel_fifo.cpp.o
+[43/50] Building CXX object CMakeFiles/util.dir/util/parallel.cpp.o
+[44/50] Building CXX object CMakeFiles/util.dir/util/parallel_null.cpp.o
+[45/50] Building CXX object CMakeFiles/util.dir/util/parallel_unrestricted.cpp.o
+[46/50] Linking CXX static library libutil.a
+[47/50] Building CXX object CMakeFiles/llvm_util.dir/llvm_util/llvm2alive.cpp.o
+[48/50] Linking CXX static library libllvm_util.a
+[49/50] Building CXX object CMakeFiles/alive-tv.dir/tools/alive-tv.cpp.o
+[50/50] Linking CXX executable alive-tv
+-- installing Python deps (venv) --
+Requirement already satisfied: pip in /root/better-compiler-runtime/venv/lib/python3.12/site-packages (24.0)
+Collecting pip
+  Downloading pip-26.2.2-py3-none-any.whl.metadata (4.6 kB)
+Downloading pip-26.2.2-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 16.7 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 24.0
+    Uninstalling pip-24.0:
+      Successfully uninstalled pip-24.0
+Successfully installed pip-26.2.2
+Collecting dateparser==1.2.0 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 1))
+  Downloading dateparser-1.2.0-py2.py3-none-any.whl.metadata (28 kB)
+Collecting jsonlines==4.0.0 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 2))
+  Downloading jsonlines-4.0.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting openai==1.60.1 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading openai-1.60.1-py3-none-any.whl.metadata (27 kB)
+Collecting psutil==6.1.1 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 4))
+  Downloading psutil-6.1.1-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (22 kB)
+Collecting Requests==2.32.4 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 5))
+  Downloading requests-2.32.4-py3-none-any.whl.metadata (4.9 kB)
+Collecting tqdm==4.66.5 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 6))
+  Downloading tqdm-4.66.5-py3-none-any.whl.metadata (57 kB)
+Collecting tree_sitter==0.23.2 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 7))
+  Downloading tree_sitter-0.23.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.8 kB)
+Collecting tree_sitter_cpp==0.23.4 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 8))
+  Downloading tree_sitter_cpp-0.23.4-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.8 kB)
+Collecting unidiff==0.7.5 (from -r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 9))
+  Downloading unidiff-0.7.5-py2.py3-none-any.whl.metadata (4.6 kB)
+Collecting python-dateutil (from dateparser==1.2.0->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 1))
+  Downloading python_dateutil-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+Collecting pytz (from dateparser==1.2.0->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 1))
+  Downloading pytz-2026.6-py2.py3-none-any.whl.metadata (22 kB)
+Collecting regex!=2019.02.19,!=2021.8.27 (from dateparser==1.2.0->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 1))
+  Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+Collecting tzlocal (from dateparser==1.2.0->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 1))
+  Downloading tzlocal-5.4.5-py3-none-any.whl.metadata (7.7 kB)
+Collecting attrs>=19.2.0 (from jsonlines==4.0.0->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 2))
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting anyio<5,>=3.5.0 (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading anyio-4.16.0-py3-none-any.whl.metadata (4.7 kB)
+Collecting distro<2,>=1.7.0 (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+Collecting httpx<1,>=0.23.0 (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting jiter<1,>=0.4.0 (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading jiter-0.18.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+Collecting pydantic<3,>=1.9.0 (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading pydantic-2.14.2-py3-none-any.whl.metadata (137 kB)
+Collecting sniffio (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting typing-extensions<5,>=4.11 (from openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting charset_normalizer<4,>=2 (from Requests==2.32.4->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 5))
+  Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+Collecting idna<4,>=2.5 (from Requests==2.32.4->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 5))
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting urllib3<3,>=1.21.1 (from Requests==2.32.4->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 5))
+  Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting certifi>=2017.4.17 (from Requests==2.32.4->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 5))
+  Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx<1,>=0.23.0->openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.23.0->openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.50.2 (from pydantic<3,>=1.9.0->openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading pydantic_core-2.50.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (6.5 kB)
+Collecting typing-inspection>=0.4.4 (from pydantic<3,>=1.9.0->openai==1.60.1->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 3))
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Collecting tzdata (from python-dateutil->dateparser==1.2.0->-r /root/24BCE5561/better-compiler/llvm-apr-benchmark/requirements.txt (line 1))
+  Downloading tzdata-2026.6-py2.py3-none-any.whl.metadata (1.4 kB)
+Downloading dateparser-1.2.0-py2.py3-none-any.whl (294 kB)
+Downloading jsonlines-4.0.0-py3-none-any.whl (8.7 kB)
+Downloading openai-1.60.1-py3-none-any.whl (456 kB)
+Downloading psutil-6.1.1-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (287 kB)
+Downloading requests-2.32.4-py3-none-any.whl (64 kB)
+Downloading tqdm-4.66.5-py3-none-any.whl (78 kB)
+Downloading tree_sitter-0.23.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (571 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 571.2/571.2 kB 84.6 MB/s  0:00:00
+Downloading tree_sitter_cpp-0.23.4-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (316 kB)
+Downloading unidiff-0.7.5-py2.py3-none-any.whl (14 kB)
+Downloading anyio-4.16.0-py3-none-any.whl (134 kB)
+Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading jiter-0.18.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (336 kB)
+Downloading pydantic-2.14.2-py3-none-any.whl (490 kB)
+Downloading pydantic_core-2.50.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 47.3 MB/s  0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.8/807.8 kB 123.7 MB/s  0:00:00
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading python_dateutil-4.0.0-py3-none-any.whl (92 kB)
+Downloading pytz-2026.6-py2.py3-none-any.whl (506 kB)
+Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+Downloading tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Downloading tzlocal-5.4.5-py3-none-any.whl (18 kB)
+Installing collected packages: unidiff, pytz, urllib3, tzlocal, tzdata, typing-extensions, tree_sitter_cpp, tree_sitter, tqdm, sniffio, regex, psutil, jiter, idna, h11, distro, charset_normalizer, certifi, attrs, annotated-types, typing-inspection, Requests, python-dateutil, pydantic-core, jsonlines, httpcore, anyio, pydantic, httpx, dateparser, openai
+
+Successfully installed Requests-2.32.4 annotated-types-0.8.0 anyio-4.16.0 attrs-26.1.0 certifi-2026.10.23 charset_normalizer-3.5.2 dateparser-1.2.0 distro-1.9.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 jiter-0.18.0 jsonlines-4.0.0 openai-1.60.1 psutil-6.1.1 pydantic-2.14.2 pydantic-core-2.50.2 python-dateutil-4.0.0 pytz-2026.6 regex-2026.9.29 sniffio-1.3.1 tqdm-4.66.5 tree_sitter-0.23.2 tree_sitter_cpp-0.23.4 typing-extensions-4.16.0 typing-inspection-0.4.4 tzdata-2026.6 tzlocal-5.4.5 unidiff-0.7.5 urllib3-2.8.0
+Collecting pytest
+  Downloading pytest-9.2.0-py3-none-any.whl.metadata (7.9 kB)
+Collecting iniconfig>=2 (from pytest)
+  Downloading iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+Collecting packaging>=24 (from pytest)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pluggy<2,>=1.6 (from pytest)
+  Downloading pluggy-1.7.0-py3-none-any.whl.metadata (5.0 kB)
+Collecting pygments>=2.15 (from pytest)
+  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Downloading pytest-9.2.0-py3-none-any.whl (411 kB)
+Downloading pluggy-1.7.0-py3-none-any.whl (27 kB)
+Downloading iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 22.5 MB/s  0:00:00
+Installing collected packages: pygments, pluggy, packaging, iniconfig, pytest
+
+Successfully installed iniconfig-2.3.1 packaging-26.3 pluggy-1.7.0 pygments-2.21.0 pytest-9.2.0
+-- adding /root/better-compiler-runtime/env.sh to ~/.bashrc --
+
+== done ==
+Environment written to /root/better-compiler-runtime/env.sh and loaded from ~/.bashrc, so every
+new shell already has it -- no 'export' lines needed before any command.
+
+For THIS shell (which started before that was true), load it once:
+    source /root/better-compiler-runtime/env.sh
+
+Then continue with docs/NEW_CONTAINER_SHARED_H100.md.

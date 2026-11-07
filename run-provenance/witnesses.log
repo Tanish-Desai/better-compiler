@@ -1,0 +1,59 @@
+Development/diagnostic corpus selected by the incomplete v2 sweep: real initial compiler witnesses, one per observed bug. These tiny witnesses were used during harness development. Results do not establish repair improvement, independence from development, or generalization.
+205 saved records; 8 agreed initial witnesses; 0 extraction issues
+  89390: 8 instructions, 1004 chars, 6 agreeing copies, args=[]
+  116249: 21 instructions, 1918 chars, 6 agreeing copies, args=[]
+  126012: 27 instructions, 1827 chars, 4 agreeing copies, args=['-src-unroll=4', '-tgt-unroll=4']
+  126974: 10 instructions, 1105 chars, 6 agreeing copies, args=[]
+  135182: 10 instructions, 958 chars, 6 agreeing copies, args=[]
+  143123: 6 instructions, 407 chars, 6 agreeing copies, args=[]
+  154116: 8 instructions, 711 chars, 6 agreeing copies, args=[]
+  165878: 19 instructions, 1351 chars, 6 agreeing copies, args=[]
+Comparing 89390 ...
+  raw: ok; instructions=8; calls=0+0+1; seconds=0.056299
+  generic: ok; instructions=8; calls=192+1+1; seconds=5.656811
+  llvmreduce: ok; instructions=3; calls=249+1+1; seconds=32.79975
+  iraware: ok; instructions=8; calls=0+0+1; seconds=0.068916
+  iraware-no-promotion: ok; instructions=8; calls=0+0+1; seconds=0.065156
+Comparing 116249 ...
+  raw: ok; instructions=21; calls=0+0+1; seconds=0.061685
+  generic: ok; instructions=20; calls=400+1+1; seconds=9.118766
+  llvmreduce: ok; instructions=2; calls=299+1+1; seconds=30.791616
+  iraware: ok; instructions=18; calls=5+1+1; seconds=0.393468
+  iraware-no-promotion: ok; instructions=20; calls=4+1+1; seconds=0.319444
+Comparing 126012 ...
+  raw: ok; instructions=27; calls=0+0+1; seconds=0.038968
+  generic: ok; instructions=27; calls=400+1+1; seconds=6.26147
+  llvmreduce: ok; instructions=2; calls=307+1+1; seconds=25.898076
+  iraware: ok; instructions=24; calls=20+1+1; seconds=0.594302
+  iraware-no-promotion: ok; instructions=26; calls=11+1+1; seconds=0.36798
+Comparing 126974 ...
+  raw: ok; instructions=10; calls=0+0+1; seconds=0.036561
+  generic: ok; instructions=10; calls=400+1+1; seconds=6.763106
+  llvmreduce: ok; instructions=5; calls=353+1+1; seconds=30.404534
+  iraware: ok; instructions=4; calls=5+1+1; seconds=0.221393
+  iraware-no-promotion: ok; instructions=4; calls=4+1+1; seconds=0.189325
+Comparing 135182 ...
+  raw: ok; instructions=10; calls=0+0+1; seconds=0.032055
+  generic: ok; instructions=10; calls=400+1+1; seconds=6.007161
+  llvmreduce: ok; instructions=2; calls=202+1+1; seconds=17.139435
+  iraware: ok; instructions=10; calls=1+0+1; seconds=0.045739
+  iraware-no-promotion: ok; instructions=10; calls=1+0+1; seconds=0.041657
+Comparing 143123 ...
+  raw: ok; instructions=6; calls=0+0+1; seconds=0.042479
+  generic: ok; instructions=6; calls=80+1+1; seconds=1.364649
+  llvmreduce: ok; instructions=4; calls=288+1+1; seconds=25.243163
+  iraware: ok; instructions=6; calls=1+1+1; seconds=0.110344
+  iraware-no-promotion: ok; instructions=6; calls=1+1+1; seconds=0.111484
+Comparing 154116 ...
+  raw: ok; instructions=8; calls=0+0+1; seconds=0.075124
+  generic: ok; instructions=8; calls=153+1+1; seconds=2.90483
+  llvmreduce: ok; instructions=5; calls=264+1+1; seconds=28.384186
+  iraware: ok; instructions=8; calls=2+1+1; seconds=1.776803
+  iraware-no-promotion: ok; instructions=8; calls=2+1+1; seconds=1.755939
+Comparing 165878 ...
+  raw: ok; instructions=19; calls=0+0+1; seconds=0.03594
+  generic: ok; instructions=19; calls=400+1+1; seconds=6.517419
+  llvmreduce: ok; instructions=3; calls=247+1+1; seconds=21.423719
+  iraware: ok; instructions=19; calls=1+1+1; seconds=0.096611
+  iraware-no-promotion: ok; instructions=19; calls=1+1+1; seconds=0.116183
+Saved witness-comparison-v2-cpu/report.json; statuses: {'ok': 40}

@@ -1,0 +1,71 @@
+{
+  "captured_at_utc": "2026-11-03T10:50:12.551187+00:00",
+  "effective_cpus": 32,
+  "available_ram_gib": 119.2,
+  "host_available_ram_gib": 845.27,
+  "cgroup_limits": {
+    "cpu": {
+      "location": {
+        "version": 2,
+        "membership": "/",
+        "mount_root": "/",
+        "mount_point": "/sys/fs/cgroup",
+        "paths": [
+          "/sys/fs/cgroup"
+        ]
+      },
+      "checks": [
+        {
+          "path": "/sys/fs/cgroup",
+          "quota": "3200000 100000"
+        }
+      ],
+      "known": true
+    },
+    "memory": {
+      "location": {
+        "version": 2,
+        "membership": "/",
+        "mount_root": "/",
+        "mount_point": "/sys/fs/cgroup",
+        "paths": [
+          "/sys/fs/cgroup"
+        ]
+      },
+      "checks": [
+        {
+          "path": "/sys/fs/cgroup",
+          "maximum": "137438953472",
+          "current": "9449209856"
+        }
+      ],
+      "known": true
+    }
+  },
+  "warnings": [],
+  "recommended_build_jobs": 8,
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-d93f49e9-f0cf-3545-98b9-f4d95c547b63",
+      "name": "NVIDIA H100 PCIe",
+      "total_mib": 81559,
+      "free_mib": 25,
+      "budget_mib": 0,
+      "gpu_memory_utilization": 0.0,
+      "reserve_mib": 4096,
+      "offload20_profile_memory_gate": false
+    }
+  ],
+  "cuda_visible_devices": null,
+  "note": "Read-only snapshot. Memory/CPU availability can change; no resource reservation is made.",
+  "selected_gpu": null,
+  "gpu_selection": {
+    "requested": null,
+    "cuda_visible_devices": null,
+    "cuda_mapping_verified": false,
+    "warnings": [
+      "No GPU selected. Pass --gpu-index PHYSICAL_INDEX or --gpu-uuid UUID after checking nvidia-smi -L."
+    ]
+  }
+}
