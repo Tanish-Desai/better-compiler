@@ -110,7 +110,7 @@ def decode_output(output):
     return output.decode()
 
 
-def build(max_build_jobs: int, additional_cmake_args=[]):
+def build(max_build_jobs: int, additional_cmake_args=[], *, targets=()):
     try:
         link_jobs = int(os.environ.get("LAB_LLVM_PARALLEL_LINK_JOBS", "4"))
     except ValueError as error:
@@ -144,8 +144,11 @@ def build(max_build_jobs: int, additional_cmake_args=[]):
             stderr=subprocess.STDOUT,
             cwd=llvm_build_dir,
         ).decode()
+        command = ["cmake", "--build", ".", "-j", str(max_build_jobs)]
+        if targets:
+            command.extend(["--target", *targets])
         log += subprocess.check_output(
-            ["cmake", "--build", ".", "-j", str(max_build_jobs)] + NINJA_QUIET,
+            command + NINJA_QUIET,
             stderr=subprocess.STDOUT,
             cwd=llvm_build_dir,
         ).decode()

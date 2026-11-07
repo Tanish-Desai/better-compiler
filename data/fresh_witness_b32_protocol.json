@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "id": "fresh-llvm-witness-b32-v1",
+  "selection": "Exclude all IDs in historical checked-in results and repair plans, including listed reserves. Sort remaining single-function Alive2 miscompilation cases by reproducer lines then numeric ID, divide into thirds, order each third by SHA-256 of protocol ID + colon + bug ID, round-robin components, take the first 16 candidates per tier in that order. Take the first 8 eligible, with duplicate fresh pair hashes skipped within or across tiers.",
+  "excluded_bug_ids": [
+    "78621",
+    "80113",
+    "82884",
+    "85333",
+    "89390",
+    "89672",
+    "91177",
+    "91369",
+    "91957",
+    "98838",
+    "102597",
+    "108698",
+    "112350",
+    "112577",
+    "114738",
+    "114879",
+    "114901",
+    "114905",
+    "115149",
+    "115574",
+    "115575",
+    "116249",
+    "116553",
+    "118467",
+    "120361",
+    "123550",
+    "124267",
+    "126012",
+    "126974",
+    "135182",
+    "136646",
+    "136650",
+    "140444",
+    "142286",
+    "142957",
+    "143123",
+    "152824",
+    "154116",
+    "156849",
+    "161492",
+    "161524",
+    "165878",
+    "167627",
+    "169921",
+    "173784",
+    "173793",
+    "179613",
+    "180456",
+    "180870"
+  ],
+  "pool_size": 51,
+  "tiers": [
+    {
+      "name": "short",
+      "target": 8,
+      "candidates": [
+        {
+          "bug_id": "77320",
+          "base_commit": "ade7ae4760a0b0e74cddd8f852830ca946295930",
+          "dataset_sha256": "a921e9a8facff6e49e22daaed5aaef035aa023f0f7963cd415f6dd81fb1d90c4",
+          "component": "InstructionSimplify",
+          "reproducer_lines": 15
+        },
+        {
+          "bug_id": "113423",
+          "base_commit": "a1c6dc223ee1eedc049890676992b508ebd6b623",
+          "dataset_sha256": "f95fd86ef7c5d8a0e02e3393784effb446e1a340ee57a5de2b4f248882a033de",
+          "component": "InstCombine",
+          "reproducer_lines": 6
+        },
+        {
+          "bug_id": "173796",
+          "base_commit": "3c5f206b67ad4894874d5ec29d80e22adfec4b94",
+          "dataset_sha256": "adda225fb316ce6a30417e295c6e8d12bb445cadea04657caa673ca88362187e",
+          "component": "SLPVectorizer",
+          "reproducer_lines": 11
+        },
+        {
+          "bug_id": "121110",
+          "base_commit": "f68dbbbd57dd0947730300d1e827ad16c2dfffb5",
+          "dataset_sha256": "2575565ed7b96d63323bd31c89b12133fd6fd11b62dbc4c1cb06937f3e77b92c",
+          "component": "VectorCombine",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "80289",
+          "base_commit": "f7b05e055fa63e1c4b5ae5e391b654b57161a0e4",
+          "dataset_sha256": "92ba35dd1ad9568d5c5f503a04e225dd6f9b2cfc6c36a1d5578a3666ecd9a721",
+          "component": "LoopUnrollRuntime",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "115465",
+          "base_commit": "d822c099eeacc69f6bf834a6373a41d0c9f84a3e",
+          "dataset_sha256": "72a891a7442f73d64830f9a96b62e23f1bee92515af6ffad9330bd8651443eb4",
+          "component": "InstCombine",
+          "reproducer_lines": 10
+        },
+        {
+          "bug_id": "174041",
+          "base_commit": "a53dbe29d74dcab17078f9699e4a8c9f02ece0c3",
+          "dataset_sha256": "cd86bb4350765a44cd0050a30f0fe50dd04bfd57da0a13fd91c4f3cabde6af7f",
+          "component": "SLPVectorizer",
+          "reproducer_lines": 8
+        },
+        {
+          "bug_id": "98139",
+          "base_commit": "6aefa918768c834ec21e0b599fa14d03b9ce3dc0",
+          "dataset_sha256": "1bf4e44af56470f5fb8739c83e4e7d5d8fa75cfcfd36c8c7b0f0dec00fff03d5",
+          "component": "InstCombine",
+          "reproducer_lines": 11
+        },
+        {
+          "bug_id": "120823",
+          "base_commit": "9d0a5d4620a2aa5dc01b150e5ebe7613238cae1c",
+          "dataset_sha256": "184f1ad5bd2e2766473be3f661e78241a85e7a8cc67dc5b3488fa7909c60117a",
+          "component": "SLPVectorizer",
+          "reproducer_lines": 17
+        },
+        {
+          "bug_id": "98435",
+          "base_commit": "0e124537aabea0d18e030226a3ca4c6f494c1322",
+          "dataset_sha256": "2b49352a9a9046e4d86c5dab0a286e26d6225dce17ab5258deac69df026b3ecc",
+          "component": "InstCombine",
+          "reproducer_lines": 4
+        },
+        {
+          "bug_id": "157714",
+          "base_commit": "924bf242c8e0ef61544471488eb9e729dda72a50",
+          "dataset_sha256": "f89ecd94e61df65c67f429e421717ff0ebac3501d9903cde6d75a470f8afea24",
+          "component": "InstCombine",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "97053",
+          "base_commit": "a3571376ad9555de07e4d8f74f92de1eaa4c486e",
+          "dataset_sha256": "c1397e43f1147ef51ff028b7e306ca3e3c405780ea5269573928bf48c7958e2c",
+          "component": "InstCombine",
+          "reproducer_lines": 10
+        },
+        {
+          "bug_id": "124387",
+          "base_commit": "77c325b646301e394bcd89c2980b4c2da8af49cd",
+          "dataset_sha256": "941627f416c9b458ae9ebe607501e840ac023dcd1d3cb0f8c74f8035e268ce1c",
+          "component": "InstCombine",
+          "reproducer_lines": 12
+        },
+        {
+          "bug_id": "92887",
+          "base_commit": "f78b1a40864470f7eb30dfda44a6ea8e845346a5",
+          "dataset_sha256": "a77cd74cc426f95f2845f24c522e5b42641a6b8fd20d9060165edd306e18231a",
+          "component": "InstCombine",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "89516",
+          "base_commit": "18bb175428f520aaa4a5e388bd3b680a1a7c60c0",
+          "dataset_sha256": "062059939af0104029ffbf635bebeb315f52757eeec292ef283725689cdf2c5f",
+          "component": "InstCombine",
+          "reproducer_lines": 14
+        },
+        {
+          "bug_id": "178245",
+          "base_commit": "ff79d7d1bf0415e52ad542b059c55f0e92b3bad6",
+          "dataset_sha256": "505ef7a01ad7b5c614d2186e8c8071b8cdc4e482e0d2a647eb37c755243c6870",
+          "component": "InstCombine",
+          "reproducer_lines": 16
+        }
+      ]
+    },
+    {
+      "name": "medium",
+      "target": 8,
+      "candidates": [
+        {
+          "bug_id": "105785",
+          "base_commit": "39986f0b4d797e4ad3c12607f2b4abe2322b82bb",
+          "dataset_sha256": "7aceec5788dc4fcba41d24fe4a767f47790a67622c9ac8b3320f1af6f7a4b3c0",
+          "component": "ConstraintElimination",
+          "reproducer_lines": 28
+        },
+        {
+          "bug_id": "161636",
+          "base_commit": "92d83134b44161cad50198e663b543b46d25b45a",
+          "dataset_sha256": "2fa2d1eb6c362916fd6189c86d998d9dededa1fe7c1a11d4331aa613ac48a3dc",
+          "component": "InstCombine",
+          "reproducer_lines": 20
+        },
+        {
+          "bug_id": "112356",
+          "base_commit": "a3a9ba80337ec1b276a7571049eda6ea03276ea3",
+          "dataset_sha256": "c05e2ab230b88b86773157ef23cfd5a7d6e3fd9e36d0c8e9adaa4847d5ea184b",
+          "component": "IR",
+          "reproducer_lines": 36
+        },
+        {
+          "bug_id": "104422",
+          "base_commit": "13a6a7975256ebdbce85f1174ae2eec735fa0d7a",
+          "dataset_sha256": "ab30af9a89a355caff8621c53eddfdeef922565b65317265bc24b7c0921d6906",
+          "component": "SLPVectorizer",
+          "reproducer_lines": 26
+        },
+        {
+          "bug_id": "95547",
+          "base_commit": "7767f0d47428db66d65b07b35aa52f0507df71f9",
+          "dataset_sha256": "b226ea5ae554a759acc08e38fa492123aee479591412935a92c68b32607ec0a2",
+          "component": "InstCombine",
+          "reproducer_lines": 25
+        },
+        {
+          "bug_id": "105988",
+          "base_commit": "4b0c0ec6b8065e611640f44adce94e2da12b3a3a",
+          "dataset_sha256": "4c814b91a9d8f3f99dc7c67d2b3afc1314e9cc2994da5ab321ffdee02c8cd48a",
+          "component": "SLPVectorizer",
+          "reproducer_lines": 27
+        },
+        {
+          "bug_id": "161525",
+          "base_commit": "c4709823bb82cb4b6ca2675ef69b1a0e02e3f58e",
+          "dataset_sha256": "247a43eb0f13ea2366d3cdd0a1263221c2f799a8337785200a1a2743bcfbbc1f",
+          "component": "InstCombine",
+          "reproducer_lines": 30
+        },
+        {
+          "bug_id": "113869",
+          "base_commit": "c752efbdcc1ebd81f879633d6b798248064e2ae2",
+          "dataset_sha256": "7730b2a7d9721bc6b4fae357a93a8d0fe3eeacbb233055e2cf7a38fd3d94f8c4",
+          "component": "InstCombine",
+          "reproducer_lines": 22
+        },
+        {
+          "bug_id": "121890",
+          "base_commit": "7612dcc6e8d8e7f19b364084effbb01946294720",
+          "dataset_sha256": "4736da8e3aefd191b37a037ecc8d09697e4bb9397753e3404fe8cc85a580a862",
+          "component": "InstCombine",
+          "reproducer_lines": 35
+        },
+        {
+          "bug_id": "121584",
+          "base_commit": "4a7c0b8afe6bf616cd6bb4f13b5b706a43c10e74",
+          "dataset_sha256": "2a15f7c483a2e3c3b7235609e9bb35fef6d47b5c4eae5f314301b6a7d5779eaf",
+          "component": "InstCombine",
+          "reproducer_lines": 24
+        },
+        {
+          "bug_id": "112666",
+          "base_commit": "d6d73ec89e493c69cf24dc3a710d861e2ce08acb",
+          "dataset_sha256": "0711a849044f2b3a5c99a76eaf09c07a6169b8606a8d966dfed6813f44c03f14",
+          "component": "InstCombine",
+          "reproducer_lines": 35
+        },
+        {
+          "bug_id": "161493",
+          "base_commit": "2e5a5fdd329073e3d4b174743dfc7fca655e9491",
+          "dataset_sha256": "75e2c5f0ab34d930032395acf46fb626d377f72bbb1f3d0f706d099db90f31c0",
+          "component": "InstCombine",
+          "reproducer_lines": 25
+        },
+        {
+          "bug_id": "142518",
+          "base_commit": "9ba332f9963561bb5ac6933266afe38eb8fde8cd",
+          "dataset_sha256": "7254c4d921ca1334e280859546912b6e011fdb42fdadea6bd119088bafa6a44f",
+          "component": "InstCombine",
+          "reproducer_lines": 25
+        },
+        {
+          "bug_id": "121428",
+          "base_commit": "b5f21671ef04984bc00770263234dfb94833a274",
+          "dataset_sha256": "a58c58e90a108c693d02d14bd87965c4422c38634bcdbf26107b7a65568073ec",
+          "component": "InstCombine",
+          "reproducer_lines": 34
+        },
+        {
+          "bug_id": "89338",
+          "base_commit": "ab1d988e1483895a71dcd257bdcaf6fdb0a83d62",
+          "dataset_sha256": "c90775a3c0f120d4668b280d72bf858cc742e8f1b2e8a2ecec09687a8d2f707b",
+          "component": "InstCombine",
+          "reproducer_lines": 21
+        },
+        {
+          "bug_id": "113123",
+          "base_commit": "67ff5ba9af9754261abe11d762af11532a816126",
+          "dataset_sha256": "a499590b993dfb60a78ae55eb00adeaf44dd4bc5c9f5f9c7746326e531594183",
+          "component": "InstCombine",
+          "reproducer_lines": 24
+        }
+      ]
+    },
+    {
+      "name": "long",
+      "target": 8,
+      "candidates": [
+        {
+          "bug_id": "121432",
+          "base_commit": "b51a082e1afd707f8cf1473e4c49374e7e951d2d",
+          "dataset_sha256": "7106150c6457a2a62f920d13fa756c0420e52a1a04db3ef460c809d8fef89f38",
+          "component": "InstCombine",
+          "reproducer_lines": 53
+        },
+        {
+          "bug_id": "91178",
+          "base_commit": "7098cd215b95286794d9e0c822e8323ad0509750",
+          "dataset_sha256": "6f8fd056fd9dcca2469c4280d11cc317269d170470adc1e8ada593987ca481fd",
+          "component": "InstructionSimplify",
+          "reproducer_lines": 39
+        },
+        {
+          "bug_id": "131465",
+          "base_commit": "baab447aadd59b34bd838584b16d11475329853f",
+          "dataset_sha256": "4f4648846a94813eba94d47e095166d29833a14f677bf826e60986456b6912d1",
+          "component": "ScalarEvolution",
+          "reproducer_lines": 97
+        },
+        {
+          "bug_id": "157238",
+          "base_commit": "18507a7a6bf1c82e2614b3995320ebab8dd60ef2",
+          "dataset_sha256": "4f1ece308f5be6b52e1c87d2820dd9b29b52d003ed005de814657b0196c566b0",
+          "component": "ValueTracking",
+          "reproducer_lines": 42
+        },
+        {
+          "bug_id": "136430",
+          "base_commit": "1f69d6354a4b088bda5ee62c31411a75eead8b0c",
+          "dataset_sha256": "6c8415825026ac2b9f337a49dacfc918ee61d0ecf0e2a9964d76748d9acc427c",
+          "component": "InstCombine",
+          "reproducer_lines": 50
+        },
+        {
+          "bug_id": "82052",
+          "base_commit": "a45df47375e50914900dcc07abd2fa67bfa0dd3b",
+          "dataset_sha256": "51a25104ca91f34988d9cb38a5c6fe2748d96d1ed88814caedb6b9ec60cfb6f8",
+          "component": "InstCombine",
+          "reproducer_lines": 42
+        },
+        {
+          "bug_id": "85536",
+          "base_commit": "f84980570d3f85bdf5c9432647c05bae04a735a0",
+          "dataset_sha256": "058d84045b43696720be586886996722a6f9dbda0a5fca85ec0e550ca24641f9",
+          "component": "InstCombine",
+          "reproducer_lines": 39
+        },
+        {
+          "bug_id": "173787",
+          "base_commit": "0258aa62b7686b21812999b99aa6e2d1077a96c6",
+          "dataset_sha256": "6717e049bcbc49ec6c49815a5b819535c1e68d845dbaed05dc1f6ae0fc75e5a3",
+          "component": "InstCombine",
+          "reproducer_lines": 43
+        },
+        {
+          "bug_id": "161634",
+          "base_commit": "4cc0bae159e56dc02145f9154005dc1eb9ed1fd7",
+          "dataset_sha256": "112e24ecfd7dc87a08368fbffbdfcb7a9813e47c5f803b670e4e8773286afe3a",
+          "component": "InstCombine",
+          "reproducer_lines": 65
+        },
+        {
+          "bug_id": "91127",
+          "base_commit": "30367cb5982dfdab2655401f020711311e7d78b9",
+          "dataset_sha256": "fd8820bec4d0a5bb07c2f5ffd2ce6e77aa60c085bc60549df86475a0fbd506e2",
+          "component": "InstCombine",
+          "reproducer_lines": 42
+        },
+        {
+          "bug_id": "94897",
+          "base_commit": "add89088fb8de84fdbeb97c0386a831e51d090a1",
+          "dataset_sha256": "a5e634e03ebe87eed05a0553963a9d9248393c174048ee4ccfdf339c45c0a2de",
+          "component": "InstCombine",
+          "reproducer_lines": 49
+        },
+        {
+          "bug_id": "112068",
+          "base_commit": "b24acc06e1d465b3e3e4e28515dd437f6a7454f2",
+          "dataset_sha256": "9e2d8e51c50a606278d5d405f28d78eb0ad2d70395f1072d3d4199feb1c1bc0b",
+          "component": "InstCombine",
+          "reproducer_lines": 80
+        },
+        {
+          "bug_id": "112467",
+          "base_commit": "9df8d8d05c2650b51bd4233e1759206d163f3133",
+          "dataset_sha256": "3c069330fed93e4dcc6bbcf9de5c50a9e82bb72cd123fd989c8a1539efd05039",
+          "component": "InstCombine",
+          "reproducer_lines": 36
+        },
+        {
+          "bug_id": "121581",
+          "base_commit": "95c5c5d4badf7c2128d098be325356e15c2197be",
+          "dataset_sha256": "ad8239e3fb04736906d55399e3a6265547d571a0c0d510715585ca0735839f49",
+          "component": "InstCombine",
+          "reproducer_lines": 39
+        },
+        {
+          "bug_id": "140994",
+          "base_commit": "7c080e267722ba14439e2f35789c5c293672ab84",
+          "dataset_sha256": "1b81fedc3fffbb8a9c1f4cd363ea3e0231fff40f4d703d1dc7ce357b2f926ef6",
+          "component": "InstCombine",
+          "reproducer_lines": 278
+        },
+        {
+          "bug_id": "93769",
+          "base_commit": "d517f15e09e49e172387cb6deb76e4ee2d45d0e4",
+          "dataset_sha256": "4d31675ffd1461258d6a9feb09f70f6b49e3b056250798d1e4f839ed3d3e0114",
+          "component": "InstCombine",
+          "reproducer_lines": 95
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "budget": 32,
+    "hybrid_prefix_calls": 8,
+    "instruction_seed_only": true,
+    "oracle_strictness": "error_class",
+    "timeout": 120,
+    "primary": [
+      "iraware-then-llvmreduce",
+      "llvmreduce"
+    ],
+    "endpoint": "fraction of original instructions removed with fresh verification",
+    "test": "two-sided exact paired sign test of the instruction-count difference, alpha=0.05",
+    "minimum_mean_gain": 0.05,
+    "balanced_secondary": [
+      "iraware-then-llvmreduce-balanced",
+      "llvmreduce-balanced"
+    ],
+    "analysis_unit": "one witness per bug"
+  },
+  "eligible_total": 24
+}

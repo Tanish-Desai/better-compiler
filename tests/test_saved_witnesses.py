@@ -206,6 +206,25 @@ def test_hybrid_spends_only_the_remaining_budget_and_keeps_the_smaller_seed(monk
     assert hybrid["status"] == "ok" and hybrid["same_violation_fresh"]
 
 
+def test_instruction_gate_keeps_original_for_character_only_seed(monkeypatch):
+    original = compare.Witness("1", SRC + "; comment\n", TGT, ARGS, "f")
+
+    def paired(src, tgt, oracle, violation):
+        return make_reduction("iraware", src, tgt, SRC, TGT)
+
+    def sequential(src, tgt, oracle, *, balanced):
+        assert (src, tgt) == (original.src, original.tgt)
+        return make_reduction("llvmreduce", src, tgt, src, tgt)
+
+    monkeypatch.setattr(compare, "reduce_iraware", paired)
+    monkeypatch.setattr(compare, "reduce_llvmreduce", sequential)
+    fb = compare.hybrid_feedback(original, live_run().first_violation(), alive_tv="alive-tv",
+                                 timeout=30, budget=32, prefix_calls=8,
+                                 verifier=lambda *a, **kw: live_run(), instruction_seed_only=True)
+    assert not fb.summary()["hybrid_seed_used"]
+    assert fb.reduction.src == original.src
+
+
 def test_invalid_original_is_retained_with_all_five_methods_explicitly_skipped():
     def forbidden(*args, **kwargs):
         raise AssertionError("reduction must not run without an established failure")

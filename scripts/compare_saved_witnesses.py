@@ -242,14 +242,14 @@ def llvm_reduce_override(path: str):
 def run_details(run) -> dict:
     violation = run.first_violation()
     return {"tool_error": run.tool_error, "num_incorrect": run.num_incorrect,
-            "num_errors": run.num_errors,
+            "num_errors": run.num_errors, "num_failed_to_prove": run.num_failed_to_prove,
             "violation": asdict(Violation.from_result(violation)) if violation else None,
             "raw": run.raw}
 
 
 def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: str, timeout: float,
                     budget: int, prefix_calls: int, verifier: Callable,
-                    balanced: bool = False) -> Feedback:
+                    balanced: bool = False, instruction_seed_only: bool = False) -> Feedback:
     """Start LLVM reduction from the best pair found under a small paired cap."""
     original = witness.src, witness.tgt
     oracle = Oracle(target=Violation.from_result(violation), strictness="error_class",
@@ -264,7 +264,10 @@ def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: st
     paired = reduce_iraware(*original, oracle, violation)
     paired_calls = oracle.calls
     seed = (paired.src, paired.tgt)
-    use_seed = not paired.error and size_key(seed) < size_key(original)
+    seed_size, original_size = size_key(seed), size_key(original)
+    use_seed = not paired.error and (
+        seed_size[0] < original_size[0] if instruction_seed_only else seed_size < original_size
+    )
     pair = seed if use_seed else original
     selected = "iraware" if use_seed else "original"
     passes = paired.passes_applied if use_seed else []
@@ -278,6 +281,7 @@ def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: st
         passes = passes + sequential.passes_applied
 
     metrics = {"hybrid_prefix_cap": prefix_calls, "hybrid_seed_used": use_seed,
+               "hybrid_instruction_seed_only": instruction_seed_only,
                "hybrid_selected_stage": selected,
                "hybrid_stages": [
                    {"method": "iraware", "candidate_calls": paired_calls,
@@ -307,6 +311,7 @@ def finish_experimental_feedback(method: str, witness: Witness, violation: Funct
                        feedback_refresh_seconds=time.perf_counter() - refresh_start,
                        feedback_refresh_tool_failures=int(bool(refresh.tool_error)))
         match = (oracle._match(refresh) if not refresh.tool_error and not refresh.num_errors
+                 and not refresh.num_failed_to_prove
                  and refresh.num_incorrect else None)
         if match is None:
             pair, passes = original, []
@@ -340,7 +345,8 @@ def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
                     timeout: float = 120, verifier: Callable | None = None,
                     feedback_builder: Callable | None = None,
                     hybrid_prefix_calls: int | None = None,
-                    balanced_llvmreduce: bool = False) -> dict:
+                    balanced_llvmreduce: bool = False,
+                    instruction_seed_only: bool = False) -> dict:
     """One common establishment call, equal search caps, separate fresh postchecks."""
     verifier = verifier or run_alive_tv
     feedback_builder = feedback_builder or build_feedback
@@ -354,7 +360,8 @@ def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
     case["establishment_calls"] = 1
     case["establishment"] = run_details(original)
     violation = original.first_violation()
-    if (original.tool_error or not original.num_incorrect or original.num_errors or violation is None
+    if (original.tool_error or not original.num_incorrect or original.num_errors
+            or original.num_failed_to_prove or violation is None
             or not violation.name or not violation.error_class):
         case["status"] = "skipped"
         case["reason"] = "original pair did not establish a refinement failure with a parsed function and error class"
@@ -373,7 +380,8 @@ def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
                 feedback = hybrid_feedback(witness, violation, alive_tv=alive_tv,
                                            timeout=timeout, budget=budget,
                                            prefix_calls=hybrid_prefix_calls, verifier=verifier,
-                                           balanced=method == BALANCED_HYBRID)
+                                           balanced=method == BALANCED_HYBRID,
+                                           instruction_seed_only=instruction_seed_only)
             elif method == BALANCED:
                 oracle = Oracle(target=target, strictness="error_class", extra_args=witness.extra_args,
                                 alive_tv=alive_tv, timeout=timeout, max_calls=budget)
