@@ -37,7 +37,23 @@ The candidate contribution is a paired reduction strategy that uses the Alive2 d
 - On 116553 the IR-aware reducer shrank the witness from 23 to 3 instructions, yet no IR-aware trial passed full validation. One candidate fixed the reproducer and narrowed where the compiler adds a loop exit fact. That edit then failed an existing `FileCheck` expectation in `induction-condition-in-loop-exit.ll`. Raw structured repaired the bug in all three trials. This is a concrete case where better compression and better repair outcomes diverge.
 - Six IR-aware initial pairs retained the original instruction and character counts with no accepted reduction across the three trials. Five more had no instruction reduction despite a character reduction. The initial audit recorded no fallback errors. These counts measure search behavior on these inputs and do not establish minimality.
 
-## Next CPU experiment
+## Completed 32-call CPU replay
+
+The report committed at `fb321fcaa864bc558412c07d24a4792522b78440` matches all 192 archived trial hashes. It contains 16 agreed initial witnesses and 80 successful method/case postchecks. The 32-call ceiling applies to the reducer. The reported call totals include the feedback refresh and independent postcheck outside that ceiling. They exclude the shared establishment call.
+
+| Measure across the 16 witnesses | IR-aware | Sequential `llvm-reduce` |
+|---|---:|---:|
+| Median recorded verifier calls, including refresh and postcheck | 3.5 | 34 |
+| Median pipeline and postcheck time | 0.189 s | 10.493 s |
+| Median fraction of instructions removed per witness | 0% | 22.0% |
+| Witnesses with fewer instructions than the original | 5/16 | 10/16 |
+| Instructions removed across all witnesses | 40 | 41 |
+
+IR-aware left fewer instructions on four witnesses, tied on five, and left more on seven (exploratory two-sided exact sign test, p = 0.549). Its reductions were concentrated in fewer cases, including `116553` (23 to 3 instructions versus 23 to 18) and `78621` (9 to 3 versus 9 to 7). IR-aware used fewer calls on all 16 and had lower elapsed time on 15. Sequential `llvm-reduce` used its full reducer allowance on every witness, whereas IR-aware used 0 to 27 calls. The methods shared a ceiling and stopped at different costs. Each method had one timing run per witness.
+
+The replay shows a fast reduction pass with occasional large savings and lower typical compression. A concrete next variant is to use a small portion of the call budget for the paired reducer and give the remaining calls to a sequential fallback. Compare it with sequential-only under the same total ceiling and with paired-only to measure the incremental gain. Keep the smallest independently rechecked result under the agreed instruction-count metric. Use the existing cases for development and freeze the budget split, stopping rule, and sequential configuration before measuring a fresh witness cohort. This tests whether the cheaper pass improves the combined pipeline. A separate seed-blind comparison would be required to attribute that improvement specifically to counterexample guidance.
+
+## CPU replay commands
 
 Replay the same 16 initial pairs under a shared cap of 32 Alive2 calls charged to the reducer. The cap is exploratory and was chosen after the completed sweep. It is just above the largest observed IR-aware first-turn call count of 27. Compare the fraction of original instructions removed per bug under the shared cap, with a fresh postcheck for each method. Count a verified unchanged pair as zero reduction, retain the identities of all failed checks or missing records, and report wins, ties and losses for each pairwise comparison. Report costs and sizes at the original cap of 400 as a reference point. Record verifier seconds and total seconds because equal call caps can hide large differences in per-call cost.
 
@@ -62,6 +78,6 @@ python3 -u scripts/compare_saved_witnesses.py \
   2>&1 | tee run-provenance/witnesses-v3c-b400.log
 ```
 
-These replays use the existing Alive2 and `llvm-reduce` binaries. They make no LLM requests and perform no compiler rebuilds. Keep the replay separate from the completed repair sweep. If the low-budget advantage survives the tuned baseline, freeze one endpoint, the cap, and the baselines before collecting an independent witness cohort. A seed-blind version of the same paired reducer would test whether guidance from the counterexample contributes beyond pairing and dependency closure. The existing no-promotion condition isolates a different design choice.
+These replays use the existing Alive2 and `llvm-reduce` binaries. They make no LLM requests and perform no compiler rebuilds. Keep the replay separate from the completed repair sweep. The existing no-promotion condition isolates operand promotion, a different design choice from guidance by the counterexample.
 
 For a repair-rate follow-up, raw structured is the strongest observed control. A separate pilot could compare it with feedback that retains the original witness and adds a concise contrast between the original failing case and a regression that must remain optimized. The current harness already returns regression diagnostics. This extension would need to identify the changed IR behavior explicitly. The pilot should establish that the output truncation rate is under control for both arms before a new matched evaluation.
