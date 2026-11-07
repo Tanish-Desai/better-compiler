@@ -172,6 +172,39 @@ def test_a_different_function_or_error_class_is_not_a_success():
     assert all(row["status"] == "failed" and not row["same_violation_fresh"] for row in result["methods"])
 
 
+def test_hybrid_spends_only_the_remaining_budget_and_keeps_the_smaller_seed(monkeypatch):
+    def paired(src, tgt, oracle, violation):
+        assert (src, tgt, oracle.max_calls) == (SRC, TGT, 8)
+        oracle.record_external(calls=3)
+        return make_reduction("iraware", src, tgt, SMALL_SRC, SMALL_TGT)
+
+    def sequential(src, tgt, oracle):
+        assert (src, tgt) == (SMALL_SRC, SMALL_TGT)
+        assert (oracle.calls, oracle.max_calls) == (3, 32)
+        oracle.record_external(calls=29)
+        return make_reduction("llvmreduce", src, tgt, SRC, TGT)
+
+    monkeypatch.setattr(compare, "reduce_iraware", paired)
+    monkeypatch.setattr(compare, "reduce_llvmreduce", sequential)
+    checks = []
+
+    def verify(src, tgt, args, **kwargs):
+        assert args == ARGS
+        checks.append((src, tgt))
+        return live_run(src, tgt)
+
+    result = compare.compare_witness(witness(), alive_tv="alive-tv", budget=32,
+                                     hybrid_prefix_calls=8, verifier=verify,
+                                     feedback_builder=lambda s, t, condition, **kw: Feedback("raw", condition))
+    hybrid = result["methods"][-1]
+    assert hybrid["method"] == compare.HYBRID
+    assert hybrid["feedback"]["hybrid_selected_stage"] == "iraware"
+    assert hybrid["candidate_calls"] == 32
+    assert hybrid["total_physical_calls"] == 34
+    assert checks[-2:] == [(SMALL_SRC, SMALL_TGT)] * 2
+    assert hybrid["status"] == "ok" and hybrid["same_violation_fresh"]
+
+
 def test_invalid_original_is_retained_with_all_five_methods_explicitly_skipped():
     def forbidden(*args, **kwargs):
         raise AssertionError("reduction must not run without an established failure")

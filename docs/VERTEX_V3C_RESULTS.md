@@ -53,6 +53,28 @@ IR-aware left fewer instructions on four witnesses, tied on five, and left more 
 
 The replay shows a fast reduction pass with occasional large savings and lower typical compression. A concrete next variant is to use a small portion of the call budget for the paired reducer and give the remaining calls to a sequential fallback. Compare it with sequential-only under the same total ceiling and with paired-only to measure the incremental gain. Keep the smallest independently rechecked result under the agreed instruction-count metric. Use the existing cases for development and freeze the budget split, stopping rule, and sequential configuration before measuring a fresh witness cohort. This tests whether the cheaper pass improves the combined pipeline. A separate seed-blind comparison would be required to attribute that improvement specifically to counterexample guidance.
 
+## Completed 400-call CPU replay
+
+Commit `4dc695d` contains a second CPU replay with the same witness hashes and verifier binaries as the 32-call replay. All 80 method/case outputs passed the fresh check. IR-aware shrank 5 of 16 witnesses, with a median of 8 instructions remaining and 3.5 verifier calls including refresh and postcheck. Sequential `llvm-reduce` shrank all 16, with 2.5 median instructions remaining, a median of 74.2% of instructions removed per witness, and 252 median verifier calls including refresh and postcheck. The extra budget improved the sequential baseline's compression from 10 to 16 cases. IR-aware already stopped below 32 reducer calls on every witness.
+
+## Hybrid development replay
+
+`--hybrid-prefix-calls 8` adds a sixth method. It caps paired search at eight calls. If the paired result is smaller, sequential reduction starts from that pair. Otherwise it starts from the original pair. A single oracle counts both stages against the 32-call total and makes unspent calls available to the second stage. Candidates are ranked first by instruction count, then by IR characters to break ties. The selected output is checked by a fresh verifier. Establishment, feedback refresh and independent postcheck are recorded outside the candidate cap as in the existing replay. Report smaller, tied and larger instruction counts against the sequential baseline on the same inputs. Report actual verifier calls and elapsed time alongside the size comparison.
+
+Eight calls is a development choice made after inspecting the prior replays. The existing 16 witnesses can identify where the hybrid helps or harms compression before we fix a protocol for a fresh cohort.
+
+```bash
+cd ~/24BCE5561/better-compiler
+git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
+source "$HOME/better-compiler-runtime/env.sh"
+set -o pipefail
+python3 -u scripts/compare_saved_witnesses.py \
+  --directory results-vertex-v3c --budget 32 --hybrid-prefix-calls 8 \
+  --llvm-reduce /usr/lib/llvm-21/bin/llvm-reduce \
+  --out witness-comparison-v3c-hybrid-b32 \
+  2>&1 | tee run-provenance/witnesses-v3c-hybrid-b32.log
+```
+
 ## CPU replay commands
 
 Replay the same 16 initial pairs under a shared cap of 32 Alive2 calls charged to the reducer. The cap is exploratory and was chosen after the completed sweep. It is just above the largest observed IR-aware first-turn call count of 27. Compare the fraction of original instructions removed per bug under the shared cap, with a fresh postcheck for each method. Count a verified unchanged pair as zero reduction, retain the identities of all failed checks or missing records, and report wins, ties and losses for each pairwise comparison. Report costs and sizes at the original cap of 400 as a reference point. Record verifier seconds and total seconds because equal call caps can hide large differences in per-call cost.

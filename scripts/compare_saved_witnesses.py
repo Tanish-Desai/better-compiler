@@ -32,14 +32,18 @@ from typing import Callable
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ce.alive import parse_extra_args, run_alive_tv  # noqa: E402
-from ce.feedback import build_feedback  # noqa: E402
+from ce.alive import FunctionResult, parse_extra_args, run_alive_tv  # noqa: E402
+from ce.feedback import Feedback, build_feedback  # noqa: E402
 from ce.irmodel import measure_pair  # noqa: E402
 from ce.oracle import Oracle, Violation  # noqa: E402
-from ce.reduce_llvmreduce import DEFAULT_SUBPROCESS_TIMEOUT, default_llvm_reduce  # noqa: E402
+from ce.reduce_iraware import reduce_iraware  # noqa: E402
+from ce.reduce_llvmreduce import DEFAULT_SUBPROCESS_TIMEOUT, default_llvm_reduce, reduce_llvmreduce  # noqa: E402
+from ce.reduction import make_reduction  # noqa: E402
+from ce.structured import render_plain  # noqa: E402
 
 FROZEN_V2 = "73f2ba151742c44cf88878b50c027ef7f06293c6"
 METHODS = ("raw", "generic", "llvmreduce", "iraware", "iraware-no-promotion")
+HYBRID = "iraware-then-llvmreduce"
 CORPUS_NOTE = (
     "Development/diagnostic corpus selected by the incomplete v2 sweep: real "
     "initial compiler witnesses, one per observed bug. These tiny witnesses "
@@ -241,12 +245,77 @@ def run_details(run) -> dict:
             "raw": run.raw}
 
 
+def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: str, timeout: float,
+                    budget: int, prefix_calls: int, verifier: Callable) -> Feedback:
+    """Start LLVM reduction from the best pair found under a small paired cap."""
+    original = witness.src, witness.tgt
+    oracle = Oracle(target=Violation.from_result(violation), strictness="error_class",
+                    extra_args=witness.extra_args, alive_tv=alive_tv,
+                    timeout=timeout, max_calls=prefix_calls)
+
+    def size_key(pair: tuple[str, str]) -> tuple[int, int]:
+        size = measure_pair(*pair)
+        return size["instructions"], size["chars"]
+
+    started = time.perf_counter()
+    paired = reduce_iraware(*original, oracle, violation)
+    paired_calls = oracle.calls
+    seed = (paired.src, paired.tgt)
+    use_seed = not paired.error and size_key(seed) < size_key(original)
+    pair = seed if use_seed else original
+    selected = "iraware" if use_seed else "original"
+    passes = paired.passes_applied if use_seed else []
+
+    oracle.max_calls = budget
+    sequential = reduce_llvmreduce(*pair, oracle)
+    candidate = sequential.src, sequential.tgt
+    if not sequential.error and size_key(candidate) < size_key(pair):
+        pair = candidate
+        selected = "llvmreduce"
+        passes = passes + sequential.passes_applied
+
+    metrics = {"hybrid_prefix_cap": prefix_calls, "hybrid_seed_used": use_seed,
+               "hybrid_selected_stage": selected, "feedback_refresh_calls": 0,
+               "hybrid_stages": [
+                   {"method": "iraware", "candidate_calls": paired_calls,
+                    "size_after": paired.size_after, "error": paired.error},
+                   {"method": "llvmreduce", "candidate_calls": oracle.calls - paired_calls,
+                    "size_after": sequential.size_after, "error": sequential.error},
+               ]}
+    reduction_seconds = time.perf_counter() - started
+    shown, error = violation, None
+    if pair != original:
+        refresh_start = time.perf_counter()
+        refresh = verifier(*pair, witness.extra_args, alive_tv=alive_tv, timeout=timeout)
+        metrics.update(feedback_refresh_calls=1,
+                       feedback_refresh_seconds=time.perf_counter() - refresh_start,
+                       feedback_refresh_tool_failures=int(bool(refresh.tool_error)))
+        match = (oracle._match(refresh) if not refresh.tool_error and not refresh.num_errors
+                 and refresh.num_incorrect else None)
+        if match is None:
+            pair, passes = original, []
+            error = "hybrid pair failed re-verification; reverted"
+        else:
+            shown = match
+    metrics["reduction_fallback"] = bool(error)
+    reduction = make_reduction(HYBRID, *original, *pair, passes_applied=passes,
+                               oracle_stats=oracle.stats(), seconds=reduction_seconds, error=error)
+    return Feedback(render_plain(shown, *pair), HYBRID, violation=shown,
+                    reduction=reduction, metrics=metrics, error=error)
+
+
 def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
                     timeout: float = 120, verifier: Callable | None = None,
-                    feedback_builder: Callable | None = None) -> dict:
+                    feedback_builder: Callable | None = None,
+                    hybrid_prefix_calls: int | None = None) -> dict:
     """One common establishment call, equal search caps, separate fresh postchecks."""
     verifier = verifier or run_alive_tv
     feedback_builder = feedback_builder or build_feedback
+    methods = METHODS
+    if hybrid_prefix_calls is not None:
+        if not 1 <= hybrid_prefix_calls <= budget - 2:
+            raise ValueError("hybrid prefix must leave at least two calls for sequential reduction")
+        methods += (HYBRID,)
     case = {**asdict(witness), "witness_sha256": witness.identity,
             "original_size": measure_pair(witness.src, witness.tgt), "methods": []}
     started = time.perf_counter()
@@ -261,23 +330,28 @@ def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
         case["status"] = "skipped"
         case["reason"] = "original pair did not establish a refinement failure with a parsed function and error class"
         case["methods"] = [{"method": method, "status": "skipped", "reason": case["reason"],
-                            "candidate_budget": budget} for method in METHODS]
+                            "candidate_budget": budget} for method in methods]
         return case
     case["status"] = "completed"
     target = Violation.from_result(violation)
     matcher = Oracle(target=target, strictness="error_class")
-    for method in METHODS:
+    for method in methods:
         row = {"method": method, "candidate_budget": budget,
                "strictness": "error_class", "allow_promotion": method != "iraware-no-promotion"}
         start = time.perf_counter()
         try:
-            strategy = "iraware" if method == "iraware-no-promotion" else method
-            feedback = feedback_builder(
-                witness.src, witness.tgt, f"{strategy}-plain", extra_args=witness.extra_args,
-                alive_tv=alive_tv, timeout=timeout, oracle_budget=budget,
-                oracle_strictness="error_class", allow_promotion=row["allow_promotion"],
-                alive_output=original.raw,
-            )
+            if method == HYBRID:
+                feedback = hybrid_feedback(witness, violation, alive_tv=alive_tv,
+                                           timeout=timeout, budget=budget,
+                                           prefix_calls=hybrid_prefix_calls, verifier=verifier)
+            else:
+                strategy = "iraware" if method == "iraware-no-promotion" else method
+                feedback = feedback_builder(
+                    witness.src, witness.tgt, f"{strategy}-plain", extra_args=witness.extra_args,
+                    alive_tv=alive_tv, timeout=timeout, oracle_budget=budget,
+                    oracle_strictness="error_class", allow_promotion=row["allow_promotion"],
+                    alive_output=original.raw,
+                )
             row["pipeline_seconds"] = round(time.perf_counter() - start, 6)
             summary = feedback.summary()
             row["feedback"] = summary
@@ -369,6 +443,8 @@ def main(argv=None) -> int:
                         help="dataset directory for --directory mode only")
     parser.add_argument("--out", type=Path, default=Path("witness-comparison-v2"))
     parser.add_argument("--budget", type=int, default=400, help="equal candidate-call cap per reducer")
+    parser.add_argument("--hybrid-prefix-calls", type=int,
+                        help="add an IR-aware prefix followed by llvm-reduce under the same total cap")
     parser.add_argument("--timeout", type=float, default=120, help="per alive-tv call timeout in seconds")
     parser.add_argument("--alive-tv", default=os.environ.get("LAB_LLVM_ALIVE_TV"))
     parser.add_argument("--llvm-reduce", default=default_llvm_reduce())
@@ -377,6 +453,9 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     if args.budget <= 0 or args.timeout <= 0:
         parser.error("budget and timeout must be positive")
+    if args.hybrid_prefix_calls is not None and not 1 <= args.hybrid_prefix_calls <= args.budget - 2:
+        parser.error("--hybrid-prefix-calls must leave at least two calls for sequential reduction")
+    methods = METHODS if args.hybrid_prefix_calls is None else (*METHODS, HYBRID)
     try:
         records, dataset, source_info = (load_directory(args.directory, args.dataset) if args.directory
                                         else load_snapshot(args.snapshot or FROZEN_V2, args.results))
@@ -417,7 +496,7 @@ def main(argv=None) -> int:
             "record_sha256": {path: digest(blob) for path, blob in sorted(records.items())},
             "implementation_sha256": source_identity(),
             "binaries": {"alive_tv": binary_identity(alive_tv), "llvm_reduce": binary_identity(llvm_reduce)},
-            "settings": {"methods": list(METHODS), "candidate_budget": args.budget,
+            "settings": {"methods": list(methods), "candidate_budget": args.budget,
                          "oracle_strictness": "error_class", "alive_tv_timeout": args.timeout,
                          "llvmreduce_subprocess_timeout": DEFAULT_SUBPROCESS_TIMEOUT,
                          "equal_wall_budget": False,
@@ -426,12 +505,15 @@ def main(argv=None) -> int:
                          "cost_policy": "shared establishment once per case; candidate search, pipeline refresh, and independent postcheck separately counted"},
             "extraction_issues": issues, "cases": [], "complete": False,
         }
+        if args.hybrid_prefix_calls is not None:
+            report["settings"]["hybrid_prefix_calls"] = args.hybrid_prefix_calls
         args.out.mkdir(parents=True, exist_ok=True)
         write_report(report_path, report)
         with llvm_reduce_override(llvm_reduce):
             for witness in witnesses:
                 print(f"Comparing {witness.bug_id} ...", flush=True)
-                case = compare_witness(witness, alive_tv=alive_tv, budget=args.budget, timeout=args.timeout)
+                case = compare_witness(witness, alive_tv=alive_tv, budget=args.budget,
+                                       timeout=args.timeout, hybrid_prefix_calls=args.hybrid_prefix_calls)
                 report["cases"].append(case)
                 write_report(report_path, report)
                 for row in case["methods"]:
