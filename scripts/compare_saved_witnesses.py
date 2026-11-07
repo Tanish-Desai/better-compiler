@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Compare reducers on real initial witnesses saved by the v2 repair sweep.
+"""Compare reducers on real initial witnesses saved by a repair sweep.
 
-This is a development-corpus mechanism experiment, not a repair-success study.
+This experiment measures reducer behavior on the selected witness corpus.
 No model, GPU, compiler rebuild, reference patch, or generated mutation is used.
 The default input is the frozen, incomplete v2 snapshot, with one witness per
 bug. Initial raw-plain/raw-structured copies must agree across conditions and
@@ -45,6 +45,11 @@ CORPUS_NOTE = (
     "initial compiler witnesses, one per observed bug. These tiny witnesses "
     "were used during harness development. Results do not establish repair "
     "improvement, independence from development, or generalization."
+)
+EXPLICIT_CORPUS_NOTE = (
+    "Reducer comparison on saved initial witnesses, one per observed bug. "
+    "The source selection determines the scope. This replay does not estimate "
+    "the effect of reduction on repair."
 )
 PLAIN = re.compile(
     r"(?:^|\n)Source:\n(.*?)\n\nTarget:\n(.*?)\n\n"
@@ -382,7 +387,10 @@ def main(argv=None) -> int:
             issues.extend({"stage": "selection", "bug_id": bug, "error": "requested bug has no usable witness"}
                           for bug in sorted(requested - available))
             witnesses = [w for w in witnesses if w.bug_id in requested]
-        print(CORPUS_NOTE)
+        corpus_note = (CORPUS_NOTE if source_info.get("revision") == FROZEN_V2
+                       and source_info.get("results") == "results-qwen3-v2"
+                       else EXPLICIT_CORPUS_NOTE)
+        print(corpus_note)
         print(f"{len(records)} saved records; {len(witnesses)} agreed initial witnesses; {len(issues)} extraction issues")
         for witness in witnesses:
             size = measure_pair(witness.src, witness.tgt)
@@ -400,7 +408,7 @@ def main(argv=None) -> int:
         if report_path.exists():
             raise ValueError(f"{report_path} already exists; use a new --out to preserve the earlier run")
         report = {
-            "schema": "saved-witness-comparison-v1", "corpus_note": CORPUS_NOTE,
+            "schema": "saved-witness-comparison-v1", "corpus_note": corpus_note,
             "started_utc": datetime.now(timezone.utc).isoformat(),
             "host": {"platform": platform.platform(), "machine": platform.machine(),
                      "python": platform.python_version(), "logical_cpus": os.cpu_count()},
