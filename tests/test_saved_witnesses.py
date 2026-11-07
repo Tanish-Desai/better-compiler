@@ -178,9 +178,10 @@ def test_hybrid_spends_only_the_remaining_budget_and_keeps_the_smaller_seed(monk
         oracle.record_external(calls=3)
         return make_reduction("iraware", src, tgt, SMALL_SRC, SMALL_TGT)
 
-    def sequential(src, tgt, oracle):
+    def sequential(src, tgt, oracle, *, balanced):
         assert (src, tgt) == (SMALL_SRC, SMALL_TGT)
         assert (oracle.calls, oracle.max_calls) == (3, 32)
+        assert not balanced
         oracle.record_external(calls=29)
         return make_reduction("llvmreduce", src, tgt, SRC, TGT)
 

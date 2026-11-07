@@ -44,6 +44,8 @@ from ce.structured import render_plain  # noqa: E402
 FROZEN_V2 = "73f2ba151742c44cf88878b50c027ef7f06293c6"
 METHODS = ("raw", "generic", "llvmreduce", "iraware", "iraware-no-promotion")
 HYBRID = "iraware-then-llvmreduce"
+BALANCED = "llvmreduce-balanced"
+BALANCED_HYBRID = "iraware-then-llvmreduce-balanced"
 CORPUS_NOTE = (
     "Development/diagnostic corpus selected by the incomplete v2 sweep: real "
     "initial compiler witnesses, one per observed bug. These tiny witnesses "
@@ -246,7 +248,8 @@ def run_details(run) -> dict:
 
 
 def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: str, timeout: float,
-                    budget: int, prefix_calls: int, verifier: Callable) -> Feedback:
+                    budget: int, prefix_calls: int, verifier: Callable,
+                    balanced: bool = False) -> Feedback:
     """Start LLVM reduction from the best pair found under a small paired cap."""
     original = witness.src, witness.tgt
     oracle = Oracle(target=Violation.from_result(violation), strictness="error_class",
@@ -267,7 +270,7 @@ def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: st
     passes = paired.passes_applied if use_seed else []
 
     oracle.max_calls = budget
-    sequential = reduce_llvmreduce(*pair, oracle)
+    sequential = reduce_llvmreduce(*pair, oracle, balanced=balanced)
     candidate = sequential.src, sequential.tgt
     if not sequential.error and size_key(candidate) < size_key(pair):
         pair = candidate
@@ -275,18 +278,31 @@ def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: st
         passes = passes + sequential.passes_applied
 
     metrics = {"hybrid_prefix_cap": prefix_calls, "hybrid_seed_used": use_seed,
-               "hybrid_selected_stage": selected, "feedback_refresh_calls": 0,
+               "hybrid_selected_stage": selected,
                "hybrid_stages": [
                    {"method": "iraware", "candidate_calls": paired_calls,
                     "size_after": paired.size_after, "error": paired.error},
                    {"method": "llvmreduce", "candidate_calls": oracle.calls - paired_calls,
-                    "size_after": sequential.size_after, "error": sequential.error},
+                    "size_after": sequential.size_after, "error": sequential.error,
+                    **{key: value for key, value in sequential.oracle_stats.items()
+                       if key.startswith("llvmreduce_")}},
                ]}
-    reduction_seconds = time.perf_counter() - started
+    return finish_experimental_feedback(
+        BALANCED_HYBRID if balanced else HYBRID, witness, violation, pair, passes,
+        oracle, metrics, time.perf_counter() - started, verifier,
+    )
+
+
+def finish_experimental_feedback(method: str, witness: Witness, violation: FunctionResult,
+                                 pair: tuple[str, str], passes: list[str], oracle: Oracle,
+                                 metrics: dict, reduction_seconds: float,
+                                 verifier: Callable) -> Feedback:
+    original = witness.src, witness.tgt
+    metrics["feedback_refresh_calls"] = 0
     shown, error = violation, None
     if pair != original:
         refresh_start = time.perf_counter()
-        refresh = verifier(*pair, witness.extra_args, alive_tv=alive_tv, timeout=timeout)
+        refresh = verifier(*pair, witness.extra_args, alive_tv=oracle.alive_tv, timeout=oracle.timeout)
         metrics.update(feedback_refresh_calls=1,
                        feedback_refresh_seconds=time.perf_counter() - refresh_start,
                        feedback_refresh_tool_failures=int(bool(refresh.tool_error)))
@@ -294,28 +310,41 @@ def hybrid_feedback(witness: Witness, violation: FunctionResult, *, alive_tv: st
                  and refresh.num_incorrect else None)
         if match is None:
             pair, passes = original, []
-            error = "hybrid pair failed re-verification; reverted"
+            error = f"{method} pair failed re-verification; reverted"
         else:
             shown = match
     metrics["reduction_fallback"] = bool(error)
-    reduction = make_reduction(HYBRID, *original, *pair, passes_applied=passes,
+    reduction = make_reduction(method, *original, *pair, passes_applied=passes,
                                oracle_stats=oracle.stats(), seconds=reduction_seconds, error=error)
-    return Feedback(render_plain(shown, *pair), HYBRID, violation=shown,
+    return Feedback(render_plain(shown, *pair), method, violation=shown,
                     reduction=reduction, metrics=metrics, error=error)
+
+
+def comparison_methods(budget: int, prefix_calls: int | None, balanced: bool) -> tuple[str, ...]:
+    methods = METHODS
+    if balanced and budget < 3:
+        raise ValueError("balanced sequential reduction needs at least three calls")
+    if prefix_calls is not None:
+        minimum_remaining = 3 if balanced else 2
+        if not 1 <= prefix_calls <= budget - minimum_remaining:
+            raise ValueError(f"hybrid prefix must leave at least {minimum_remaining} calls for sequential reduction")
+        methods += (HYBRID,)
+    if balanced:
+        methods += (BALANCED,)
+        if prefix_calls is not None:
+            methods += (BALANCED_HYBRID,)
+    return methods
 
 
 def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
                     timeout: float = 120, verifier: Callable | None = None,
                     feedback_builder: Callable | None = None,
-                    hybrid_prefix_calls: int | None = None) -> dict:
+                    hybrid_prefix_calls: int | None = None,
+                    balanced_llvmreduce: bool = False) -> dict:
     """One common establishment call, equal search caps, separate fresh postchecks."""
     verifier = verifier or run_alive_tv
     feedback_builder = feedback_builder or build_feedback
-    methods = METHODS
-    if hybrid_prefix_calls is not None:
-        if not 1 <= hybrid_prefix_calls <= budget - 2:
-            raise ValueError("hybrid prefix must leave at least two calls for sequential reduction")
-        methods += (HYBRID,)
+    methods = comparison_methods(budget, hybrid_prefix_calls, balanced_llvmreduce)
     case = {**asdict(witness), "witness_sha256": witness.identity,
             "original_size": measure_pair(witness.src, witness.tgt), "methods": []}
     started = time.perf_counter()
@@ -340,10 +369,23 @@ def compare_witness(witness: Witness, *, alive_tv: str, budget: int = 400,
                "strictness": "error_class", "allow_promotion": method != "iraware-no-promotion"}
         start = time.perf_counter()
         try:
-            if method == HYBRID:
+            if method in (HYBRID, BALANCED_HYBRID):
                 feedback = hybrid_feedback(witness, violation, alive_tv=alive_tv,
                                            timeout=timeout, budget=budget,
-                                           prefix_calls=hybrid_prefix_calls, verifier=verifier)
+                                           prefix_calls=hybrid_prefix_calls, verifier=verifier,
+                                           balanced=method == BALANCED_HYBRID)
+            elif method == BALANCED:
+                oracle = Oracle(target=target, strictness="error_class", extra_args=witness.extra_args,
+                                alive_tv=alive_tv, timeout=timeout, max_calls=budget)
+                reduced = reduce_llvmreduce(witness.src, witness.tgt, oracle, balanced=True)
+                if reduced.error:
+                    raise RuntimeError(reduced.error)
+                metrics = {key: value for key, value in reduced.oracle_stats.items()
+                           if key.startswith("llvmreduce_")}
+                feedback = finish_experimental_feedback(
+                    method, witness, violation, (reduced.src, reduced.tgt), reduced.passes_applied,
+                    oracle, metrics, reduced.seconds, verifier,
+                )
             else:
                 strategy = "iraware" if method == "iraware-no-promotion" else method
                 feedback = feedback_builder(
@@ -445,6 +487,8 @@ def main(argv=None) -> int:
     parser.add_argument("--budget", type=int, default=400, help="equal candidate-call cap per reducer")
     parser.add_argument("--hybrid-prefix-calls", type=int,
                         help="add an IR-aware prefix followed by llvm-reduce under the same total cap")
+    parser.add_argument("--balanced-llvmreduce", action="store_true",
+                        help="add sequential controls that reserve half of the search for the target side")
     parser.add_argument("--timeout", type=float, default=120, help="per alive-tv call timeout in seconds")
     parser.add_argument("--alive-tv", default=os.environ.get("LAB_LLVM_ALIVE_TV"))
     parser.add_argument("--llvm-reduce", default=default_llvm_reduce())
@@ -453,10 +497,8 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     if args.budget <= 0 or args.timeout <= 0:
         parser.error("budget and timeout must be positive")
-    if args.hybrid_prefix_calls is not None and not 1 <= args.hybrid_prefix_calls <= args.budget - 2:
-        parser.error("--hybrid-prefix-calls must leave at least two calls for sequential reduction")
-    methods = METHODS if args.hybrid_prefix_calls is None else (*METHODS, HYBRID)
     try:
+        methods = comparison_methods(args.budget, args.hybrid_prefix_calls, args.balanced_llvmreduce)
         records, dataset, source_info = (load_directory(args.directory, args.dataset) if args.directory
                                         else load_snapshot(args.snapshot or FROZEN_V2, args.results))
         witnesses, issues = collect_witnesses(records, dataset)
@@ -507,13 +549,18 @@ def main(argv=None) -> int:
         }
         if args.hybrid_prefix_calls is not None:
             report["settings"]["hybrid_prefix_calls"] = args.hybrid_prefix_calls
+        if args.balanced_llvmreduce:
+            report["settings"]["balanced_llvmreduce"] = (
+                "source gets at most half the available search calls after reserving the final pair check; "
+                "target can use the rest")
         args.out.mkdir(parents=True, exist_ok=True)
         write_report(report_path, report)
         with llvm_reduce_override(llvm_reduce):
             for witness in witnesses:
                 print(f"Comparing {witness.bug_id} ...", flush=True)
                 case = compare_witness(witness, alive_tv=alive_tv, budget=args.budget,
-                                       timeout=args.timeout, hybrid_prefix_calls=args.hybrid_prefix_calls)
+                                       timeout=args.timeout, hybrid_prefix_calls=args.hybrid_prefix_calls,
+                                       balanced_llvmreduce=args.balanced_llvmreduce)
                 report["cases"].append(case)
                 write_report(report_path, report)
                 for row in case["methods"]:

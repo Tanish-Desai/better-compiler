@@ -106,6 +106,36 @@ def test_external_wrapper_merges_actual_child_tool_failures(monkeypatch):
     assert oracle.seconds == 0.75
 
 
+def test_balanced_wrapper_reserves_target_calls_after_a_prefix(monkeypatch):
+    import importlib
+    wrapper = importlib.import_module("ce.reduce_llvmreduce")
+    seen = []
+
+    def child(command, **kwargs):
+        env = kwargs["env"]
+        side = env["CE_LLVMREDUCE_SIDE"]
+        cap = int(env["CE_LLVMREDUCE_MAX_CALLS"])
+        seen.append((side, cap))
+        calls = 2 if side == "src" else cap
+        Path(env["CE_LLVMREDUCE_LOG"]).write_text('{"ok": true}\n' * calls)
+        (Path(kwargs["cwd"]) / "reduced.ll").write_text(f"reduced {side}")
+        return SimpleNamespace(returncode=0)
+
+    fn = FunctionResult(name="@f", src_ir="", tgt_ir="", verified=False,
+                        error_class="Value mismatch")
+    monkeypatch.setattr(wrapper.subprocess, "run", child)
+    monkeypatch.setattr("ce.oracle.run_alive_tv", lambda *a, **kw: AliveRun(functions=[fn], num_incorrect=1))
+    oracle = Oracle(Violation("@f", "Value mismatch"), max_calls=32)
+    oracle.record_external(calls=8)
+    result = wrapper.reduce_llvmreduce("source", "target", oracle, llvm_reduce="llvm-reduce", balanced=True)
+
+    assert seen == [("src", 11), ("tgt", 21)]
+    assert (result.src, result.tgt) == ("reduced src", "reduced tgt")
+    assert result.oracle_stats["llvmreduce_source_calls"] == 2
+    assert result.oracle_stats["llvmreduce_target_calls"] == 21
+    assert result.oracle_stats["oracle_calls"] == 32
+
+
 def test_dataset_identity_is_portable_cached_and_changes_with_selected_inputs(monkeypatch, tmp_path):
     first = tmp_path / "first"
     second = tmp_path / "second"

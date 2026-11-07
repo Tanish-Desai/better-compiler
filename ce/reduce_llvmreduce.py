@@ -101,7 +101,7 @@ def default_llvm_reduce() -> Optional[str]:
 
 def _reduce_one_side(
     text: str, other_text: str, side: str, oracle: Oracle,
-    llvm_reduce: str, timeout: float,
+    llvm_reduce: str, timeout: float, *, call_cap: Optional[int] = None,
 ) -> Tuple[str, Dict[str, object]]:
     """Run `llvm-reduce` on `text` (the `side` file), holding `other_text`
     fixed. Returns `(reduced_text, external_stats)`; the caller merges
@@ -133,12 +133,13 @@ def _reduce_one_side(
         env["CE_LLVMREDUCE_TARGET_KIND"] = oracle.target.kind
         env["CE_LLVMREDUCE_EXTRA_ARGS"] = " ".join(oracle.extra_args)
         env["CE_LLVMREDUCE_TIMEOUT"] = str(oracle.timeout)
+        # External child checks cannot populate the parent's positive cache.
+        # Reserve one actual call for the final pair check.
         if oracle.max_calls is not None:
-            env["CE_LLVMREDUCE_MAX_CALLS"] = str(
-                # External child checks cannot populate the parent's positive
-                # cache. Reserve one actual call for the final pair check.
-                max(oracle.max_calls - oracle.calls - 1, 0)
-            )
+            remaining = max(oracle.max_calls - oracle.calls - 1, 0)
+            call_cap = remaining if call_cap is None else min(call_cap, remaining)
+        if call_cap is not None:
+            env["CE_LLVMREDUCE_MAX_CALLS"] = str(call_cap)
 
         try:
             subprocess.run(
@@ -176,6 +177,7 @@ def reduce_llvmreduce(
     src: str, tgt: str, oracle: Oracle, *,
     llvm_reduce: Optional[str] = None,
     subprocess_timeout: float = DEFAULT_SUBPROCESS_TIMEOUT,
+    balanced: bool = False,
 ) -> Reduction:
     """The second baseline: real IR-valid reduction, zero counterexample
     awareness. See module docstring for the two-pass integration design."""
@@ -192,9 +194,17 @@ def reduce_llvmreduce(
             ),
         )
 
+    source_cap = None
+    if balanced:
+        if oracle.max_calls is None:
+            raise ValueError("balanced sequential reduction requires a finite oracle budget")
+        # Keep one final check and give the source at most half the search calls.
+        # The target can use every search call the source leaves unused.
+        source_cap = max(oracle.max_calls - oracle.calls - 1, 0) // 2
+
     with _Timer() as timer:
         reduced_src, stats_src = _reduce_one_side(
-            src, tgt, "src", oracle, binary, subprocess_timeout
+            src, tgt, "src", oracle, binary, subprocess_timeout, call_cap=source_cap
         )
         oracle.record_external(**stats_src)
 
@@ -215,9 +225,13 @@ def reduce_llvmreduce(
     if reduced_tgt != tgt:
         passes.append("llvm-reduce-tgt")
 
+    stats = oracle.stats()
+    if balanced:
+        stats.update(llvmreduce_source_cap=source_cap,
+                     llvmreduce_source_calls=stats_src["calls"], llvmreduce_target_calls=stats_tgt["calls"])
     return make_reduction(
         "llvmreduce", src, tgt, reduced_src, reduced_tgt,
         passes_applied=passes,
-        oracle_stats=oracle.stats(),
+        oracle_stats=stats,
         seconds=timer.elapsed,
     )

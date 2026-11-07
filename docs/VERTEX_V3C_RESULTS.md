@@ -63,16 +63,20 @@ Commit `4dc695d` contains a second CPU replay with the same witness hashes and v
 
 Eight calls is a development choice made after inspecting the prior replays. The existing 16 witnesses can identify where the hybrid helps or harms compression before we fix a protocol for a fresh cohort.
 
+The replay at commit `0db597e` matched the earlier 32-call witness and input hashes and used identical binaries. All 96 method/case outputs passed the fresh check. Compared with the sequential baseline in the same replay, the hybrid returned fewer instructions on five witnesses, tied on ten, and returned more on one (exploratory two-sided exact sign test, p = 0.219). Both methods left a median of seven instructions and shrank ten witnesses. The hybrid removed 60 instructions in total versus 41, with `116553` accounting for 15 of the 19 additional removals. On `118467`, the hybrid kept 13 instructions while the baseline reached five. The hybrid produced shorter IR text on 11 cases, tied on four, and produced longer text on one. Character count was secondary to instruction count in this comparison. Median elapsed times were 9.34 s for the hybrid and 10.84 s for the sequential baseline, with one timing run per case and method.
+
+The source-first sequential control can consume nearly all the search calls before it reaches the target. The optional `--balanced-llvmreduce` flag adds a balanced sequential control and, when a hybrid prefix is specified, a hybrid with that same allocation rule. Both reserve one call for the final pair check, let the source use at most half the remaining search calls, and give the target the remaining allowance. The budget split and actual per-side calls are recorded. Compare the two balanced arms before collecting fresh data, and retain the source-first comparison as a separate result.
+
 ```bash
 cd ~/24BCE5561/better-compiler
 git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
 source "$HOME/better-compiler-runtime/env.sh"
 set -o pipefail
 python3 -u scripts/compare_saved_witnesses.py \
-  --directory results-vertex-v3c --budget 32 --hybrid-prefix-calls 8 \
+  --directory results-vertex-v3c --budget 32 --hybrid-prefix-calls 8 --balanced-llvmreduce \
   --llvm-reduce /usr/lib/llvm-21/bin/llvm-reduce \
-  --out witness-comparison-v3c-hybrid-b32 \
-  2>&1 | tee run-provenance/witnesses-v3c-hybrid-b32.log
+  --out witness-comparison-v3c-balanced-b32 \
+  2>&1 | tee run-provenance/witnesses-v3c-balanced-b32.log
 ```
 
 ## CPU replay commands
