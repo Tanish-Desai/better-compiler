@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "id": "fresh-llvm-witness-frontier-v1",
+  "selection": "Start with the original single-function Alive2 miscompilation pool. Exclude its prior repair exclusions and all bugs screened in the original fresh archive. Sort the remaining pool by reproducer lines and numeric ID into equal-sized tiers. Within each tier sort by SHA-256 of protocol ID + colon + bug ID and round-robin components. Take the first six eligible per tier, skipping duplicate witness hashes within the new cohort and against the original fresh archive.",
+  "original_archive": "witness-comparison-fresh-b32/report.json",
+  "original_archive_sha256": "dad70de865c7b5a22ba60092f1f76b6c5c1008ee0235f4e36e9ba3b300448c8b",
+  "excluded_bug_ids": [
+    "77320",
+    "78621",
+    "80113",
+    "80289",
+    "82052",
+    "82884",
+    "85333",
+    "85536",
+    "89390",
+    "89672",
+    "91177",
+    "91178",
+    "91369",
+    "91957",
+    "95547",
+    "98139",
+    "98838",
+    "102597",
+    "104422",
+    "105785",
+    "105988",
+    "108698",
+    "112350",
+    "112356",
+    "112577",
+    "113423",
+    "113869",
+    "114738",
+    "114879",
+    "114901",
+    "114905",
+    "115149",
+    "115465",
+    "115574",
+    "115575",
+    "116249",
+    "116553",
+    "118467",
+    "120361",
+    "121110",
+    "121432",
+    "123550",
+    "124267",
+    "126012",
+    "126974",
+    "131465",
+    "135182",
+    "136430",
+    "136646",
+    "136650",
+    "140444",
+    "142286",
+    "142957",
+    "143123",
+    "152824",
+    "154116",
+    "156849",
+    "157238",
+    "161492",
+    "161524",
+    "161525",
+    "161636",
+    "165878",
+    "167627",
+    "169921",
+    "173784",
+    "173787",
+    "173793",
+    "173796",
+    "174041",
+    "179613",
+    "180456",
+    "180870"
+  ],
+  "eligible_total": 18,
+  "tiers": [
+    {
+      "name": "short",
+      "target": 6,
+      "candidates": [
+        {
+          "bug_id": "157714",
+          "base_commit": "924bf242c8e0ef61544471488eb9e729dda72a50",
+          "dataset_sha256": "f89ecd94e61df65c67f429e421717ff0ebac3501d9903cde6d75a470f8afea24",
+          "component": "InstCombine",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "120823",
+          "base_commit": "9d0a5d4620a2aa5dc01b150e5ebe7613238cae1c",
+          "dataset_sha256": "184f1ad5bd2e2766473be3f661e78241a85e7a8cc67dc5b3488fa7909c60117a",
+          "component": "SLPVectorizer",
+          "reproducer_lines": 17
+        },
+        {
+          "bug_id": "97053",
+          "base_commit": "a3571376ad9555de07e4d8f74f92de1eaa4c486e",
+          "dataset_sha256": "c1397e43f1147ef51ff028b7e306ca3e3c405780ea5269573928bf48c7958e2c",
+          "component": "InstCombine",
+          "reproducer_lines": 10
+        },
+        {
+          "bug_id": "92887",
+          "base_commit": "f78b1a40864470f7eb30dfda44a6ea8e845346a5",
+          "dataset_sha256": "a77cd74cc426f95f2845f24c522e5b42641a6b8fd20d9060165edd306e18231a",
+          "component": "InstCombine",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "89516",
+          "base_commit": "18bb175428f520aaa4a5e388bd3b680a1a7c60c0",
+          "dataset_sha256": "062059939af0104029ffbf635bebeb315f52757eeec292ef283725689cdf2c5f",
+          "component": "InstCombine",
+          "reproducer_lines": 14
+        },
+        {
+          "bug_id": "97475",
+          "base_commit": "b77e734e4e6c8f5e016ba3ac49526862e6039482",
+          "dataset_sha256": "8f233cfb882d22faf85facad12f2d653d0baff006c23b5474cc9aebe99c5b334",
+          "component": "InstCombine",
+          "reproducer_lines": 12
+        },
+        {
+          "bug_id": "98435",
+          "base_commit": "0e124537aabea0d18e030226a3ca4c6f494c1322",
+          "dataset_sha256": "2b49352a9a9046e4d86c5dab0a286e26d6225dce17ab5258deac69df026b3ecc",
+          "component": "InstCombine",
+          "reproducer_lines": 4
+        },
+        {
+          "bug_id": "178245",
+          "base_commit": "ff79d7d1bf0415e52ad542b059c55f0e92b3bad6",
+          "dataset_sha256": "505ef7a01ad7b5c614d2186e8c8071b8cdc4e482e0d2a647eb37c755243c6870",
+          "component": "InstCombine",
+          "reproducer_lines": 16
+        },
+        {
+          "bug_id": "124387",
+          "base_commit": "77c325b646301e394bcd89c2980b4c2da8af49cd",
+          "dataset_sha256": "941627f416c9b458ae9ebe607501e840ac023dcd1d3cb0f8c74f8035e268ce1c",
+          "component": "InstCombine",
+          "reproducer_lines": 12
+        }
+      ]
+    },
+    {
+      "name": "middle",
+      "target": 6,
+      "candidates": [
+        {
+          "bug_id": "112666",
+          "base_commit": "d6d73ec89e493c69cf24dc3a710d861e2ce08acb",
+          "dataset_sha256": "0711a849044f2b3a5c99a76eaf09c07a6169b8606a8d966dfed6813f44c03f14",
+          "component": "InstCombine",
+          "reproducer_lines": 35
+        },
+        {
+          "bug_id": "121428",
+          "base_commit": "b5f21671ef04984bc00770263234dfb94833a274",
+          "dataset_sha256": "a58c58e90a108c693d02d14bd87965c4422c38634bcdbf26107b7a65568073ec",
+          "component": "InstCombine",
+          "reproducer_lines": 34
+        },
+        {
+          "bug_id": "121584",
+          "base_commit": "4a7c0b8afe6bf616cd6bb4f13b5b706a43c10e74",
+          "dataset_sha256": "2a15f7c483a2e3c3b7235609e9bb35fef6d47b5c4eae5f314301b6a7d5779eaf",
+          "component": "InstCombine",
+          "reproducer_lines": 24
+        },
+        {
+          "bug_id": "142518",
+          "base_commit": "9ba332f9963561bb5ac6933266afe38eb8fde8cd",
+          "dataset_sha256": "7254c4d921ca1334e280859546912b6e011fdb42fdadea6bd119088bafa6a44f",
+          "component": "InstCombine",
+          "reproducer_lines": 25
+        },
+        {
+          "bug_id": "121890",
+          "base_commit": "7612dcc6e8d8e7f19b364084effbb01946294720",
+          "dataset_sha256": "4736da8e3aefd191b37a037ecc8d09697e4bb9397753e3404fe8cc85a580a862",
+          "component": "InstCombine",
+          "reproducer_lines": 35
+        },
+        {
+          "bug_id": "84025",
+          "base_commit": "f51ade25b9205efee09a4915031848cebe772805",
+          "dataset_sha256": "40a9f9a34057f032e4e14c5f0777777757ec0c23d8e7283496c7f4281c98d74d",
+          "component": "InstCombine",
+          "reproducer_lines": 30
+        },
+        {
+          "bug_id": "161493",
+          "base_commit": "2e5a5fdd329073e3d4b174743dfc7fca655e9491",
+          "dataset_sha256": "75e2c5f0ab34d930032395acf46fb626d377f72bbb1f3d0f706d099db90f31c0",
+          "component": "InstCombine",
+          "reproducer_lines": 25
+        },
+        {
+          "bug_id": "89338",
+          "base_commit": "ab1d988e1483895a71dcd257bdcaf6fdb0a83d62",
+          "dataset_sha256": "c90775a3c0f120d4668b280d72bf858cc742e8f1b2e8a2ecec09687a8d2f707b",
+          "component": "InstCombine",
+          "reproducer_lines": 21
+        },
+        {
+          "bug_id": "113123",
+          "base_commit": "67ff5ba9af9754261abe11d762af11532a816126",
+          "dataset_sha256": "a499590b993dfb60a78ae55eb00adeaf44dd4bc5c9f5f9c7746326e531594183",
+          "component": "InstCombine",
+          "reproducer_lines": 24
+        }
+      ]
+    },
+    {
+      "name": "long",
+      "target": 6,
+      "candidates": [
+        {
+          "bug_id": "94897",
+          "base_commit": "add89088fb8de84fdbeb97c0386a831e51d090a1",
+          "dataset_sha256": "a5e634e03ebe87eed05a0553963a9d9248393c174048ee4ccfdf339c45c0a2de",
+          "component": "InstCombine",
+          "reproducer_lines": 49
+        },
+        {
+          "bug_id": "112467",
+          "base_commit": "9df8d8d05c2650b51bd4233e1759206d163f3133",
+          "dataset_sha256": "3c069330fed93e4dcc6bbcf9de5c50a9e82bb72cd123fd989c8a1539efd05039",
+          "component": "InstCombine",
+          "reproducer_lines": 36
+        },
+        {
+          "bug_id": "121581",
+          "base_commit": "95c5c5d4badf7c2128d098be325356e15c2197be",
+          "dataset_sha256": "ad8239e3fb04736906d55399e3a6265547d571a0c0d510715585ca0735839f49",
+          "component": "InstCombine",
+          "reproducer_lines": 39
+        },
+        {
+          "bug_id": "121459",
+          "base_commit": "68d265666e708bad1c63b419b6275aaba1a7dcd2",
+          "dataset_sha256": "8f582ce46c46f90b2ed3154c9b4976bfc83b4b04374f6aa6b0297ba8c86cc614",
+          "component": "InstCombine",
+          "reproducer_lines": 48
+        },
+        {
+          "bug_id": "140994",
+          "base_commit": "7c080e267722ba14439e2f35789c5c293672ab84",
+          "dataset_sha256": "1b81fedc3fffbb8a9c1f4cd363ea3e0231fff40f4d703d1dc7ce357b2f926ef6",
+          "component": "InstCombine",
+          "reproducer_lines": 278
+        },
+        {
+          "bug_id": "112068",
+          "base_commit": "b24acc06e1d465b3e3e4e28515dd437f6a7454f2",
+          "dataset_sha256": "9e2d8e51c50a606278d5d405f28d78eb0ad2d70395f1072d3d4199feb1c1bc0b",
+          "component": "InstCombine",
+          "reproducer_lines": 80
+        },
+        {
+          "bug_id": "93769",
+          "base_commit": "d517f15e09e49e172387cb6deb76e4ee2d45d0e4",
+          "dataset_sha256": "4d31675ffd1461258d6a9feb09f70f6b49e3b056250798d1e4f839ed3d3e0114",
+          "component": "InstCombine",
+          "reproducer_lines": 95
+        },
+        {
+          "bug_id": "91127",
+          "base_commit": "30367cb5982dfdab2655401f020711311e7d78b9",
+          "dataset_sha256": "fd8820bec4d0a5bb07c2f5ffd2ce6e77aa60c085bc60549df86475a0fbd506e2",
+          "component": "InstCombine",
+          "reproducer_lines": 42
+        },
+        {
+          "bug_id": "161634",
+          "base_commit": "4cc0bae159e56dc02145f9154005dc1eb9ed1fd7",
+          "dataset_sha256": "112e24ecfd7dc87a08368fbffbdfcb7a9813e47c5f803b670e4e8773286afe3a",
+          "component": "InstCombine",
+          "reproducer_lines": 65
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "budgets": [
+      4,
+      8,
+      16,
+      32
+    ],
+    "primary_budget": 8,
+    "minimum_mean_gain": 0.05,
+    "alpha": 0.05,
+    "timeout": 120,
+    "llvm_delta_passes": [
+      "instructions",
+      "basic-blocks",
+      "simplify-cfg",
+      "arguments",
+      "operands-to-args",
+      "instruction-flags"
+    ],
+    "oracle_strictness": "error_class",
+    "operand_promotion": true,
+    "endpoint": "paired minus focused LLVM fraction of original instructions removed after independent postcheck",
+    "test": "two-sided exact paired sign test at the primary budget; other budgets descriptive"
+  }
+}

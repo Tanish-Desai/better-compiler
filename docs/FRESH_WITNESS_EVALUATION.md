@@ -160,21 +160,48 @@ and record the CPU allocation.
 
 ### Confirm performance on unused witnesses
 
-Freeze a disjoint cohort and screen for the original violation before comparing
-methods. Include a prespecified stratum of longer witnesses. Compare the focused
-and default `llvm-reduce` schedules, a paired reducer and at most one hybrid
-selected on development cases. Keep the verifier, acceptance rule, and call
-ceilings identical across arms. Start with ceilings of 4, 8, 16, 32, 64, and 128
-calls. Report verified compression at each ceiling and calls to a prespecified
-size target, with the count of cases that never reach the target. Report paired
-effects and confidence intervals by resampling bugs. For a mechanism study,
-toggle trace seeds and executed-path folding independently with promotion held
-fixed. Check whether the reduced source still reproduces a violation after the
-original `opt` pipeline runs. Where possible, repeat with the reference fix.
+The [frozen protocol](../data/fresh_witness_frontier_protocol.json) targets 18
+unused bugs, six per reproducer-size tier, from 27 candidates. The runner
+builds unpatched `opt` and uses the first six eligible witnesses per tier.
+It compares the paired reducer with trace seeds and path folding disabled
+against focused source-first `llvm-reduce` at 4, 8, 16, and 32 reducer calls.
+Each result receives an independent Alive2 postcheck, one call outside the
+ceiling. Failed outputs receive zero removal credit. Eight calls is the
+primary comparison, with a two-sided paired sign test and a prespecified
+five-percentage-point minimum mean gain. The other ceilings are descriptive.
 
-The guidance runner fixes the budget at 32 and reads an archived cohort. The
-original fresh-witness runner fixes its cohort in code. A prospective study
-needs a new protocol and a runner that accepts it.
+Run from the repository root in Bash, optionally inside `tmux new -s bc-frontier`.
+The plan needs no LLVM binaries. The full run needs the native runtime and
+can spend substantial CPU time on historical builds. It uses no GPU or model credits.
+
+```bash
+set -e -o pipefail
+git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
+source "$HOME/better-compiler-runtime/env.sh"
+mkdir -p run-provenance
+
+python3 scripts/run_witness_frontier.py --plan
+flock -n "$HOME/better-compiler-runtime/repair.lock" \
+  python3 -u scripts/run_witness_frontier.py \
+    --build-jobs 8 \
+    --llvm-reduce /usr/lib/llvm-21/bin/llvm-reduce \
+    --out witness-comparison-frontier/report.json \
+  2>&1 | tee -a run-provenance/witnesses-frontier.log
+```
+
+Detach with Ctrl-b then d. Use the same commit, binaries, build concurrency,
+and output path if resuming. The report checkpoints each eligible capture and
+completed comparison. A build failure stops the runner for diagnosis. A tier
+that exhausts its fixed reserves stays incomplete. To inspect saved progress:
+
+```bash
+python3 scripts/run_witness_frontier.py --status --out witness-comparison-frontier/report.json
+```
+
+Retain the JSON report and log. A later mechanism study can toggle trace seeds
+and executed-path folding independently with promotion held fixed. Separately
+test whether reduced sources still produce a violation after the original
+`opt` pipeline runs, and repeat with the reference fix where available.
 
 ### Review the archived repair patches
 

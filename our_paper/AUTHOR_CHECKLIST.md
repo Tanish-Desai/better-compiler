@@ -54,10 +54,11 @@ The three prespecified repair comparisons were inconclusive. [Evidence map](EVID
   The archived per-case report records all 24 cases and matching verifier
   hashes.
   [H100 replay outcome](../docs/FRESH_WITNESS_EVALUATION.md#h100-replay-outcome)
-- [ ] Freeze a disjoint cohort and the focused sequential control before
-  testing a new variant. Collect paired compression and call counts across
-  fixed caps. Use repeated single-worker timing if elapsed time becomes a
-  headline metric.
+- [x] Freeze a disjoint cohort, the focused sequential control, and the
+  primary call ceiling. [Protocol](../data/fresh_witness_frontier_protocol.json)
+- [ ] Collect paired compression and call counts across the fixed ceilings.
+  Use repeated single-worker timing if elapsed time becomes a headline metric.
+  [Container commands](../docs/FRESH_WITNESS_EVALUATION.md#confirm-performance-on-unused-witnesses)
 - [ ] Check whether the reduced source still triggers a violation when passed
   through the original `opt` pipeline. Where a reference fix is available,
   also run the reduced source with the fixed compiler. Report that endpoint
