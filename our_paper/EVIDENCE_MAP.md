@@ -1,4 +1,16 @@
-# Evidence map for the interim manuscript
+# Evidence map for the manuscript
+
+## Completed evaluations
+
+| Manuscript claim | Evidence | Scope |
+|---|---|---|
+| 192 complete v3c repair trials over 16 bugs. Pass@3 is 7, 9, 6, and 8 for raw plain, raw structured, sequential reduction, and IR-aware reduction. | `vertex-v3c-records.tar.gz` at `fbc772d`, `run-provenance/repair-v3c-audit.json`, `docs/VERTEX_V3C_RESULTS.md` | Localized editing with Gemini. A passing trial passes the listed checks. |
+| No significant v3c repair contrast. | `examples/analyze_significance.py --final` with `run-provenance/repair_v3c_vertex_resolved.json` | Three prespecified contrasts, one-sided exact McNemar tests, BH correction. |
+| 24 fresh cases and 192 verified outputs. Primary hybrid gain is 0.7 points, with 8 wins, 12 ties and 4 losses. | Frozen protocol at `fc8c671`, `witness-comparison-fresh-b32/report.json` at `520e08d` | 32-call reducer ceiling. The primary comparison fell short of the 5-point and significance criteria. |
+| Standalone IR-aware versus sequential medians are 4.5 versus 34 verifier calls. Mean compression is 8.6% versus 8.9%. | Same fresh report, using per-case `total_physical_calls` and combined instruction counts. | Descriptive. Calls include refresh and independent recheck and exclude the shared establishment call. |
+| Balanced hybrid gains 6.1 points, with 8 wins, 15 ties and 1 loss. | Same fresh report, `analysis.balanced_secondary`. | Secondary comparison against the balanced allocation baseline. |
+
+## Historical v2 and proposed amendments
 
 Updated 2026-10-22. Paths are relative to this repository. The evaluated method
 is `repair-v2`, with code anchored at `38b381b`; numerical results are frozen at

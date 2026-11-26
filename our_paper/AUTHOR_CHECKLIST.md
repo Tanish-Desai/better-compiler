@@ -1,4 +1,14 @@
-# Author checklist for the interim v2 manuscript
+# Author checklist
+
+The current manuscript reports the completed v3c repair panel and fresh reducer
+evaluation. The [evidence map](EVIDENCE_MAP.md) links both to their protocols and
+reports. The main result is lower verifier cost for standalone IR-aware
+reduction. The hybrid missed the prespecified improvement criterion, and the
+registered repair contrasts were inconclusive. Before submission, check the
+target venue's length rules and retain the distinction between benchmark passes
+and independently reviewed repairs.
+
+## Historical v2 checklist
 
 Updated 2026-10-22. The paper source is `our_paper/main.tex`. Results refer to
 **data snapshot `73f2ba151742c44cf88878b50c027ef7f06293c6`**, not the changing

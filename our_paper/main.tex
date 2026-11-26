@@ -39,7 +39,7 @@
 \maketitle
 
 \begin{abstract}
-Alive2 can report a concrete counterexample when an LLVM optimization fails refinement. Its output contains the reproducer, intermediate values, and verifier diagnostics, which a repair model must interpret while editing the compiler's C++ implementation. We study whether reducing this witness and presenting it in a fixed structure help repair. Our feedback layer crosses four reduction choices with two presentation choices, alongside a no-counterexample baseline. The IR-aware reducer edits source and target together, closes candidates over dependencies, uses seeds from the verifier report, and checks accepted changes with Alive2. The planned evaluation uses 24 stratified single-function miscompilations, three trials per bug and condition, and at most four repair turns with Qwen3-Coder-30B-A3B-Instruct. This draft reports an interim snapshot of 205 runs. Seven bugs have all three trials under all nine conditions; across them, raw structured feedback repairs two bugs, IR-aware plain feedback repairs one, and IR-aware structured feedback repairs none. These data do not establish an improvement from IR-aware reduction. The audit also identifies incomplete replacement replies, compilation failures, and unreduced witnesses that limit the comparison. We report these observations separately from a revised harness planned for further evaluation.
+Alive2 reports refinement violations in LLVM transformations as pairs of intermediate representation (IR) fragments and a verifier trace. We study how to reduce and present these witnesses for localized language-model repair of the LLVM pass. Our IR-aware reducer edits both sides of the transformation, uses the verifier trace to guide candidate selection, and checks each accepted edit with Alive2. We evaluate witness compression separately from repair. On 24 previously unused LLVM bugs, the standalone IR-aware reducer removed 8.6\% of instructions on average with a median of 4.5 verifier calls, compared with 8.9\% and 34 calls for sequential \texttt{llvm-reduce} under the same 32-call reducer ceiling. A hybrid that uses paired reduction before sequential reduction gained 0.7 percentage points in mean compression (paired $p=0.388$), below the prespecified five-point target. In a separate 192-run Gemini repair evaluation, raw structured feedback yielded plausible repairs for 9 of 16 bugs within three trials, versus 8 with IR-aware structured feedback. No registered repair contrast reached significance. The results describe where paired reduction saves verifier work and where those savings fail to translate into stronger compression or repair.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -52,17 +52,17 @@ compiler testing, translation validation, Alive2, counterexample reduction, prog
 
 When an LLVM middle-end pass miscompiles a function, Alive2 can often demonstrate the error. Given the IR before and after the pass, it searches for an input on which the target does not refine the source, and it reports that input together with the values computed by both sides~\cite{lopes2021alive2}. The repair loop of \emph{llvm-apr-benchmark} returns this report to the model after a failed patch~\cite{zheng2025aprbench}. The report is verbose relative to the information it conveys. It repeats the reproducer pair (the reproducer alone is 6 to 164 lines in the sample used here) and lists every value computed along the failing execution, most of which are unrelated to the violated refinement.
 
-Two lines of work suggest that the form of failure feedback matters. For the repair of ordinary programs, shortening a large failure-inducing test input before it enters the prompt has been reported to help~\cite{yang2026reducefix}, as has selecting the smallest failing counterexample from a pool~\cite{he2026pgs}. For compilers, recent work studies benchmarks and agent harnesses and reports low resolution rates on LLVM bugs~\cite{zheng2026harness,tian2026llvmbench}. These settings differ from ours: the feedback here is a \emph{verifier witness for an IR transformation}, while the artifact to repair is the \emph{C++ implementation of the pass}. We ask whether a witness reduced with IR structure and presented in labelled sections helps more than raw feedback. The interim evidence in this draft does not yet establish that benefit.
+Two lines of work suggest that the form of failure feedback matters. For the repair of ordinary programs, shortening a large failure-inducing test input before it enters the prompt has been reported to help~\cite{yang2026reducefix}, as has selecting the smallest failing counterexample from a pool~\cite{he2026pgs}. For compilers, recent work studies benchmarks and agent harnesses and reports low resolution rates on LLVM bugs~\cite{zheng2026harness,tian2026llvmbench}. These settings differ from ours: the feedback here is a \emph{verifier witness for an IR transformation}, while the artifact to repair is the \emph{C++ implementation of the pass}. We ask whether a witness reduced with IR structure and presented in labelled sections helps more than raw feedback. We measure the effect on repair separately from the cost and compression of the reducer itself.
 
 Within one harness version, the study varies the text supplied to the model from a failed Alive2 check. This includes the initial unpatched failure and later validation failures. Reduction and presentation are separate factors. The benchmark, Alive2, and the underlying repair-loop design are existing work. We contribute the following, described in Sections~\ref{sec:method} and~\ref{sec:impl}:
 \begin{itemize}
 \item a reducer for Alive2 counterexamples that edits source and target in tandem, builds dependency-closed candidates, seeds its search from the verifier's report, and accepts an edit only if an oracle confirms the violation;
 \item two baseline reducers that differ from it in what they know about the witness, namely line-level delta debugging and a wrapper around \texttt{llvm-reduce}, so that prompt length and IR validity can be separated from counterexample awareness;
 \item a deterministic structured renderer that derives its sections from the IR and the verifier output without a second model; and
-\item a nine-condition protocol with a prespecified paired analysis whose resolution limits are stated in advance.
+\item a paired evaluation of verifier cost and compression on previously unused bugs, alongside a matched four-condition model repair study.
 \end{itemize}
 
-The research questions (Section~\ref{sec:problem}) concern repair outcomes, repair turns, and reducer cost. We give preliminary outcomes for the completed portion of the sweep and an audit of the harness. The incomplete sweep and subsequent harness revision are kept separate; neither is presented as a completed positive evaluation.
+The evaluations answer two questions. First, does a verifier-guided paired first pass increase compression under the same Alive2 call ceiling as sequential reduction? Second, does the feedback produced by IR-aware reduction improve the number of bugs with a plausible model repair? We report a Qwen development snapshot and two completed evaluations. The completed repair evaluation uses Gemini, and the fresh reducer evaluation runs on CPU without a model.
 
 %=====================================================================
 \section{Background and Related Work}
@@ -90,7 +90,7 @@ What is \emph{repaired} differs again: in this study it is the LLVM C++ that pro
 
 Conversational APR alternates patch generation with validation, incorporating earlier patches and validation feedback into subsequent turns rather than repeatedly sampling from the initial prompt~\cite{xia2023conversational}. Its feedback consists of test inputs, expected outputs, and error information, and it is evaluated on small programs from the Java and Python versions of QuixBugs. RepairAgent instead lets the model select tools and gather information, rather than following a fixed feedback loop~\cite{bouzenia2025repairagent}. A survey of 66 LLM-based repair systems classifies them by where the control logic resides: in model parameters, in prompts and context, in designer-specified workflows, or in model-directed control~\cite{yang2026survey}. The loop studied here is a fixed, designer-specified workflow. RepairLLaMA reports that the input and output code representations used for fine-tuning affect repair quality~\cite{silva2025repairllama}; because we do not fine-tune, this serves only as an analogy. In these systems the feedback consists of tests or properties over source programs. None of the work cited here uses a translation-validation counterexample as feedback or reduces one.
 
-Our model also appears in recent repair studies. PAIR-Bench evaluates Qwen3-Coder-30B-A3B-Instruct on Python submissions using controlled hints about failing behavior~\cite{le2026pairbench}. Li et al.\ use the same model as the starting policy for reinforcement learning on compilation-repair tasks~\cite{li2026signal}. These studies support studying this model's response to feedback, but they do not supply an expected repair rate for LLVM miscompilations. Our experiment leaves the model weights unchanged and processes the verifier witness rather than training a repair policy or generating hints with another model.
+The Qwen model used in our development runs also appears in recent repair studies. PAIR-Bench evaluates Qwen3-Coder-30B-A3B-Instruct on Python submissions using controlled hints about failing behavior~\cite{le2026pairbench}. Li et al.\ use the same model as the starting policy for reinforcement learning on compilation-repair tasks~\cite{li2026signal}. These studies support studying this model's response to feedback, but they do not supply an expected repair rate for LLVM miscompilations. Our experiment leaves the model weights unchanged and processes the verifier witness rather than training a repair policy or generating hints with another model.
 
 \subsection{Compiler repair benchmarks and harnesses}
 
@@ -109,7 +109,7 @@ Paired binary outcomes on a shared bug set are compared with McNemar's test in t
 
 \textbf{Setting.} A bug $b$ consists of a base commit of LLVM, one or more reproducer tests run through \texttt{opt}, hints (components, file and line ranges, and the issue title), and a list of regression-test directories. A repair attempt edits a source window $W_b$ of one C++ file. The patched compiler is built and checked by the benchmark's \texttt{check\_full()} (Section~\ref{sec:success}). If the failing check is an Alive2 refinement failure, the benchmark produces a \emph{witness} $w=(\mathit{src},\mathit{tgt},\mathit{report})$. Here $\mathit{src}$ is the reproducer, $\mathit{tgt}$ is the IR printed by the patched \texttt{opt}, and $\mathit{report}$ is the output of \texttt{alive-tv}. A feedback function $\varphi_{r,s}(w)$ maps the witness to the text appended to the conversation, where $r\in\{\texttt{raw},\texttt{generic},\texttt{llvmreduce},\texttt{iraware}\}$ is the reduction and $s\in\{\texttt{plain},\texttt{structured}\}$ is the presentation. The \cn{baseline} condition replaces $\varphi$ with a fixed sentence stating that the transformation is incorrect. Failures that are not Alive2 refinement failures (build errors, lit failures, and an unmatched patch window) are passed through unchanged under every condition.
 
-\textbf{Research questions.}
+\textbf{Development questions.} The initial factorial v2 design posed the following questions. Sections~\ref{sec:v3} and~\ref{sec:fresh-design} define the comparisons for the completed evaluations.
 \begin{itemize}
 \item \textbf{RQ1 (reducers).} How much do the reducers shrink witnesses, at what verifier cost, and how often do they fail to reduce?
 \item \textbf{RQ2 (reduction).} Does the proportion of bugs repaired differ between \cn{iraware-plain} and each of \cn{generic-plain} and \cn{llvmreduce-plain}? The second comparison separates IR validity from counterexample awareness.
@@ -267,16 +267,16 @@ In v2, the reply must contain the full replacement window, including requested p
 
 \textbf{Version history.} Earlier full-window prompts and models produced many unchanged replies. V2 adds a no-op guard, the brace heuristic, and a stronger instruction to make a targeted edit; all nine conditions use these changes. The excluded bug 115575 was used for a nine-condition v2 pilot. It is a development check, not an additional evaluation bug. The original draft's 45 passing and 18 skipped tests describe an earlier source snapshot; those counts do not certify the current native experiment.
 
-\subsection{Revised v3 implementation awaiting evaluation}
+\subsection{Revised v3 implementation}
 
-A revised v3 implementation forwards per-test verifier arguments, uses strict response parsing and atomic search/replace edits, rejects length-truncated completions, and sets an 8{,}192-token output limit. It also avoids unconsumed terminal feedback, caches previously verified candidate pairs, reserves a final validation call for LLVM-reduce, checks the refreshed failure class, and records the witness actually shown after fallback. These changes affect the edit interface and feedback semantics. They require a fresh output directory and H100 validation on development inputs. No v3 repair outcomes are reported here, and v2 and v3 records will not be pooled. Section~\ref{sec:v3} specifies the amended follow-up.
+A revised v3 implementation forwards per-test verifier arguments, uses strict response parsing and atomic search/replace edits, rejects length-truncated completions, and sets an 8{,}192-token output limit. It also avoids unconsumed terminal feedback, caches previously verified candidate pairs, reserves a final validation call for LLVM-reduce, checks the refreshed failure class, and records the witness actually shown after fallback. The v3c runner repeats the original C++ excerpt on revision turns. Each candidate is applied to the unpatched tree. The renderer checks that a changed pair still triggers the same function and error class before using its diagnostic. The completed v3c experiment and its retained calibration records are described in Section~\ref{sec:v3}.
 
 %=====================================================================
 \section{Experimental Design and Evaluation Protocol}
 \label{sec:design}
 %=====================================================================
 
-The original main protocol specifies 24 bugs, three trials, and nine conditions. This draft audits a frozen partial v2 snapshot and describes a separate v3 follow-up. A repository document dated 2026-09-04 specifies the repeat count, test, and four primary comparisons before the repair records it describes. This is a record in repository history, not an external preregistration. Later model and harness changes are disclosed in a dated amendment. The v3 follow-up is fixed before observing its outcomes, but it is not a completion of the original unchanged protocol.
+The v2 development design specifies 24 bugs, three trials, and nine conditions. Its dated repository protocol defines four primary comparisons before the runs. The v3c repair study and the fresh reducer evaluation have their own versioned protocols and analysis panels.
 
 \subsection{Population}
 
@@ -284,7 +284,7 @@ The original main protocol specifies 24 bugs, three trials, and nine conditions.
 \caption{From the full benchmark to the sample, counted from the vendored dataset files.}
 \label{tab:funnel}
 \centering\footnotesize
-\begin{tabular}{@{}p{6.4cm}r@{}}
+\begin{tabular}{@{}p{0.82\columnwidth}r@{}}
 \toprule
 Stage & Bugs \\
 \midrule
@@ -300,7 +300,7 @@ Interim complete panel (3 trials, all 9 conditions) & 7 \\
 
 A bug is eligible if it is a miscompilation, every reproducer is checked by Alive2 rather than \texttt{lli}, and the reference fix touches one function. The counterexample conditions require the first filter, and the runner skips multi-function fixes. The pool excludes bug 115575, which was used during harness development. The pool is sorted by hint-region size (the number of lines covered by the bug-location hints), then by reproducer size, then by identifier, and it is cut into three tiers of 33 bugs. Within each tier, bugs are drawn round-robin across the first hinted component, so that InstCombine (45 of the 100 eligible bugs) does not dominate. The procedure is deterministic, and re-running the selection script reproduces the committed list. The tier labels in the repository (easy, medium, hard) describe the size of the hint region and reproducer, not measured difficulty for any model.
 
-The sample has 16 distinct primary component labels, one of which is a placeholder for a bug with no component hint. Eleven of the 24 bugs have knowledge cutoffs in 2025 or 2026. Results will be reported over this subset of miscompilations only, not over the whole benchmark. The runner additionally skips a bug whose failure does not reproduce at its base commit, so the analyzed count may be below 24.
+The sample has 16 distinct primary component labels, one of which is a placeholder for a bug with no component hint. Eleven of the 24 bugs have knowledge cutoffs in 2025 or 2026. The available v2 results cover a subset of that planned sample. The runner requires reproduction at the base commit.
 
 \subsection{Conditions}
 
@@ -356,73 +356,89 @@ The four $p$-values are adjusted together with the Benjamini--Hochberg procedure
 
 Fewer than five discordant bugs cannot yield $p<0.05$ one-sided at any split, and $n=24$ limits power. Under assumed per-attempt rates of 0.12--0.35 and a per-bug difficulty multiplier, the repository's simulation gives power between roughly 0.10 and 0.57 at three trials. The assumptions are the authors' and are based on reported frontier-agent rates rather than on data from this setup. The comparison is therefore best read as a pilot-scale screen. Conditions should have equal numbers of trials before pass@3 is compared.
 
-\subsection{October amendment: unstarted v3 plan}
+\subsection{Completed v3c repair study}
 \label{sec:v3}
 
-After the v2 audit, an amendment dated 2026-10-22 assigns the original 16 medium- and hard-tier bugs to a separate v3 evaluation. The eight first-tier bugs informed v2 harness debugging and are excluded from that follow-up. The remaining tiers are not a pristine held-out set: bug 115149 was previously used in earlier Qwen3 diagnostics and known-patch validation. The follow-up is prospective with respect to v3 outcomes, not the authors' first exposure to every bug. The source manifest \texttt{data/repair\_v3\_protocol.json} fixes the identifiers, condition set, and budgets before v3 repair outcomes are collected.
+The four conditions are raw plain, raw structured, sequential \texttt{llvm-reduce} with structured feedback, and IR-aware reduction with structured feedback. We used \texttt{gemini-3.1-flash-lite} via the Vertex global endpoint, at temperature 0.8, LOW thinking, and an output ceiling of 8,192 tokens including thinking. Each bug had three trials per condition and at most four replies per trial. The condition order rotates by bug and trial. The reducer ceiling was 400 calls per feedback event. A successful trial meets the build, reproducer, and selected regression checks in Section~\ref{sec:success}.
 
-To fit the remaining computation budget, the follow-up uses six conditions: \cn{baseline}, \cn{raw-plain}, \cn{generic-plain}, \cn{llvmreduce-plain}, \cn{iraware-plain}, and \cn{iraware-structured}. These retain all four original primary comparisons. Three trials and four replies per run give 16 by 6 by 3 = 288 planned runs. The same generation and validation settings are applied across those conditions, with the v3 changes described above. This subset does not retain the full factorial design, so it cannot estimate every reduction--presentation interaction. No v3 outcome or promotion-off result is available in this draft.
+The resolved protocol retained the structure of the 16-bug medium and hard tiers. Bug 91369 timed out under the verifier, and bug 179613 did not yield an eligible Alive2 witness during preflight. The resolved cohort substituted eligible cases 78621 and 116553, respectively. The archived amendment records 36 completed trials carried over from the previous protocol after matching the treatment and settings. Bug 115149 had also appeared in earlier diagnostics. The completed panel contains 192 trials. The three prespecified contrasts use one-sided exact McNemar tests with Benjamini--Hochberg correction. The pairs are IR-aware structured versus raw structured, IR-aware structured versus LLVM-reduced structured, and raw structured versus raw plain.
 
-The amendment separates development observations from prospective follow-up data, rather than pooling them into a larger apparent sample. It also reduces the paired sample from 24 to 16; statistical significance is therefore not assured. The hypothesis directions, four-comparison correction family, matched-trial rule, and plausibility criterion remain unchanged. Any secondary-model pilot on the excluded development bug would be a feasibility check and would not contribute to the v3 outcome table.
+\subsection{Fresh reducer evaluation}
+\label{sec:fresh-design}
 
-For v3, candidate-oracle calls and separate trace-refresh calls will be reported individually and together as feedback-verification work. That sum still excludes the benchmark's reproducer and regression-validation work. This avoids treating the 400-call candidate budget as a complete verifier-cost measurement.
+A second protocol, fixed in commit \texttt{fc8c671}, measures compression on real initial witnesses from previously unused bugs. It excludes IDs in earlier repair plans and results, including listed reserves. The remaining eligible benchmark cases are stratified by reproducer line count and ordered deterministically across components. We take the first eight eligible cases from each of three size tiers. We build \texttt{opt} at each bug's unpatched base commit and require its first failing reproducer to yield one named Alive2 violation without verifier errors or unresolved proofs. Each method receives the same witness, original verifier arguments, and independent output check.
 
-\subsection{November amendment: shared-H100 follow-up}
+The primary comparison uses a ceiling of 32 reducer calls for both source-first sequential \texttt{llvm-reduce} and the hybrid. The hybrid first spends up to eight calls on paired reduction. It uses the paired output as the starting point for sequential reduction only if the pair has fewer instructions. The sequential stage receives any remaining calls. The output is chosen by instruction count with character count as a tie breaker. The balanced secondary comparison caps the source phase at half the available search calls after reserving the final pair check and gives the remaining calls to the target. We also record the standalone paired reducer with operand promotion enabled and disabled.
 
-On 2026-11-01, before any v3 pilot or evaluation run had started, the operator confirmed a replacement Ubuntu 24.04 container with a shared H100 PCIe. The reported device had 81,559 MiB total and 21,796 MiB free at inspection. A second dated manifest, \texttt{data/repair\_v3\_shared\_h100\_protocol.json}, supersedes the October execution schedule. It retains the same 16 bugs and three trials, with four conditions: \cn{raw-plain}, \cn{raw-structured}, \cn{llvmreduce-structured}, and \cn{iraware-structured}. This gives 192 planned runs, with at most four turns per run. Raw structured feedback remains a control because it had the most repaired bugs in the descriptive v2 panel; it is not removed in favor of a weaker comparator.
-
-Three directions are specified before collecting the revised outcomes: IR-aware structured versus raw structured, IR-aware structured versus LLVM-reduce structured, and raw structured versus raw plain. The first two compare reduction pipelines at a shared presentation setting; the third compares rendering without reduction. Exact one-sided paired tests will be corrected together with Benjamini--Hochberg across these three comparisons. The four-arm schedule makes no repair-rate claim about generic delta debugging, the no-counterexample baseline, promotion ablation, or a full factorial interaction. Condition order rotates deterministically by bug index and trial; over 16 bugs, each condition occupies each position equally often.
-
-The intended serving configuration uses a pinned official Qwen3-Coder-30B FP8 checkpoint, 20 GiB of CPU weight offload and a GPU allocation capped at approximately 17 GiB, with one 32K sequence. Its startup fit and generation latency remain to be measured. This changes the checkpoint and serving configuration from v2 and requires a separate result directory. Availability of additional GPU memory does not authorize switching configurations during the experiment. A smaller model or an API would require another prospectively identified configuration, not pooled trials. Sixteen bugs still provide limited inferential resolution; neither significance nor journal suitability follows from the schedule.
-
-A separate CPU-only diagnostic will compare the corrected reducers on the eight initial real witnesses saved in the v2 snapshot, including an operand-promotion ablation. It requires neither model replies nor rebuilding LLVM. It will report fresh preservation checks, displayed sizes, fallbacks and verifier costs, retaining failures. Those eight development witnesses are not an independent held-out corpus, and preserving a function and error class is not proof of preserving the compiler bug's semantic root cause. No measurements from this diagnostic or the November repair schedule are reported in this draft.
+The endpoint is the fraction of original source and target instructions removed. An output receives credit only if a fresh check returns one violation with the same function and error class and no errors or unresolved proofs. An unverified output receives zero credit. The original check, diagnostic refresh, and independent output check are recorded outside the reducer ceiling. The primary comparison uses a two-sided exact paired sign test on instruction-count differences. The prespecified success rule requires $p<0.05$ in the direction of improvement and a mean paired gain of at least five percentage points. The balanced comparison is descriptive.
 
 %=====================================================================
 \section{Results}
 %=====================================================================
 
-\subsection{Snapshot coverage}
+\subsection{Qwen development snapshot}
 
-The frozen v2 snapshot contains 205 runs over eight observed bugs. It has ten full-validation passes across three bugs: 89390, 135182, and 126012. The eighth bug, 126012, has not completed all trials and conditions. It is included in the diagnostic totals but excluded from the matched repair table. Seven bugs form the complete panel, with 189 runs and 21 trials per condition. All seven belong to the first size tier, so this panel does not represent the planned 24-bug sample's balance. These are preliminary descriptive results, not a final significance analysis.
+The archived v2 snapshot contains 205 trials across eight bugs. Seven bugs completed all nine conditions and three trials. Raw structured feedback yielded plausible repairs on two of those seven bugs. IR-aware plain feedback did so on one, and IR-aware structured feedback on zero. The response interface and coverage limited interpretation. Of 810 recorded replies, 87 returned unchanged code and 467 of 723 build attempts failed. The project archive retains the matched tables and failure audit for this development snapshot.
 
-\input{generated/v2_snapshot_tables}
+\subsection{Gemini v3c repair outcomes}
 
-\subsection{Matched repair outcomes}
+\begin{table}[t]
+\caption{Plausible repairs in the completed v3c panel. Pass@3 counts bugs with at least one passing trial.}
+\label{tab:v3c-repair}
+\centering\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Feedback & Passing trials & Pass@3 \\
+\midrule
+Raw plain & 13/48 & 7/16 \\
+Raw structured & 22/48 & 9/16 \\
+Sequential reduction, structured & 11/48 & 6/16 \\
+IR-aware reduction, structured & 16/48 & 8/16 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Table~\ref{tab:v2-matched} reports the common panel. Raw structured feedback repairs two of seven bugs, while generic plain, LLVM-reduce plain, LLVM-reduce structured, and IR-aware plain each repair one. IR-aware structured, raw plain, generic structured, and the no-counterexample baseline repair none. The successful bugs in this panel are 89390 and 135182. These counts do not show that IR-aware reduction improves repair.
+Table~\ref{tab:v3c-repair} summarizes the 192 complete trials. Compared with raw structured feedback, IR-aware structured feedback had zero exclusive successes and one exclusive failure ($p_{\mathrm{BH}}=1.000$). Compared with sequentially reduced structured feedback, it had four exclusive successes and two exclusive failures ($p_{\mathrm{BH}}=0.516$). Raw structured versus raw plain had two exclusive successes and zero exclusive failures ($p_{\mathrm{BH}}=0.516$). Thus the prespecified analysis found no significant repair gain in any contrast. Across all conditions, 62 trials passed full validation. Another 63 trials passed the reproducer at least once and ended without passing full validation. Of 620 recorded model replies, 189 were truncated at the output limit.
 
-The primary paired counts are given in Table~\ref{tab:v2-pairs}. IR-aware plain and generic plain each repair a different bug, giving $b=c=1$. IR-aware plain and LLVM-reduce plain repair the same bug, giving no discordant pairs. The structured IR-aware condition has one loss and no exclusive success relative to IR-aware plain. Raw plain and the baseline both have zero successes. All four BH-adjusted $p$-values are 1.0. With at most two discordant bugs, these comparisons provide little information about an effect. The larger count for raw structured feedback is exploratory and does not establish superiority.
+\subsection{Fresh witness compression}
 
-\subsection{Failures and treatment delivery}
+\begin{table}[t]
+\caption{Fresh witness compression on 24 LLVM bugs. Calls are medians, including refresh and independent postcheck but excluding the shared establishment call.}
+\label{tab:fresh-reducers}
+\centering\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Method & Mean removed & Shrunk & Calls \\
+\midrule
+IR-aware only & 8.6\% & 10/24 & 4.5 \\
+Sequential & 8.9\% & 6/24 & 34 \\
+Hybrid & 9.6\% & 10/24 & 33 \\
+Balanced sequential & 4.2\% & 2/24 & 34 \\
+Balanced hybrid & 10.3\% & 10/24 & 33 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Across all 205 records, 810 model replies were recorded. Of these, 87 return unchanged code and 723 reach a build; 467 build attempts fail. Saved diagnostics include stray backticks, undeclared names, missing or incompatible LLVM APIs, and linking errors. A build-stage label alone cannot attribute the failure to hardware or to model reasoning. The source and reply audit identifies failures in the full-window and code-fence protocol, so the compilation rate is partly a property of this harness version. Other failures remain candidate-code errors. Table~\ref{tab:v2-diagnostics} keeps these stages separate.
+All 24 witnesses reproduced at their original revisions. The first eight cases in every tier passed eligibility, so no reserves were needed. All 192 output checks passed across the eight reducer and control variants. The cohort's median initial witness contained eight instructions. Table~\ref{tab:fresh-reducers} reports the compression and verifier costs of the main variants. Standalone IR-aware reduction used fewer verifier calls and removed instructions on more witnesses than source-first sequential reduction. The mean fractions removed were 8.6\% and 8.9\%, respectively. Observed median pipeline and postcheck times were 0.19~s and 10.43~s, based on one timing run per method and case. With operand promotion disabled, the standalone reducer shrank four witnesses, compared with ten with promotion enabled. This comparison describes the reducer's behavior under the same verification criterion.
 
-Ten turns pass full validation and 41 reach regression testing but fail there. Certificate flags record whether any turn passed the reproducer, and are not statements about the final saved patch. Case studies must therefore use the corresponding reply rather than a later failed proposal. Regression failures include optimization expectations in VectorCombine and InstCombine; passing a reproducer alone is not enough.
-
-Offline inspection also limits the interpretation of the ten passing patches. For bug 89390, two LLVM-reduce-condition proposals disable the affected folding step for every integer division or remainder operation. The reference fix instead guards those operations when the shuffle mask contains poison. The proposals may therefore sacrifice valid optimizations even though the selected checks pass; the performance effect has not been measured. We retain their harness-pass labels and do not treat source differences alone as proof of incorrectness. Correctness and optimization-preservation review remain pending.
-
-Table~\ref{tab:v2-reducers} summarizes the first initial witness per observed bug. The audit also finds no accepted IR-aware reduction on any recorded witness for 89390, 135182, and 126012. These are the same three bugs with full passes somewhere in the snapshot. Thus a passing repair in an IR-aware condition cannot, by itself, be attributed to successful IR-aware shrinking. An unchanged witness can still receive structured presentation, and stochastic generations can differ even when feedback is identical. The promotion-disabled ablation and the remaining size tiers are not yet evaluated.
+Against source-first sequential reduction, the hybrid returned fewer instructions on eight witnesses, tied on twelve, and returned more on four. The mean gain was 0.7 percentage points and the median paired gain was zero ($p=0.388$). The result fell short of both parts of the success criterion. With the balanced allocation, the hybrid won on eight witnesses, tied on fifteen, and lost on one. The mean gain was 6.1 points and the median paired gain was zero. The balanced baseline itself removed fewer instructions on average than the source-first baseline. Its larger paired gain therefore describes the effect of this particular budget allocation.
 
 %=====================================================================
 \section{Discussion}
 %=====================================================================
 
-The preliminary snapshot shows that the model can produce plausible LLVM repairs, but it does not show an advantage for the proposed reducer. The condition with the most repaired bugs is raw structured feedback, and its advantage is only two bugs in a seven-bug panel. The absence of passes under the no-counterexample baseline and raw plain feedback also leaves the anchor comparison without discordant outcomes. These results should guide an implementation audit, not a new claim of statistical significance.
+The most consistent practical advantage is the low verifier cost of the standalone paired pass. On fresh witnesses it used a median of 4.5 verifier calls and achieved a mean reduction close to sequential reduction. Neither the hybrid's primary comparison nor the model repair experiment established a gain. A developer who values a quick first reduction may still benefit from the paired pass. An engineer seeking a smaller witness can spend more calls on sequential search. In the development replay, increasing the sequential ceiling from 32 to 400 calls raised the number of witnesses it shortened from ten to sixteen, while standalone IR-aware stopped below 32 calls on every witness in that panel.
 
-The main practical limitation is the number of turns that fail before semantic validation. Improving response parsing and the edit interface may recover useful repair attempts, but it would change the harness. Any resulting gain must first be described as a gain from the revised repair procedure. Evidence for the counterexample method would still require comparing its feedback conditions within that revised procedure. Mixing revised runs into v2 would confound the two changes.
-
-Reducer behavior also needs to be separated from repair success. Some initial witnesses are already short, while budget fallbacks or missing verifier arguments can prevent useful edits. The three bugs repaired somewhere in this snapshot have no accepted IR-aware reduction in their recorded feedback. This observation limits attribution, but does not establish that reduction is ineffective on the larger witnesses outside this v2 snapshot. Evaluating the remaining tiers, inspecting actual shown sizes, and examining fallback causes are needed to address that question.
-
-A useful final analysis should examine whether reduced feedback changes the repairs proposed, whether those repairs preserve existing optimization behavior, and whether any improvement persists without operand promotion. All passing candidate patches should be reviewed before making a claim about correct repairs. Where the evidence remains inconclusive, the paper will report the measured counts and limitations rather than infer equivalence.
+The repair traces also show why compression deserves its own outcome. On bug 116553 the paired reducer shortened the witness from 23 to three instructions, yet none of the three IR-aware structured trials passed full validation. All three raw structured trials passed. One IR-aware proposal passed the reproducer and then failed an existing loop optimization check. This case illustrates the gap between preserving an Alive2 diagnostic in a reduced pair and giving the model enough context to preserve an unrelated optimization.
 
 %=====================================================================
 \section{Threats to Validity and Limitations}
 \label{sec:threats}
 %=====================================================================
 
-The interim audit exposes implementation and coverage limits in addition to the design limitations below. Their effects cannot be cleanly separated from model capability in the present snapshot.
+The development audit identifies response-interface and coverage limits. The completed studies measure the revised harness and reducer on their respective cohorts.
 
-\textbf{Witness generalization.} Operand promotion can yield witnesses that describe unreachable executions. Only the ablation addresses this, and only through repair outcomes rather than through judgments of relevance.
+\textbf{Witness generalization.} Operand promotion can yield witnesses that describe unreachable executions. The fresh experiment includes a reducer-only comparison with promotion disabled. The comparison measures compression and verifier cost and leaves semantic relevance open.
 
 \textbf{What the oracle preserves.} Equal error class in the same function does not imply equal root cause. The default strictness level was chosen as a compromise, results at other levels are not comparable, and only one level is planned.
 
@@ -430,11 +446,11 @@ The interim audit exposes implementation and coverage limits in addition to the 
 
 \textbf{Parser and model coverage.} The IR model is line-oriented, and the round-trip check does not test edits. When a parser error produces invalid IR or destroys the preserved violation, the oracle rejects the candidate, which typically turns the error into a missed reduction. However, because the oracle preserves an error class rather than semantic equivalence to the original witness, undetected semantic drift remains possible. Missed reductions make \cn{iraware} resemble \cn{raw} on the affected bugs. Unreduced fallbacks will be counted in the results.
 
-\textbf{Reduction failures and budget.} A reduction that exhausts the budget is discarded rather than returned, so a tight budget biases the outcome toward unreduced witnesses. The budget of 400 calls is shared by the reducers in different ways: the \texttt{llvm-reduce} wrapper counts its subprocess calls against the same budget and additionally has a wall-clock cap that the other reducers lack.
+\textbf{Reduction failures and budget.} In v2, budget exhaustion could prevent the concluding oracle check and discard progress. The later implementation caches accepted candidates and reserves a concluding call in the sequential wrapper. The call ceilings still allow different search patterns: the \texttt{llvm-reduce} wrapper counts its subprocess calls against the same budget and additionally has a wall-clock cap that the other reducers lack.
 
 \textbf{Source and target name matching.} Tandem editing and the structured diff assume that names correspond between the reproducer and the IR printed by the patched \texttt{opt}. Renumbered unnamed values or renamed instructions would appear as unrelated additions and removals. Only the target function with the reported name is reduced, and other functions in the module are left untouched.
 
-\textbf{Prompt length and content.} Conditions differ in prompt length by construction. The \cn{generic} condition controls for length only if it actually shortens the prompt. The interim size measurements describe only the observed initial witnesses and do not establish the behavior on the remaining sample. In addition, \cn{structured} changes content as well as layout. Length is estimated as characters divided by four.
+\textbf{Prompt length and content.} Conditions differ in prompt length by construction. The \cn{generic} condition controls for length only if it actually shortens the prompt. The fresh measurements describe the initial witness only, before any model edits. In addition, \cn{structured} changes content as well as layout. Length is estimated as characters divided by four.
 
 \textbf{Treatment reach.} Initial Alive2 feedback and later refinement failures are treated. Build and lit diagnostics are passed through without a useful length cap; they can dominate later conversation context. A compilation-failure turn still retains the earlier treatment in its history.
 
@@ -450,15 +466,17 @@ The interim audit exposes implementation and coverage limits in addition to the 
 
 \textbf{Naming effects.} The reducer introduces parameter names of the form \texttt{\%ce.argN}. We know of no evidence on the effect of such names on models for IR. Evidence from Java repair shows sensitivity to renaming for fine-tuned models~\cite{rabbi2026hej}, but it need not transfer to this setting.
 
-\textbf{Statistical resolution.} With 24 bugs, a non-significant comparison is uninformative about the absence of an effect. Pass@3 and pass@1 can disagree, and iterations to repair are conditional on repair. The contrast of the full method (\cn{iraware-structured}) against \cn{baseline} is not in the primary family and is exploratory.
+\textbf{Statistical resolution.} Sixteen paired repair bugs and 24 paired reduction witnesses limit precision. Ties further reduce the number of informative sign-test comparisons. The tests evaluate the declared endpoints on the selected corpora, and neither study establishes equivalence. The balanced reducer contrast was declared secondary.
 
-\textbf{Scope and interim coverage.} The observed complete panel contains only seven first-tier bugs, rather than the planned 24. Findings concern single-function miscompilations checked by Alive2. They do not extend to crashes, hangs, multi-function fixes, or miscompilations checked by execution. V3 follows a data-informed harness revision and evaluates the original two remaining size tiers. Earlier exposure to bug 115149 is disclosed; prospective collection does not imply an untouched development set. V3 requires separate records and cannot erase the v2 findings.
+\textbf{Scope.} The evaluations concern single-function LLVM miscompilations checked with Alive2. The repair study evaluates one hosted model under a fixed localized edit interface. The fresh reducer study uses unpatched witnesses and one timing measurement per method and bug. Its cost figures describe this implementation and toolchain.
+
+\textbf{Artifacts.} The project repository archives the v3c trial records at commit \texttt{fbc772d} and the fresh reducer report at \texttt{520e08d}. The latter contains eligibility decisions, per-case outputs and independent checks, tool hashes, and both paired summaries~\cite{betterCompiler2026}.
 
 %=====================================================================
 \section{Conclusion}
 %=====================================================================
 
-We implemented a feedback layer that reduces and structures Alive2 counterexamples for localized LLVM repair. Its design separates reduction from presentation and preserves a selected failure class through a verifier oracle. The interim v2 evaluation contains 205 runs, but only seven bugs have complete three-trial coverage under every condition. These data show plausible repairs and substantial compilation failures; they do not establish that IR-aware reduction improves repair. The audit motivates a separate harness revision and further evaluation. The final result must depend on matched outcomes and reviewed patches, with the original primary comparisons and all protocol changes reported.
+We evaluated an IR-aware reducer that uses the verifier trace to propose jointly checked edits to both sides of an LLVM transformation. On 24 fresh witnesses, it used a median of 4.5 verifier calls and removed 8.6\% of instructions on average. The 32-call hybrid did not meet its prespecified improvement criterion against source-first sequential reduction. In the completed model repair study, the IR-aware feedback condition yielded plausible repairs for eight bugs versus nine with raw structured feedback. These results support a low-cost first reduction pass for LLVM witnesses and leave an overall compression or repair advantage unestablished.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
