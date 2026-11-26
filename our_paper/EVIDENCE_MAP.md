@@ -35,6 +35,15 @@ their original results. The replay supports testing the focused baseline and
 the guidance ablation under a frozen protocol on new witnesses. [Replay design
 and container command](../docs/FRESH_WITNESS_EVALUATION.md#trace-guidance-follow-up)
 
+The [archived H100 replay](../witness-comparison-guidance-h100-b32/report.json)
+at `ecd51cc` verifies 120 outputs on the same 24 pairs using the original
+binary hashes. Focused and default LLVM again averaged 42.8% and 8.9% removal
+at a median of 33 calls each. The focused schedule left fewer instructions
+on 20 cases and tied on four. Disabling trace seeds and path folding increased
+mean removal by 5.78 points. The postcheck requires the same function and
+violation class. The cohort was reused after the original results were
+inspected. [H100 replay summary](../docs/FRESH_WITNESS_EVALUATION.md#h100-replay-outcome)
+
 ## Implementation checks
 
 The [native integration tests](../tests/test_integration.py) use small

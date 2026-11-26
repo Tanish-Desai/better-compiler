@@ -74,6 +74,31 @@ results, so this is a mechanism study and a development comparison for the new
 variant. The [local replay summary](../run-provenance/witness-guidance-local-summary.json)
 records results from different binary builds than the original H100 evaluation.
 
+### H100 replay outcome
+
+The [archived H100 report](../witness-comparison-guidance-h100-b32/report.json)
+at `ecd51cc` records all 24 cases complete and all 120 outputs verified. The
+input and both verifier hashes match the archived fresh evaluation. The
+report SHA-256 is `c0030d16ac0be976c02bfa2ca3af64f705cab7a4d1858ccb73f0c959c664806c`.
+
+| Method | Mean instructions removed | Median search and postcheck calls |
+|---|---:|---:|
+| Trace-guided paired | 8.6% | 3.5 |
+| Paired without trace seeds or path folding | 14.4% | 4 |
+| Relax if stalled | 12.2% | 4 |
+| Default sequential `llvm-reduce` | 8.9% | 33 |
+| Focused sequential `llvm-reduce` | 42.8% | 33 |
+
+The paired reducer without trace seeds or path folding left fewer instructions
+on seven cases, tied on sixteen, and left more on one compared with trace
+guidance. Its mean gain was 5.78 percentage points. The focused LLVM schedule
+left fewer instructions than the default LLVM schedule on 20 cases and tied
+on four. It left fewer instructions than the paired reducer without trace
+seeds or path folding on 22 cases and left more on two. These results
+reproduce the main development observations on the original H100 toolchain.
+Both replays used the same witnesses. The next prospective study should
+compare against the focused schedule on unused cases.
+
 ### Reproduce the comparison on the H100 container
 
 Use the existing native runtime. Replace the `cd` path if the clone is

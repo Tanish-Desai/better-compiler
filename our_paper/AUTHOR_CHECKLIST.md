@@ -18,11 +18,12 @@ The three prespecified repair comparisons were inconclusive. [Evidence map](EVID
   The 4.5 and 34 medians include refresh and recheck. The single timing run
   per method and case provides a descriptive runtime measurement.
 - [ ] Report the focused LLVM reducer and trace-guidance observations as a
-  development replay of the same 24 inputs with a different toolchain build.
+  development replay of the same 24 inputs, reproduced with the original
+  H100 toolchain.
   The focused LLVM pass schedule removed substantially more instructions in
   this replay, and disabling trace seed and path guidance improved mean
   compression. Retain both outcomes when stating how the contribution compares
-  with existing tools. [Local exploratory replay](../run-provenance/witness-guidance-local-summary.json)
+  with existing tools. [H100 replay outcome](../docs/FRESH_WITNESS_EVALUATION.md#h100-replay-outcome)
 - [ ] Recover and deduplicate the 62 full-validation passing proposals by bug
   and applied patch. Review the unique patches for semantic correctness and
   preservation of useful optimizations against the original code and reference
@@ -49,12 +50,14 @@ The three prespecified repair comparisons were inconclusive. [Evidence map](EVID
 
 ## Before the next evaluation
 
-- [ ] Reproduce the focused LLVM reducer and guidance replay on the container.
-  Record binary hashes and the exact pass schedule. Treat this as a replication
-  on archived inputs. Freeze a disjoint cohort and the strongest sequential
-  control before testing a new variant. Collect paired compression and call
-  counts across fixed caps. Use repeated single-worker timing if elapsed time
-  becomes a headline metric. [Replay runbook](../docs/FRESH_WITNESS_EVALUATION.md#trace-guidance-follow-up)
+- [x] Reproduce the focused LLVM reducer and guidance replay on the container.
+  The archived per-case report records all 24 cases and matching verifier
+  hashes.
+  [H100 replay outcome](../docs/FRESH_WITNESS_EVALUATION.md#h100-replay-outcome)
+- [ ] Freeze a disjoint cohort and the focused sequential control before
+  testing a new variant. Collect paired compression and call counts across
+  fixed caps. Use repeated single-worker timing if elapsed time becomes a
+  headline metric.
 - [ ] Check whether the reduced source still triggers a violation when passed
   through the original `opt` pipeline. Where a reference fix is available,
   also run the reduced source with the fixed compiler. Report that endpoint
