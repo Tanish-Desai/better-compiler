@@ -102,6 +102,7 @@ def default_llvm_reduce() -> Optional[str]:
 def _reduce_one_side(
     text: str, other_text: str, side: str, oracle: Oracle,
     llvm_reduce: str, timeout: float, *, call_cap: Optional[int] = None,
+    delta_passes: tuple[str, ...] = (),
 ) -> Tuple[str, Dict[str, object]]:
     """Run `llvm-reduce` on `text` (the `side` file), holding `other_text`
     fixed. Returns `(reduced_text, external_stats)`; the caller merges
@@ -146,6 +147,7 @@ def _reduce_one_side(
                 [
                     llvm_reduce, f"--test={sys.executable}",
                     f"--test-arg={_TEST_SCRIPT}",
+                    *([f"--delta-passes={','.join(delta_passes)}"] if delta_passes else []),
                     "-j", "1",  # sequential test invocations -- keeps the
                                 # log-based call counting and budget check race-free
                     input_path,
@@ -178,6 +180,7 @@ def reduce_llvmreduce(
     llvm_reduce: Optional[str] = None,
     subprocess_timeout: float = DEFAULT_SUBPROCESS_TIMEOUT,
     balanced: bool = False,
+    delta_passes: tuple[str, ...] = (),
 ) -> Reduction:
     """The second baseline: real IR-valid reduction, zero counterexample
     awareness. See module docstring for the two-pass integration design."""
@@ -204,12 +207,12 @@ def reduce_llvmreduce(
 
     with _Timer() as timer:
         reduced_src, stats_src = _reduce_one_side(
-            src, tgt, "src", oracle, binary, subprocess_timeout, call_cap=source_cap
+            src, tgt, "src", oracle, binary, subprocess_timeout, call_cap=source_cap, delta_passes=delta_passes
         )
         oracle.record_external(**stats_src)
 
         reduced_tgt, stats_tgt = _reduce_one_side(
-            tgt, reduced_src, "tgt", oracle, binary, subprocess_timeout
+            tgt, reduced_src, "tgt", oracle, binary, subprocess_timeout, delta_passes=delta_passes
         )
         oracle.record_external(**stats_tgt)
 

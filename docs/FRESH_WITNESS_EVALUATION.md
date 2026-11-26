@@ -46,3 +46,47 @@ python3 scripts/run_fresh_witnesses.py --status --out witness-comparison-fresh-b
 ```
 
 Retain `witness-comparison-fresh-b32/report.json`. It stores the fixed cohort, data and binary identities, screen outcomes, pairs, call counts, and final analysis when all 24 witnesses have been compared.
+
+## Trace guidance follow-up
+
+The archived 24-witness evaluation shows that standalone IR-aware reduction
+used fewer verifier calls on every bug and produced equal or smaller output
+on 19. The paired size counts were seven smaller, twelve tied, and five larger.
+This is a cost and output-size comparison, with no claim of equivalence or of a
+gain in model repair rate.
+
+The follow-up reuses the 24 saved pairs. At the same 32-call search ceiling,
+compare the original paired reducer with a version that omits trace-derived
+seeds and disables executed-path branch folding. Both versions retain SSA
+dependency closure, returned-value protection, and the trace-derived type
+information needed by operand promotion. This ablation measures the joint
+contribution of seed and path guidance while holding the promotion type lookup
+fixed. A new variant tries guided reduction for at most eight calls. If it
+removes no instructions, it retries from the original pair with the remaining
+allowance and without seed or path guidance.
+
+The two sequential controls use default `llvm-reduce` and the same wrapper
+restricted to instruction, basic block, CFG, argument, operand-to-argument,
+and flag passes. All arms share the original verifier arguments and require a
+fresh output check. Report fraction of instructions removed, paired counts,
+and verifier calls. The archived cohort is reused after inspecting the original
+results, so this is a mechanism study and a development comparison for the new
+variant. Any favorable effect would need confirmation on a new cohort.
+
+```bash
+cd ~/24BCE5561/better-compiler
+git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
+source "$HOME/better-compiler-runtime/env.sh"
+set -o pipefail
+python3 -u scripts/replay_reducer_guidance.py \
+  --jobs 4 \
+  --alive-tv "$LAB_LLVM_ALIVE_TV" \
+  --llvm-reduce /usr/lib/llvm-21/bin/llvm-reduce \
+  2>&1 | tee -a run-provenance/witnesses-guidance-b32.log
+```
+
+This uses the saved pairs and installed verifier binaries. It needs no LLVM
+builds, GPU, or model credits. Each completed pair is saved to
+`witness-comparison-guidance-b32/report.json`. Reuse the command to resume.
+The parallel run supports comparisons by call count and compression. Elapsed
+times can include contention from other replay workers.

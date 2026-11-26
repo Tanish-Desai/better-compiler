@@ -606,6 +606,7 @@ def reduce_iraware(
     *,
     allow_promotion: bool = True,
     max_rounds: int = 4,
+    use_trace_guidance: bool = True,
 ) -> Reduction:
     """Reduce a counterexample using LLVM IR structure, oracle-gated throughout.
 
@@ -627,11 +628,14 @@ def reduce_iraware(
             )
 
         state = _State(src_mod, tgt_mod, src_fn, tgt_fn, src_fn, tgt_fn)
+        seeds = _returned_values(src_fn)
+        if use_trace_guidance:
+            seeds |= violation_seeds(result)
         ctx = _Context(
             oracle=oracle,
-            seeds=violation_seeds(result) | _returned_values(src_fn),
+            seeds=seeds,
             types=value_types(result),
-            executed=result.executed_blocks(),
+            executed=result.executed_blocks() if use_trace_guidance else [],
             allow_promotion=allow_promotion,
         )
 
