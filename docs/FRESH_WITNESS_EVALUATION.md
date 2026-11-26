@@ -56,7 +56,7 @@ This is a cost and output-size comparison, with no claim of equivalence or of a
 gain in model repair rate.
 
 The follow-up reuses the 24 saved pairs. At the same 32-call search ceiling,
-compare the original paired reducer with a version that omits trace-derived
+it compares the original paired reducer with a version that omits trace-derived
 seeds and disables executed-path branch folding. Both versions retain SSA
 dependency closure, returned-value protection, and the trace-derived type
 information needed by operand promotion. This ablation measures the joint
@@ -71,22 +71,102 @@ and flag passes. All arms share the original verifier arguments and require a
 fresh output check. Report fraction of instructions removed, paired counts,
 and verifier calls. The archived cohort is reused after inspecting the original
 results, so this is a mechanism study and a development comparison for the new
-variant. Any favorable effect would need confirmation on a new cohort.
+variant. The [local replay summary](../run-provenance/witness-guidance-local-summary.json)
+records results from different binary builds than the original H100 evaluation.
+
+### Reproduce the comparison on the H100 container
+
+Use the existing native runtime. Replace the `cd` path if the clone is
+elsewhere. Update the branch before starting a new replay.
 
 ```bash
-cd ~/24BCE5561/better-compiler
-git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep
-source "$HOME/better-compiler-runtime/env.sh"
-set -o pipefail
-python3 -u scripts/replay_reducer_guidance.py \
-  --jobs 4 \
-  --alive-tv "$LAB_LLVM_ALIVE_TV" \
-  --llvm-reduce /usr/lib/llvm-21/bin/llvm-reduce \
-  2>&1 | tee -a run-provenance/witnesses-guidance-b32.log
+cd ~/24BCE5561/better-compiler &&
+git pull --ff-only https://github.com/Abhyuday-06/better-compiler.git feat/h100-sweep &&
+tmux new -s bc-guidance
 ```
 
-This uses the saved pairs and installed verifier binaries. It needs no LLVM
-builds, GPU, or model credits. Each completed pair is saved to
-`witness-comparison-guidance-b32/report.json`. Reuse the command to resume.
-The parallel run supports comparisons by call count and compression. Elapsed
-times can include contention from other replay workers.
+Run the following inside tmux. The same block works in a foreground Bash shell.
+The plan reads the saved witnesses and lists the case IDs before the replay.
+The replay uses installed verifier binaries and needs no LLVM builds, GPU
+allocation, or model credits.
+
+```bash
+set -e -o pipefail
+cd ~/24BCE5561/better-compiler
+source "$HOME/better-compiler-runtime/env.sh"
+mkdir -p run-provenance
+
+LLVM_REDUCE=/usr/lib/llvm-21/bin/llvm-reduce
+GUIDANCE_INPUT=witness-comparison-fresh-b32/report.json
+GUIDANCE_OUT=witness-comparison-guidance-h100-b32/report.json
+
+python3 scripts/replay_reducer_guidance.py --input "$GUIDANCE_INPUT" --plan
+git rev-parse HEAD > run-provenance/witnesses-guidance-h100-b32.commit
+sha256sum "$LAB_LLVM_ALIVE_TV" "$LLVM_REDUCE" "$GUIDANCE_INPUT" \
+  | tee run-provenance/witnesses-guidance-h100-b32-inputs.sha256
+python3 -u scripts/replay_reducer_guidance.py \
+  --input "$GUIDANCE_INPUT" \
+  --out "$GUIDANCE_OUT" \
+  --jobs 4 \
+  --alive-tv "$LAB_LLVM_ALIVE_TV" \
+  --llvm-reduce "$LLVM_REDUCE" \
+  2>&1 | tee -a run-provenance/witnesses-guidance-h100-b32.log
+sha256sum "$GUIDANCE_OUT" > run-provenance/witnesses-guidance-h100-b32.sha256
+```
+
+Detach with Ctrl-b then d and reattach with `tmux attach -t bc-guidance`.
+The report checkpoints each completed witness. Restart from the recorded
+commit with the same inputs, binaries, worker count, and output path. A
+different setup needs a fresh output path. Use the following read-only check
+from the repository root.
+
+```bash
+python3 scripts/replay_reducer_guidance.py --status \
+  --out witness-comparison-guidance-h100-b32/report.json
+```
+
+Retain the report, log, commit, and checksums. The report also records the
+input, source, and verifier digests. On a local Linux or WSL installation
+with the verifier binaries already available, set `LAB_LLVM_ALIVE_TV` and
+`LLVM_REDUCE` to their absolute paths and use a separate `GUIDANCE_OUT`.
+Report compression and search-call counts from the parallel run. For a timing
+follow-up, use one worker and a separate output path, repeat measurements,
+and record the CPU allocation.
+
+### Confirm performance on unused witnesses
+
+Freeze a disjoint cohort and screen for the original violation before comparing
+methods. Include a prespecified stratum of longer witnesses. Compare the focused
+and default `llvm-reduce` schedules, a paired reducer and at most one hybrid
+selected on development cases. Keep the verifier, acceptance rule, and call
+ceilings identical across arms. Start with ceilings of 4, 8, 16, 32, 64, and 128
+calls. Report verified compression at each ceiling and calls to a prespecified
+size target, with the count of cases that never reach the target. Report paired
+effects and confidence intervals by resampling bugs. For a mechanism study,
+toggle trace seeds and executed-path folding independently with promotion held
+fixed. Check whether the reduced source still reproduces a violation after the
+original `opt` pipeline runs. Where possible, repeat with the reference fix.
+
+The guidance runner fixes the budget at 32 and reads an archived cohort. The
+original fresh-witness runner fixes its cohort in code. A prospective study
+needs a new protocol and a runner that accepts it.
+
+### Review the archived repair patches
+
+Use the saved turn-level diffs to review the benchmark-passing candidates and
+diagnose reproducer-only fixes. This review uses neither LLVM builds nor model
+credits. Run from the repository root.
+
+```bash
+mkdir -p run-provenance
+REVIEW_DIR=$(mktemp -d)
+tar -xzf vertex-v3c-records.tar.gz -C "$REVIEW_DIR"
+python3 scripts/diagnose_repairs.py "$REVIEW_DIR/results-vertex-v3c" \
+  --bug 116553
+python3 scripts/diagnose_repairs.py "$REVIEW_DIR/results-vertex-v3c" \
+  --json > run-provenance/repair-v3c-turn-review.json
+```
+
+Use the edit and validation from the same turn. For each passing patch, review
+the bug fix, the scope of the changed optimization, and tests covering nearby
+cases where the optimization should still fire.

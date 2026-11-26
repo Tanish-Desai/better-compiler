@@ -1,5 +1,46 @@
 # Hosted Gemini inference with CPU LLVM validation
 
+## 2026-11-26 follow-up
+
+The runbook below records the November 2 Gemini 2.5 Flash plan. Google has
+deprecated that model and says requests will route to Gemini 3.5 Flash-Lite
+starting December 1, 2026. The completed v3c repair data used Gemini 3.1
+Flash-Lite via Vertex. A follow-up on AI Studio credits needs a new Gemini
+Developer API protocol and a matching prompt counter and reservation profile.
+The current guarded client accepts only the historical 2.5 Flash settings
+on the Developer API. The old cohort also includes two cases that required
+substitution in v3c. [Google's deprecation schedule](https://aistudio.google.com/docs/deprecations#gemini-2.5-flash-models)
+
+To check whether the key for the credited project can list the intended
+model, run this in a foreground Bash shell from the repository root. It
+makes no generation requests. Check the project and credits separately in
+AI Studio. [Gemini 3.1 Flash-Lite](https://aistudio.google.com/docs/models/gemini-3.1-flash-lite)
+
+```bash
+(
+  set -e
+  source "$HOME/better-compiler-runtime/env.sh"
+  unset LAB_LLM_API_LIMITS LAB_LLM_REQUEST_OPTIONS
+  read -rsp 'AI Studio API key: ' LAB_LLM_TOKEN
+  printf '\n'
+  export LAB_LLM_TOKEN
+  LAB_LLM_BACKEND=openai \
+    LAB_LLM_URL=https://generativelanguage.googleapis.com/v1beta/openai \
+    LAB_LLM_MODEL=gemini-3.1-flash-lite \
+    python3 scripts/check_llm_endpoint.py --list-models
+)
+```
+
+After wiring a budgeted Developer API profile, begin with a format probe and
+a small development pilot that includes excluded case `115575`. Compare LOW
+thinking at the v3c 8,192-token output cap and at a higher cap, such as 16,384,
+with the same edit prompt. Track truncation, applicable edits, builds, tests,
+and input, visible output, and thinking tokens. Freeze the selected setting
+before collecting outcomes on a new cohort. Both caps need their own declared
+reservation bounds. [Developer API thinking settings](https://aistudio.google.com/docs/openai#thinking)
+
+## Historical November 2 plan
+
 Written 2026-11-02. Use this route when the H100 has less than 10 GiB free.
 It needs no vLLM process or GPU allocation. LLVM builds, Alive2, reproducers
 and regression tests still use the university container's CPUs and storage.

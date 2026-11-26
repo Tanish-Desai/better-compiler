@@ -4,18 +4,56 @@
 
 | Manuscript claim | Evidence | Scope |
 |---|---|---|
-| 192 complete v3c repair trials over 16 bugs. Pass@3 is 7, 9, 6, and 8 for raw plain, raw structured, sequential reduction, and IR-aware reduction. | `vertex-v3c-records.tar.gz` at `fbc772d`, `run-provenance/repair-v3c-audit.json`, `docs/VERTEX_V3C_RESULTS.md` | Localized editing with Gemini. A passing trial passes the listed checks. |
-| No significant v3c repair contrast. | `examples/analyze_significance.py --final` with `run-provenance/repair_v3c_vertex_resolved.json` | Three prespecified contrasts, one-sided exact McNemar tests, BH correction. |
-| 24 fresh cases and 192 verified outputs. Primary hybrid gain is 0.7 points, with 8 wins, 12 ties and 4 losses. | Frozen protocol at `fc8c671`, `witness-comparison-fresh-b32/report.json` at `520e08d` | 32-call reducer ceiling. The primary comparison fell short of the 5-point and significance criteria. |
-| Standalone IR-aware versus sequential medians are 4.5 versus 34 verifier calls. Mean compression is 8.6% versus 8.9%. | Same fresh report, using per-case `total_physical_calls` and combined instruction counts. | Descriptive. Calls include refresh and independent recheck and exclude the shared establishment call. |
-| Balanced hybrid gains 6.1 points, with 8 wins, 15 ties and 1 loss. | Same fresh report, `analysis.balanced_secondary`. | Secondary comparison against the balanced allocation baseline. |
+| 192 complete v3c repair trials over 16 bugs. Pass@3 is 7, 9, 6, and 8 for raw plain, raw structured, default source-first sequential reduction, and IR-aware reduction. | [`vertex-v3c-records.tar.gz`](../vertex-v3c-records.tar.gz) at `fbc772d`, [`repair-v3c-audit.json`](../run-provenance/repair-v3c-audit.json), [results](../docs/VERTEX_V3C_RESULTS.md) | Localized edits from Gemini via Vertex. A plausible repair passed the build, reproducer, and selected regression checks. The panel includes 36 compatible trials carried over after two cohort substitutions. |
+| No significant v3c repair contrast. | `examples/analyze_significance.py --final` with [`repair_v3c_vertex_resolved.json`](../run-provenance/repair_v3c_vertex_resolved.json) | Three prespecified, bug-paired, one-sided exact McNemar tests with BH correction. The outcomes leave the repair effect uncertain. |
+| 189 of 620 v3c replies hit the output cap. Of 125 trials with a recorded reproducer pass, 62 passed all checks and 63 ended without a full pass. | [Audit](../run-provenance/repair-v3c-audit.json) and [repair bottlenecks](../docs/VERTEX_V3C_RESULTS.md#repair-bottlenecks) | Descriptive across all four arms. The last patch in a reproducer-only trial may differ from the version that passed the reproducer. |
+| 24 fresh cases and 192 verified outputs. The hybrid gains 0.7 points over default source-first sequential `llvm-reduce`, with 8 wins, 12 ties, 4 losses, and a two-sided sign-test p-value of 0.388. | [Frozen protocol](../data/fresh_witness_b32_protocol.json) at `fc8c671` and [report](../witness-comparison-fresh-b32/report.json) at `520e08d`, `analysis.primary` | Both reducers had a 32-call search ceiling. The primary comparison fell short of its five-point and significance criteria. The independent check preserves the named violation class in the same function. |
+| Standalone IR-aware uses fewer verifier calls on all 24 cases. The medians are 4.5 versus 34 calls for default source-first sequential `llvm-reduce`. Mean compression is 8.6% versus 8.9%. | [Fresh report](../witness-comparison-fresh-b32/report.json), using per-case `total_physical_calls` and combined instruction counts | Descriptive at the methods' observed stopping points under a 32-call reducer ceiling. Measured calls include diagnostic refresh and independent recheck and exclude the shared establishment call. The study did not test equivalence or compare cost at a fixed output size. |
+| The balanced hybrid gains 6.1 points over balanced sequential reduction, with 8 wins, 15 ties and 1 loss. | [Fresh report](../witness-comparison-fresh-b32/report.json), `analysis.balanced_secondary` | Secondary comparison. The balanced sequential baseline averaged 4.2% removal versus 8.9% for the default source-first baseline. |
+| The standalone reducer shrinks ten witnesses with operand promotion enabled and four with it disabled. | [Fresh report](../witness-comparison-fresh-b32/report.json), paired reducer variants | Reducer-only comparison under the same Alive2 preservation rule. Promotion can introduce inputs that cannot arise in the original execution. The effect on model repair was unmeasured. |
+| Default sequential `llvm-reduce` shrinks 10 of 16 development witnesses at 32 calls and 16 of 16 at 400 calls. Standalone IR-aware reduction stops below 32 reducer calls on every case in that panel. | [32-call replay](../witness-comparison-v3c-b32/report.json) and [400-call replay](../witness-comparison-v3c-b400/report.json) | Uses the same 16 initial v3c witnesses for both budgets. The fresh 24-witness panel has a separate frozen protocol. |
 
-## Historical v2 and proposed amendments
+## Exploratory follow-up on the archived fresh witnesses
+
+The [local replay summary](../run-provenance/witness-guidance-local-summary.json)
+records a CPU replay of the same 24 witnesses with different Alive2 and
+`llvm-reduce` binaries from the frozen study. All 120 outputs passed the
+independent check across five arms. At the 32-call reducer ceiling, default
+source-first `llvm-reduce` averaged 8.9% instruction removal and the focused
+source-first `llvm-reduce` pass schedule averaged 42.8%. The focused schedule
+left fewer instructions on 20 witnesses and tied on four. Both used a median
+of 33 calls including the independent recheck. The replay has no diagnostic
+refresh in these totals.
+
+Guided paired reduction averaged 7.4% removal at a median of 3.5 calls.
+Disabling trace-derived seed selection and path folding averaged 14.4% at a
+median of 4 calls while retaining trace-derived promotion types. The guided
+arm left fewer instructions on one case, tied on 15, and left more on eight.
+The retry-on-stall variant averaged 12.2% removal at a median of 4 calls. These
+estimates are exploratory because the witnesses were reused after inspecting
+their original results. The replay supports testing the focused baseline and
+the guidance ablation under a frozen protocol on new witnesses. [Replay design
+and container command](../docs/FRESH_WITNESS_EVALUATION.md#trace-guidance-follow-up)
+
+## Implementation checks
+
+The [native integration tests](../tests/test_integration.py) use small
+fixtures to check preservation, reduction, and rendering with the real
+verifier. Those tests are conditional on the installed binaries. The
+[guidance tests](../tests/test_reducer_guidance.py) use mocks to check that the
+retry respects the remaining call budget and that the final check rejects a
+different failure class or an unresolved proof. The 1,462-reproducer
+[round-trip check](../scripts/check_ir_roundtrip.py) compares unchanged text
+after stripping trailing newlines. The November 26 Windows test run on
+`ca7657a` reported 389 passing and 19 skipped tests. The fresh report supplies
+corpus-level evidence for the tested saved outputs under its recorded
+binaries. Record the native test results separately on the container.
+
+## Historical v2
 
 Updated 2026-10-22. Paths are relative to this repository. The evaluated method
-is `repair-v2`, with code anchored at `38b381b`; numerical results are frozen at
-`73f2ba151742c44cf88878b50c027ef7f06293c6`. The working tree may contain v3
-changes, which are not evidence of an evaluated v2 behavior or repair outcome.
+is `repair-v2`, with code anchored at `38b381b`. Its numerical results are frozen
+at `73f2ba151742c44cf88878b50c027ef7f06293c6`.
 
 ## A. Manuscript and implementation evidence
 
@@ -78,35 +116,25 @@ preprints. Their result percentages are not imported as an expected LLVM rate.
 
 | Proposed claim | Closest cited work | Difference being studied | Current support |
 |---|---|---|---|
-| Reduce a paired verifier witness before C++ repair | ReduceFix; PGS | Edit source/target IR with an error-class oracle rather than reduce input data or select from a pool | Implemented; usefulness not established by interim repairs |
-| Guide reduction with dependencies and report-derived seeds | Delta debugging; LLVM-reduce | Tandem candidate construction and report-derived choices | Code and oracle checks; no global-minimality claim |
+| Reduce a paired verifier witness before C++ repair | ReduceFix and PGS | Edit source and target IR with an error-class oracle | Implemented. The fresh evaluation supports a low-call first pass against default sequential reduction. |
+| Guide reduction with dependencies and report-derived seeds | Delta debugging and `llvm-reduce` | Tandem candidate construction and report-derived choices | Implemented and checked with the oracle. The exploratory ablation leaves the contribution of guidance open and favors testing a seed-and-path-disabled variant on new witnesses. |
 | Deterministic structured verifier feedback | Conversational APR; PAIR-Bench | No second model generates hints; IR/report-derived sections | Implemented; presentation also changes content |
-| Improve repair success | The above methods and ordinary feedback | Same model and budget, altered feedback | Not established in the current snapshot |
+| Improve repair success | The above methods and ordinary feedback | Same model and budget, altered feedback | The completed v3c comparisons did not establish a gain. |
 
 This is a bounded distinction from the sources examined, not an exhaustive claim
 that no related method exists. The final novelty wording must follow the measured
 outcomes and the closest literature rather than the desired significance level.
 
-## E. V3 status
+## E. Protocol history between v2 and v3c
 
-V3 changes are implementation work prompted by the v2 audit. Their intended
-mechanisms are documented in the manuscript and author checklist. The Oct22
-amendment reserves the original remaining 16 medium-/hard-tier bugs for a
-prospective six-condition follow-up: baseline, raw plain, generic plain,
-LLVM-reduce plain, IR-aware plain, and IR-aware structured. Three trials and
-four replies permit 288 runs and preserve the original four primary
-comparisons. They do not preserve the full nine-condition factorial or its
-interactions. `data/repair_v3_protocol.json` must be committed before its
-outcomes are collected. No H100 v3 repair result is present in this evidence
-map. A changed edit interface or verifier path cannot be credited as a
-counterexample-method improvement without within-v3 comparisons.
-
-The two remaining tiers are absent from this v2 snapshot but are not all unseen:
-`115149` appears in earlier clean Qwen3 diagnostic results and known-patch
-validation. The paper discloses that prior exposure. Prospective v3 outcome
-collection does not imply a pristine held-out bug set. Physical candidate-oracle
-and trace-refresh costs must be reported separately from the reducer's configured
-budget and from the benchmark validation cost.
+The [October six-condition plan](../data/repair_v3_protocol.json) proposed 288
+runs on the remaining two size tiers. The [November shared-H100 amendment](../data/repair_v3_shared_h100_protocol.json)
+proposed four arms and 192 trials, plus an eight-witness CPU diagnostic. Those
+plans preceded the [resolved Vertex v3c protocol](../run-provenance/repair_v3c_vertex_resolved.json)
+used for the completed repair panel above. The eight-witness development
+diagnostic is archived in [its own report](../witness-comparison-v2-cpu/report.json).
+Bug `115149` appeared in prior Qwen diagnostics and known-patch validation.
+The v3c comparisons concern feedback changes within the revised harness.
 
 ## F. Literature mapping retained from the earlier draft
 
@@ -136,13 +164,3 @@ older quantitative literature claim.
 | McNemar + BH + odds ratios in a code study | SLM-as-a-judge | Sec. on statistics |
 | Fine-tuned Java repair models lose >50% under some transformations | HEJ-Robust | Abstract |
 | pass@k over k samples | ReduceFix | Sec. 4.3 |
-
-## 2026-11-01 prospective amendment
-
-`data/repair_v3_shared_h100_protocol.json` freezes the four-arm/192-cell
-follow-up before any v3 runs (operator confirmed). The three primary
-comparisons are defined in that manifest and condition ordering is balanced
-by bug index and trial. `scripts/compare_saved_witnesses.py` is a corrected-
-pipeline diagnostic on the eight saved initial development witnesses, with
-fresh oracle checks and explicit costs; no measurements from it are claimed
-yet. Model and hardware startup estimates are not empirical repair results.
